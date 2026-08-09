@@ -27,19 +27,22 @@ class MainActivity : ComponentActivity() {
             val uiState by authViewModel.uiState.collectAsStateWithLifecycle()
             val darkMode by authViewModel.darkMode.collectAsStateWithLifecycle()
 
-            // Keep splash visible while checking auth
-            var isReady by remember { mutableStateOf(false) }
-            LaunchedEffect(uiState) { isReady = true }
-            splashScreen.setKeepOnScreenCondition { !isReady }
+            val navController = rememberNavController() // ✅ SOLO UNA VEZ
+            
+            val isReady = !uiState.isCheckingAuth
+            splashScreen.setKeepOnScreenCondition {
+                uiState.isCheckingAuth
+            }
 
             FinFlowTheme(darkTheme = darkMode) {
                 if (isReady) {
+
                     val startDestination = if (uiState.isAuthenticated)
                         Screen.Main.route else Screen.Login.route
 
                     FinFlowNavGraph(
                         startDestination = startDestination,
-                        navController    = rememberNavController(),
+                        navController    = navController, // ✅ reutilizado
                         authViewModel    = authViewModel,
                     )
                 }

@@ -18,6 +18,7 @@ data class AuthUiState(
     val isLoading: Boolean = false,
     val error: String? = null,
     val isAuthenticated: Boolean = false,
+    val isCheckingAuth: Boolean = true,
     val user: User? = null,
 )
 
@@ -41,9 +42,20 @@ class AuthViewModel @Inject constructor(
     private fun checkAuth() {
         viewModelScope.launch {
             val loggedIn = authRepository.isLoggedIn()
+
             if (loggedIn) {
                 val user = authRepository.getCurrentUser()
-                _uiState.update { it.copy(isAuthenticated = true, user = user) }
+                _uiState.update {
+                    it.copy(
+                        isAuthenticated = true,
+                        user = user,
+                        isCheckingAuth = false
+                    )
+                }
+            } else {
+                _uiState.update {
+                    it.copy(isCheckingAuth = false)
+                }
             }
         }
     }

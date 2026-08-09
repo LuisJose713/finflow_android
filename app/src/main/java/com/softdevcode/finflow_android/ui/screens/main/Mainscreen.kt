@@ -17,6 +17,7 @@ import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.*
 import com.softdevcode.finflow_android.ui.screens.auth.AuthViewModel
+import com.softdevcode.finflow_android.ui.screens.dashboard.DashboardScreen
 import com.softdevcode.finflow_android.ui.screens.navigation.Screen
 
 // ── Tab definition ────────────────────────────────────────────────────────────
@@ -106,13 +107,11 @@ fun MainScreen(
             exitTransition   = { fadeOut(animationSpec = androidx.compose.animation.core.tween(180)) },
         ) {
             composable(Screen.Dashboard.route) {
-                // DashboardScreen — se implementa en el siguiente paso
-                PlaceholderScreen(
-                    title   = "Dashboard",
-                    user    = uiState.user?.name ?: "",
-                    isDark  = darkMode,
+                DashboardScreen(
+                    userName = uiState.user?.name ?: "",
+                    isDark = darkMode,
                     onToggleTheme = { authViewModel.toggleDarkMode() },
-                    onLogout      = { authViewModel.logout() },
+                    onLogout = { authViewModel.logout() }
                 )
             }
             composable(Screen.Transactions.route) {
