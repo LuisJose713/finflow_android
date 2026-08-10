@@ -1,0 +1,68 @@
+package com.softdevcode.finflow_android.ui.screens.transactions
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.softdevcode.finflow_android.data.repository.TransactionRepository
+import com.softdevcode.finflow_android.domain.model.CreateTransactionRequest
+import com.softdevcode.finflow_android.util.onError
+import com.softdevcode.finflow_android.util.onSuccess
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import javax.inject.Inject
+
+data class AddTransactionUiState(
+    val isLoading: Boolean = false,
+    val error: String? = null,
+    val saved: Boolean = false,
+)
+
+@HiltViewModel
+class AddTransactionViewModel @Inject constructor(
+    private val transactionRepository: TransactionRepository,
+) : ViewModel() {
+
+    private val _uiState = MutableStateFlow(AddTransactionUiState())
+    val uiState: StateFlow<AddTransactionUiState> = _uiState.asStateFlow()
+
+    fun createTransaction(request: CreateTransactionRequest) {
+        viewModelScope.launch {
+            _uiState.update {
+                it.copy(
+                    isLoading = true,
+                    error = null,
+                    saved = false,
+                )
+            }
+
+            transactionRepository
+                .createTransaction(request)
+                .onSuccess {
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            saved = true,
+                        )
+                    }
+                }
+                .onError { message ->
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            error = message,
+                            saved = false,
+                        )
+                    }
+                }
+        }
+    }
+
+    fun clearError() {
+        _uiState.update {
+            it.copy(error = null)
+        }
+    }
+}
