@@ -13,14 +13,15 @@ import com.softdevcode.finflow_android.ui.screens.main.MainScreen
 
 
 sealed class Screen(val route: String) {
-    data object Login           : Screen("login")
-    data object Register        : Screen("register")
-    data object Main            : Screen("main")
-    data object Dashboard       : Screen("dashboard")
-    data object Transactions    : Screen("transactions")
-    data object Goals           : Screen("goals")
-    data object PlannedExpenses : Screen("planned_expenses")
-    data object Advisor         : Screen("advisor")
+        data object Login           : Screen("login")
+        data object Register        : Screen("register")
+        data object Main            : Screen("main")
+        data object Dashboard       : Screen("dashboard")
+        data object Transactions    : Screen("transactions")
+        data object AddTransaction  : Screen("add_transaction")
+        data object Goals           : Screen("goals")
+        data object PlannedExpenses : Screen("planned_expenses")
+        data object Advisor         : Screen("advisor")
 }
 
 @Composable

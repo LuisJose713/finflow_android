@@ -19,6 +19,9 @@ import androidx.navigation.compose.*
 import com.softdevcode.finflow_android.ui.screens.auth.AuthViewModel
 import com.softdevcode.finflow_android.ui.screens.dashboard.DashboardScreen
 import com.softdevcode.finflow_android.ui.screens.navigation.Screen
+import com.softdevcode.finflow_android.ui.screens.transactions.AddTransactionScreen
+import com.softdevcode.finflow_android.ui.screens.transactions.AddTransactionScreen
+import com.softdevcode.finflow_android.ui.screens.transactions.TransactionsScreen
 
 // ── Tab definition ────────────────────────────────────────────────────────────
 private data class BottomTab(
@@ -115,8 +118,11 @@ fun MainScreen(
                 )
             }
             composable(Screen.Transactions.route) {
-                PlaceholderScreen(title = "Transacciones", user = "", isDark = darkMode,
-                    onToggleTheme = { authViewModel.toggleDarkMode() }, onLogout = {})
+                TransactionsScreen(
+                    onAddTransaction = {
+                        navController.navigate(Screen.AddTransaction.route)
+                    }
+                )
             }
             composable(Screen.Goals.route) {
                 PlaceholderScreen(title = "Metas", user = "", isDark = darkMode,
