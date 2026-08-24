@@ -1,5 +1,7 @@
 package com.softdevcode.finflow_android.ui.screens.navigation
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
 import androidx.compose.runtime.*
@@ -13,17 +15,21 @@ import com.softdevcode.finflow_android.ui.screens.main.MainScreen
 
 
 sealed class Screen(val route: String) {
-        data object Login           : Screen("login")
-        data object Register        : Screen("register")
-        data object Main            : Screen("main")
-        data object Dashboard       : Screen("dashboard")
-        data object Transactions    : Screen("transactions")
-        data object AddTransaction  : Screen("add_transaction")
-        data object Goals           : Screen("goals")
-        data object PlannedExpenses : Screen("planned_expenses")
-        data object Advisor         : Screen("advisor")
+    data object Login           : Screen("login")
+    data object Register        : Screen("register")
+    data object Main            : Screen("main")
+    data object Dashboard       : Screen("dashboard")
+    data object Transactions    : Screen("transactions")
+    data object AddTransaction  : Screen("add_transaction")
+    data object Goals           : Screen("goals")
+    data object PlannedExpenses : Screen("planned_expenses")
+
+    object CreatePlannedExpense : Screen("create_planned_expense")
+    data object Advisor         : Screen("advisor")
+    data object CreateGoal : Screen("create_goal")
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun FinFlowNavGraph(
     startDestination: String,
