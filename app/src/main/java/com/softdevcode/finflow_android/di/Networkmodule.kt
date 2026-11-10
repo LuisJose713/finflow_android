@@ -1,5 +1,6 @@
 package com.softdevcode.finflow_android.di
 
+import com.softdevcode.finflow_android.BuildConfig
 import com.softdevcode.finflow_android.data.local.TokenManager
 import com.softdevcode.finflow_android.data.remote.api.FinFlowApi
 import dagger.Module
@@ -52,7 +53,7 @@ object NetworkModule {
             .addInterceptor(authInterceptor)
             .addInterceptor(
                 HttpLoggingInterceptor().apply {
-                    level = HttpLoggingInterceptor.Level.BODY
+                    level = HttpLoggingInterceptor.Level.NONE
                 }
             )
             .connectTimeout(30, TimeUnit.SECONDS)
@@ -65,7 +66,7 @@ object NetworkModule {
         okHttpClient: OkHttpClient
     ): Retrofit =
         Retrofit.Builder()
-            .baseUrl("http://192.168.101.11:8081")
+            .baseUrl(BuildConfig.BASE_URL)
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
