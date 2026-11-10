@@ -48,6 +48,9 @@ android {
 }
 
 dependencies {
+    // JUnit 4 for local JVM unit tests (src/test)
+    testImplementation("junit:junit:4.13.2")
+
     // Compose BOM
     implementation(platform(libs.compose.bom))
     implementation(libs.compose.ui)
