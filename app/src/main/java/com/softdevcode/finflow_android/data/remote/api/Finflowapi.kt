@@ -110,4 +110,24 @@ interface FinFlowApi {
 
     @DELETE("planned-expenses/{id}")
     suspend fun deletePlannedExpense(@Path("id") id: Int)
+
+    // Experimental E2EE vault: ciphertext only, not yet used by legacy finance flows.
+    @GET("private-vault/entries")
+    suspend fun getVaultEntries(
+        @Query("after") after: String? = null,
+        @Query("limit") limit: Int = 100
+    ): List<com.softdevcode.finflow_android.security.VaultOpaqueEntry>
+
+    @PUT("private-vault/entries/{id}")
+    suspend fun putVaultEntry(
+        @Path("id") id: String,
+        @Body request: com.softdevcode.finflow_android.security.VaultPutRequest
+    ): com.softdevcode.finflow_android.security.VaultOpaqueEntry
+
+    @DELETE("private-vault/entries/{id}")
+    suspend fun deleteVaultEntry(
+        @Path("id") id: String,
+        @Query("expectedRevision") expectedRevision: Long
+    )
+
 }
