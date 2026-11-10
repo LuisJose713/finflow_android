@@ -20,11 +20,11 @@ android {
 
     buildTypes {
         debug {
-            buildConfigField("String", "BASE_URL", "\"http://192.168.101.11:8081\"")
+            buildConfigField("String", "BASE_URL", "\"https://finflow-backend-yqhi.onrender.com/\"")
         }
         release {
             isMinifyEnabled = true
-            buildConfigField("String", "BASE_URL", "\"https://api.finflow.com\"")
+            buildConfigField("String", "BASE_URL", "\"https://finflow-backend-yqhi.onrender.com/\"")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
