@@ -1,6 +1,5 @@
 package com.softdevcode.finflow_android.data.repository
 
-import android.util.Log
 import com.softdevcode.finflow_android.data.remote.api.FinFlowApi
 import com.softdevcode.finflow_android.domain.model.PlannedExpense
 import com.softdevcode.finflow_android.domain.model.PlannedExpenseRequest
@@ -18,11 +17,9 @@ class PlannedExpenseRepository @Inject constructor(
             api.getPlannedExpenses()
         }.fold(
             onSuccess = {
-                Log.d("PLANNED_EXPENSES", "get OK: ${it.size}")
                 Result.Success(it)
             },
             onFailure = {
-                Log.e("PLANNED_EXPENSES", "get ERROR: ${it.message}", it)
                 Result.Error(
                     it.message ?: "Error al cargar los gastos planeados"
                 )
@@ -36,11 +33,9 @@ class PlannedExpenseRepository @Inject constructor(
             api.createPlannedExpense(request)
         }.fold(
             onSuccess = {
-                Log.d("PLANNED_EXPENSES", "create OK: ${it.id}")
                 Result.Success(it)
             },
             onFailure = {
-                Log.e("PLANNED_EXPENSES", "create ERROR: ${it.message}", it)
                 Result.Error(
                     it.message ?: "Error al crear el gasto planeado"
                 )
@@ -58,7 +53,6 @@ class PlannedExpenseRepository @Inject constructor(
                 Result.Success(it)
             },
             onFailure = {
-                Log.e("PLANNED_EXPENSES", "update ERROR", it)
                 Result.Error(
                     it.message ?: "Error al actualizar el gasto planeado"
                 )
@@ -75,7 +69,6 @@ class PlannedExpenseRepository @Inject constructor(
                 Result.Success(it)
             },
             onFailure = {
-                Log.e("PLANNED_EXPENSES", "execute ERROR", it)
                 Result.Error(
                     it.message ?: "Error al ejecutar el gasto planeado"
                 )
@@ -92,7 +85,6 @@ class PlannedExpenseRepository @Inject constructor(
                 Result.Success(it)
             },
             onFailure = {
-                Log.e("PLANNED_EXPENSES", "cancel ERROR", it)
                 Result.Error(
                     it.message ?: "Error al cancelar el gasto planeado"
                 )
@@ -109,7 +101,6 @@ class PlannedExpenseRepository @Inject constructor(
                 Result.Success(Unit)
             },
             onFailure = {
-                Log.e("PLANNED_EXPENSES", "delete ERROR", it)
                 Result.Error(
                     it.message ?: "Error al eliminar el gasto planeado"
                 )
