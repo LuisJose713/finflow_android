@@ -82,11 +82,20 @@ fun LoginScreen(
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    imageVector = Icons.Outlined.AccountBalanceWallet,
-                    contentDescription = null,
-                    tint = androidx.compose.ui.graphics.Color.White,
-                    modifier = Modifier.size(36.dp),
+                Text(
+                    "F",
+                    style = MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.ExtraBold),
+                    color = androidx.compose.ui.graphics.Color.White,
+                )
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(top = 16.dp, end = 17.dp)
+                        .size(8.dp)
+                        .background(
+                            com.softdevcode.finflow_android.ui.theme.Warning,
+                            androidx.compose.foundation.shape.CircleShape,
+                        ),
                 )
             }
 
