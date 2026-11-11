@@ -38,12 +38,15 @@ jobs:
           APK=$(find app/build/outputs/apk/debug -maxdepth 1 -name '*.apk' -print -quit)
           test -n "$APK"
           "$ANDROID_HOME/build-tools/34.0.0/apksigner" verify --verbose "$APK"
-          "$ANDROID_HOME/build-tools/34.0.0/aapt" dump badging "$APK" | head -n 12
+          BADGING=$("$ANDROID_HOME/build-tools/34.0.0/aapt" dump badging "$APK")
+          printf '%s\n' "$BADGING" | grep -F "versionCode='4'"
+          printf '%s\n' "$BADGING" | grep -F "versionName='1.2.1-qa'"
+          printf '%s\n' "$BADGING" | head -n 12
       - name: Publish APK for QA
         if: github.event_name != 'pull_request'
         uses: actions/upload-artifact@v4
         with:
-          name: FinFlow-Android-UI-v1.2.0-${{ github.run_number }}
+          name: FinFlow-Android-UI-v1.2.1-${{ github.run_number }}
           path: app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
           retention-days: 14
