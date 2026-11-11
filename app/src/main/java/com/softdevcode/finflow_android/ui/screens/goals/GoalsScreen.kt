@@ -21,7 +21,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -53,7 +53,11 @@ fun GoalsScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Text("Metas")
+                    Column {
+                        Text("Metas", style = MaterialTheme.typography.titleLarge)
+                        Text("Convierte tus planes en logros", style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
                 },
                 actions = {
                     IconButton(
@@ -71,14 +75,13 @@ fun GoalsScreen(
         },
 
         floatingActionButton = {
-            FloatingActionButton(
+            ExtendedFloatingActionButton(
                 onClick = onAddGoal,
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.Add,
-                    contentDescription = "Agregar meta",
-                )
-            }
+                icon = { Icon(Icons.Outlined.Add, contentDescription = null) },
+                text = { Text("Nueva meta") },
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+            )
         },
     ) { paddingValues ->
 
