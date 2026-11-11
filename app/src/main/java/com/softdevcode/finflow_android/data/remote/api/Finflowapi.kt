@@ -41,7 +41,58 @@ import com.softdevcode.finflow_android.domain.model.FinFlowRightsEntry
 import com.softdevcode.finflow_android.domain.model.ChangeFinFlowPasswordRequest
 import com.softdevcode.finflow_android.domain.model.ConfirmFinFlowPasswordRequest
 
+import com.softdevcode.finflow_android.domain.model.BillingCatalog
+import com.softdevcode.finflow_android.domain.model.BillingOffer
+import com.softdevcode.finflow_android.domain.model.BillingEntitlement
+import com.softdevcode.finflow_android.domain.model.BillingPlan
+import com.softdevcode.finflow_android.domain.model.BillingPromotion
+import com.softdevcode.finflow_android.domain.model.BillingGrantRequest
+import com.softdevcode.finflow_android.domain.model.AdminOverview
+import com.softdevcode.finflow_android.domain.model.AdminPlatformHealth
+
 interface FinFlowApi {
+    // Pricing is informative only: billing checkout is disabled on the server.
+    @GET("billing/catalog")
+    suspend fun getBillingCatalog(): BillingCatalog
+
+    @GET("billing/quote")
+    suspend fun getBillingQuote(
+        @Query("planCode") planCode: String,
+        @Query("promoCode") promoCode: String? = null,
+    ): BillingOffer
+
+    @GET("billing/me")
+    suspend fun getMyBillingStatus(): BillingEntitlement
+
+    // Role authorization is enforced independently by Spring Security.
+    // The Android UI also hides these endpoints for non-administrators.
+    @GET("admin/overview")
+    suspend fun getAdminOverview(): AdminOverview
+
+    @GET("admin/monitor")
+    suspend fun getAdminHealth(): AdminPlatformHealth
+
+    @GET("admin/billing/plans")
+    suspend fun getAdminPlans(): List<BillingPlan>
+
+    @PUT("admin/billing/plans/{code}")
+    suspend fun updateAdminPlan(@Path("code") code: String, @Body plan: BillingPlan): BillingPlan
+
+    @GET("admin/billing/promotions")
+    suspend fun getAdminPromotions(): List<BillingPromotion>
+
+    @POST("admin/billing/promotions")
+    suspend fun createAdminPromotion(@Body promotion: BillingPromotion): BillingPromotion
+
+    @PUT("admin/billing/promotions/{code}")
+    suspend fun updateAdminPromotion(
+        @Path("code") code: String, @Body promotion: BillingPromotion,
+    ): BillingPromotion
+
+    @POST("admin/billing/grants")
+    suspend fun grantAdminPlan(@Body request: BillingGrantRequest): retrofit2.Response<okhttp3.ResponseBody>
+
+
     @POST("auth/change-password")
     suspend fun changeFinFlowPassword(
         @Body request: ChangeFinFlowPasswordRequest,
