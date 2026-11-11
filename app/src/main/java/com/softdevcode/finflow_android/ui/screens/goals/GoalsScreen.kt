@@ -1,5 +1,6 @@
 package com.softdevcode.finflow_android.ui.screens.goals
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -242,6 +243,8 @@ private fun GoalCard(
     goal: Goal,
 ) {
     Card(
+        shape = MaterialTheme.shapes.large,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.45f)),
         modifier = Modifier.fillMaxWidth(),
 
         colors = CardDefaults.cardColors(
