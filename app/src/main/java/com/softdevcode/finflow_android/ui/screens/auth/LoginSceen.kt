@@ -93,14 +93,7 @@ fun LoginScreen(
             }
 
             Spacer(Modifier.height(20.dp))
-            Text(
-                text = "FinFlow",
-                style = MaterialTheme.typography.headlineLarge.copy(
-                    fontWeight = FontWeight.ExtraBold,
-                    color = MaterialTheme.colorScheme.onBackground,
-                    letterSpacing = (-1.2).sp,
-                )
-            )
+            com.softdevcode.finflow_android.ui.theme.FinFlowV4Wordmark()
             Text(
                 text = "TU DINERO, CON OTRO NIVEL DE CLARIDAD",
                 style = MaterialTheme.typography.labelSmall.copy(
