@@ -14,6 +14,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.foundation.Image
+import androidx.compose.ui.res.painterResource
+import com.softdevcode.finflow_android.R
+import com.softdevcode.finflow_android.ui.theme.FinFlowNavy
+import com.softdevcode.finflow_android.ui.theme.FinFlowGold
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.*
@@ -72,42 +77,36 @@ fun LoginScreen(
         ) {
             Spacer(Modifier.height(80.dp))
 
-            // ── Logo ──────────────────────────────────────────────────────
+            // ── Official FinFlow identity shared with Web ──────────────────
             Box(
                 modifier = Modifier
-                    .size(72.dp)
-                    .background(
-                        Brush.linearGradient(listOf(Primary, PrimaryDark)),
-                        RoundedCornerShape(20.dp)
-                    ),
+                    .size(88.dp)
+                    .background(FinFlowNavy, RoundedCornerShape(24.dp)),
                 contentAlignment = Alignment.Center
             ) {
-                Text(
-                    "F",
-                    style = MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.ExtraBold),
-                    color = androidx.compose.ui.graphics.Color.White,
-                )
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(top = 16.dp, end = 17.dp)
-                        .size(8.dp)
-                        .background(
-                            com.softdevcode.finflow_android.ui.theme.Warning,
-                            androidx.compose.foundation.shape.CircleShape,
-                        ),
+                Image(
+                    painter = painterResource(id = R.drawable.finflow_brand_symbol),
+                    contentDescription = "Símbolo de FinFlow",
+                    modifier = Modifier.size(73.dp)
                 )
             }
 
             Spacer(Modifier.height(20.dp))
-
             Text(
                 text = "FinFlow",
-                style = MaterialTheme.typography.headlineMedium.copy(
-                    fontWeight = FontWeight.Bold,
-                    color = Primary,
-                    letterSpacing = (-0.5).sp,
+                style = MaterialTheme.typography.headlineLarge.copy(
+                    fontWeight = FontWeight.ExtraBold,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    letterSpacing = (-1.2).sp,
                 )
+            )
+            Text(
+                text = "TU ESPACIO FINANCIERO",
+                style = MaterialTheme.typography.labelSmall.copy(
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 2.sp,
+                ),
+                color = FinFlowGold,
             )
 
             Spacer(Modifier.height(6.dp))
@@ -266,7 +265,7 @@ fun LoginScreen(
 
             // ── Footer ────────────────────────────────────────────────────
             Text(
-                text = "SOFTDEVCODE SAS",
+                text = "FINFLOW  •  AEVQOR",
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurface.copy(0.25f),
                 textAlign = TextAlign.Center,
