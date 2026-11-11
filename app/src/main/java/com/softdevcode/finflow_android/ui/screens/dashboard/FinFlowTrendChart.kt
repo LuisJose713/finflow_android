@@ -53,6 +53,7 @@ fun FinFlowTrendChart(monthlyData: List<MonthlyData>, amountsVisible: Boolean) {
         } else {
             val maxValue = data.maxOf { maxOf(it.income, it.expenses) }
                 .coerceAtLeast(1.0)
+            val chartGridColor = MaterialTheme.colorScheme.outline
             Canvas(Modifier.fillMaxWidth().height(158.dp)) {
                 val w = size.width
                 val h = size.height
@@ -69,7 +70,7 @@ fun FinFlowTrendChart(monthlyData: List<MonthlyData>, amountsVisible: Boolean) {
                 repeat(4) { line ->
                     val y = drawableHeight * line / 3f
                     drawLine(
-                        color = BorderLight.copy(alpha = .65f),
+                        color = chartGridColor.copy(alpha = .65f),
                         start = Offset(inset, y),
                         end = Offset(w - inset, y),
                         strokeWidth = 1.dp.toPx(),
@@ -95,10 +96,13 @@ fun FinFlowTrendChart(monthlyData: List<MonthlyData>, amountsVisible: Boolean) {
                 renderLine({ it.income }, FinFlowBlue)
                 renderLine({ it.expenses }, FinFlowGold)
             }
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            Row(
+                Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
                 data.forEachIndexed { index, point ->
                     TextButton(
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier.widthIn(min = 42.dp),
                         onClick = { selected = index },
                         contentPadding = PaddingValues(0.dp),
                     ) {
