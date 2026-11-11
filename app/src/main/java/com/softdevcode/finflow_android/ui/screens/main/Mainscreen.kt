@@ -54,6 +54,7 @@ import com.softdevcode.finflow_android.ui.screens.plannedexpenses.PlannedExpense
 import com.softdevcode.finflow_android.ui.screens.transactions.AddTransactionScreen
 import com.softdevcode.finflow_android.ui.screens.transactions.TransactionsScreen
 import com.softdevcode.finflow_android.ui.theme.FinFlowNavy
+import com.softdevcode.finflow_android.ui.theme.FinFlowGoldPale
 import com.softdevcode.finflow_android.ui.theme.FinFlowGold
 import com.softdevcode.finflow_android.ui.theme.Primary
 import com.softdevcode.finflow_android.ui.theme.Warning
@@ -128,6 +129,7 @@ fun MainScreen(
     val uiState by authViewModel.uiState.collectAsStateWithLifecycle()
 
     val darkMode by authViewModel.darkMode.collectAsStateWithLifecycle()
+    var requestedModule by remember { mutableStateOf("accounts") }
 
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -231,15 +233,15 @@ fun MainScreen(
                         colors =
                             NavigationBarItemDefaults.colors(
 
-                                selectedIconColor = FinFlowGold,
+                                selectedIconColor = FinFlowGoldPale,
 
-                                selectedTextColor = FinFlowGold,
+                                selectedTextColor = Color.White,
 
-                                indicatorColor = Color.White.copy(alpha = 0.10f),
+                                indicatorColor = Color(0xFF22334A),
 
-                                unselectedIconColor = Color.White.copy(alpha = 0.72f),
+                                unselectedIconColor = Color(0xFFAEBED2),
 
-                                unselectedTextColor = Color.White.copy(alpha = 0.72f),
+                                unselectedTextColor = Color(0xFFAEBED2),
                             )
                     )
                 }
@@ -309,6 +311,14 @@ fun MainScreen(
                     onViewTransactions = { navController.navigate(Screen.Transactions.route) { launchSingleTop = true } },
                     onViewPlannedExpenses = { navController.navigate(Screen.PlannedExpenses.route) { launchSingleTop = true } },
                     onViewGoals = { navController.navigate(Screen.Goals.route) { launchSingleTop = true } },
+                    onViewAccounts = {
+                        requestedModule = "accounts"
+                        navController.navigate(Screen.More.route) { launchSingleTop = true }
+                    },
+                    onViewAdvisor = {
+                        requestedModule = "advisor"
+                        navController.navigate(Screen.More.route) { launchSingleTop = true }
+                    },
                 )
             }
 
@@ -426,6 +436,7 @@ fun MainScreen(
                     userId = uiState.user?.id,
                     onReauthenticate = { authViewModel.logout() },
                     isAdmin = uiState.user?.role in setOf("ADMIN", "ROLE_ADMIN"),
+                    initialSection = requestedModule,
                 )
             }
 
@@ -434,17 +445,11 @@ fun MainScreen(
             // ─────────────────────────────────────────────────────────────────
 
             composable(Screen.Advisor.route) {
-
-                PlaceholderScreen(
-                    title = "Asesor IA",
-                    user = "",
-                    isDark = darkMode,
-
-                    onToggleTheme = {
-                        authViewModel.toggleDarkMode()
-                    },
-
-                    onLogout = { authViewModel.logout() }
+                FinFlowModulesScreen(
+                    userId = uiState.user?.id,
+                    onReauthenticate = { authViewModel.logout() },
+                    isAdmin = uiState.user?.role in setOf("ADMIN", "ROLE_ADMIN"),
+                    initialSection = "advisor",
                 )
             }
         }
