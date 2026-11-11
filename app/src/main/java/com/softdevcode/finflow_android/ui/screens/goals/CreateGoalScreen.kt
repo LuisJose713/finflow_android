@@ -1,5 +1,6 @@
 package com.softdevcode.finflow_android.ui.screens.goals
 
+import com.softdevcode.finflow_android.ui.theme.FinFlowV4Hero
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -99,6 +100,11 @@ fun CreateGoalScreen(
                 .padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
+
+            FinFlowV4Hero(
+                "TU FUTURO FINANCIERO", "Hazlo posible.",
+                "Define tu meta y construye el camino para cumplirla.",
+            )
 
             OutlinedTextField(
                 value = title,
