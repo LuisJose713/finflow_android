@@ -103,6 +103,11 @@
 
                 // ── Donut chart summary ───────────────────────────────────────
                 if (!uiState.isLoading && uiState.stats != null) {
+                    Text(
+                        "Tu actividad",
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                        modifier = Modifier.padding(start = 22.dp, bottom = 12.dp),
+                    )
                     SummaryCard(
                         stats   = uiState.stats!!,
                         modifier = Modifier.padding(horizontal = 20.dp),
@@ -120,14 +125,14 @@
                     )
                 }
 
-                Spacer(Modifier.height(80.dp))
+                Spacer(Modifier.height(128.dp))
             }
 
 
         }
     }
 
-    // ── Top Bar ───────────────────────────────────────────────────────────────────
+    // ── FinFlow identity, greeting and real account actions ────────────────
     @Composable
     private fun DashboardTopBar(
         userName: String,
@@ -135,97 +140,157 @@
         onToggleTheme: () -> Unit,
         onLogout: () -> Unit,
     ) {
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 16.dp),
-            verticalAlignment = Alignment.CenterVertically,
+                .padding(horizontal = 20.dp, vertical = 18.dp),
         ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text  = "Dashboard",
-                    style = MaterialTheme.typography.titleLarge.copy(
-                        fontWeight    = FontWeight.Bold,
-                        letterSpacing = (-0.5).sp,
-                    ),
-                )
-                Text(
-                    text  = "Hola, ${userName.split(" ").firstOrNull() ?: "Usuario"} 👋",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(0.5f),
-                )
-            }
-
-            // Theme toggle
-            IconButton(onClick = onToggleTheme) {
-                AnimatedContent(targetState = isDark, label = "theme") { dark ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(44.dp)
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(Brush.linearGradient(listOf(Primary, PrimaryDark))),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        text = "F",
+                        color = Color.White,
+                        style = MaterialTheme.typography.headlineSmall.copy(
+                            fontWeight = FontWeight.ExtraBold
+                        ),
+                    )
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(top = 9.dp, end = 9.dp)
+                            .size(6.dp)
+                            .background(Warning, CircleShape),
+                    )
+                }
+                Spacer(Modifier.width(12.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        "FinFlow",
+                        style = MaterialTheme.typography.titleLarge.copy(
+                            fontWeight = FontWeight.ExtraBold,
+                            letterSpacing = (-0.7).sp,
+                        ),
+                    )
+                    Text(
+                        "Tu espacio financiero",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                IconButton(onClick = onToggleTheme) {
                     Icon(
-                        imageVector = if (dark) Icons.Outlined.LightMode else Icons.Outlined.DarkMode,
-                        contentDescription = null,
-                        tint = if (dark) Warning else Primary,
+                        imageVector = if (isDark) Icons.Outlined.LightMode else Icons.Outlined.DarkMode,
+                        contentDescription = "Cambiar tema",
+                        tint = if (isDark) Warning else MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                IconButton(onClick = onLogout) {
+                    Icon(
+                        imageVector = Icons.Outlined.Logout,
+                        contentDescription = "Cerrar sesión",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
             }
-
-            // Notification (placeholder)
-            IconButton(onClick = {}) {
-                Icon(
-                    Icons.Outlined.Notifications,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurface.copy(0.5f),
-                )
-            }
-        }
-    }
-
-    // ── Hero Balance ──────────────────────────────────────────────────────────────
-    @Composable
-    private fun HeroBalance(stats: TransactionStats) {
-        Column(
-            modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp),
-        ) {
+            Spacer(Modifier.height(24.dp))
             Text(
-                text  = "Balance total",
-                style = MaterialTheme.typography.bodySmall.copy(
-                    fontWeight    = FontWeight.Medium,
-                    letterSpacing = 0.2.sp,
+                "Hola, ${userName.trim().split(" ").firstOrNull()?.ifEmpty { "Usuario" } ?: "Usuario"} 👋",
+                style = MaterialTheme.typography.headlineSmall.copy(
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = (-0.7).sp,
                 ),
-                color = MaterialTheme.colorScheme.onSurface.copy(0.45f),
             )
             Spacer(Modifier.height(4.dp))
             Text(
-                text  = formatCurrency(stats.balance),
-                style = MaterialTheme.typography.displaySmall.copy(
-                    fontWeight    = FontWeight.Normal,
-                    letterSpacing = (-2).sp,
-                ),
+                "Así se mueve tu dinero hoy.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            Spacer(Modifier.height(8.dp))
+        }
+    }
 
-            // Savings rate pill
-            val isPositive = stats.savingsRate >= 0
-            val pillColor  = if (isPositive) Success else Danger
-            Surface(
-                color = pillColor.copy(alpha = 0.12f),
-                shape = CircleShape,
-            ) {
-                Row(
-                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically,
+    // ── Prominent live balance, sourced from the existing dashboard ViewModel ──
+    @Composable
+    private fun HeroBalance(stats: TransactionStats) {
+        val savingsPositive = stats.savingsRate >= 0
+        val savingsTint = if (savingsPositive) Color(0xFF86EFAC) else Color(0xFFFCA5A5)
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp, vertical = 4.dp)
+                .clip(RoundedCornerShape(26.dp))
+                .background(
+                    Brush.linearGradient(
+                        listOf(Color(0xFF182B61), Color(0xFF37318F), Color(0xFF6251D6))
+                    )
+                )
+                .padding(24.dp),
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    "BALANCE TOTAL",
+                    style = MaterialTheme.typography.labelMedium.copy(
+                        fontWeight = FontWeight.Bold, letterSpacing = 1.5.sp,
+                    ),
+                    color = Color.White.copy(alpha = 0.74f),
+                    modifier = Modifier.weight(1f),
+                )
+                Icon(
+                    Icons.Outlined.AccountBalanceWallet,
+                    contentDescription = null,
+                    tint = Color.White.copy(alpha = 0.84f),
+                    modifier = Modifier.size(21.dp),
+                )
+            }
+            Spacer(Modifier.height(14.dp))
+            Text(
+                formatCurrency(stats.balance),
+                style = MaterialTheme.typography.displaySmall.copy(
+                    fontWeight = FontWeight.Bold, letterSpacing = (-1.3).sp,
+                ),
+                color = Color.White,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+            Spacer(Modifier.height(20.dp))
+            HorizontalDivider(color = Color.White.copy(alpha = 0.2f))
+            Spacer(Modifier.height(16.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .size(30.dp)
+                        .background(Color.White.copy(alpha = 0.15f), CircleShape),
+                    contentAlignment = Alignment.Center,
                 ) {
                     Icon(
-                        imageVector = if (isPositive) Icons.Outlined.TrendingUp else Icons.Outlined.TrendingDown,
+                        imageVector = if (savingsPositive)
+                            Icons.Outlined.TrendingUp else Icons.Outlined.TrendingDown,
                         contentDescription = null,
-                        tint     = pillColor,
-                        modifier = Modifier.size(14.dp),
-                    )
-                    Spacer(Modifier.width(4.dp))
-                    Text(
-                        text  = "${String.format("%.1f", Math.abs(stats.savingsRate))}% tasa de ahorro",
-                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
-                        color = pillColor,
+                        tint = savingsTint,
+                        modifier = Modifier.size(17.dp),
                     )
                 }
+                Spacer(Modifier.width(9.dp))
+                Text(
+                    "${String.format(Locale("es", "CO"), "%.1f", Math.abs(stats.savingsRate))}% de ahorro",
+                    color = savingsTint,
+                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                )
+                Spacer(Modifier.weight(1f))
+                Text(
+                    "Resumen general",
+                    color = Color.White.copy(alpha = 0.72f),
+                    style = MaterialTheme.typography.labelSmall,
+                )
             }
         }
     }
@@ -274,7 +339,7 @@
         val isDark = MaterialTheme.colorScheme.background == BackgroundDark
         Card(
             modifier = modifier,
-            shape    = RoundedCornerShape(14.dp),
+            shape    = RoundedCornerShape(20.dp),
             colors   = CardDefaults.cardColors(
                 containerColor = if (isDark) SurfaceDark else Color.White,
             ),
@@ -283,7 +348,7 @@
             ),
             elevation = CardDefaults.cardElevation(0.dp),
         ) {
-            Column(modifier = Modifier.padding(12.dp)) {
+            Column(modifier = Modifier.padding(14.dp)) {
                 Box(
                     modifier = Modifier
                         .size(26.dp)
