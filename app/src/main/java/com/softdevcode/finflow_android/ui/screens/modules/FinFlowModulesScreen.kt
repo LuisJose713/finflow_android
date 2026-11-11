@@ -34,6 +34,8 @@ private val sections = listOf(
     "recurring" to "Recurrentes",
     "categories" to "Categorías",
     "advisor" to "Asesor IA",
+    "reports" to "Reportes",
+    "privacy" to "Privacidad",
 )
 
 @Composable
@@ -44,7 +46,9 @@ fun FinFlowModulesScreen(userId: Int?, vm: FinFlowModulesViewModel = hiltViewMod
     var year by rememberSaveable { mutableIntStateOf(cal.get(Calendar.YEAR)) }
     var month by rememberSaveable { mutableIntStateOf(cal.get(Calendar.MONTH) + 1) }
 
-    LaunchedEffect(selected) { vm.refresh(selected, year, month) }
+    LaunchedEffect(selected) {
+        if (selected != "reports" && selected != "advisor") vm.refresh(selected, year, month)
+    }
 
     Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         Column(
@@ -107,6 +111,8 @@ fun FinFlowModulesScreen(userId: Int?, vm: FinFlowModulesViewModel = hiltViewMod
                 "recurring" -> RecurringSection(state, vm)
                 "categories" -> CategoriesSection(state, vm, userId)
                 "advisor" -> AdvisorSection(state, vm)
+                "reports" -> FinFlowReportsSection(state, vm)
+                "privacy" -> FinFlowPrivacySection(state, vm)
             }
             Spacer(Modifier.height(22.dp))
         }
