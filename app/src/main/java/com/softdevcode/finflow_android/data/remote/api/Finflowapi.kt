@@ -32,7 +32,31 @@ import com.softdevcode.finflow_android.domain.model.RecurringExecutionResult
 import com.softdevcode.finflow_android.domain.model.CategoryPayload
 import com.softdevcode.finflow_android.domain.model.FinancialChatRequest
 
+import com.softdevcode.finflow_android.domain.model.FinFlowPrivacyPolicy
+import com.softdevcode.finflow_android.domain.model.FinFlowPrivacyStatus
+import com.softdevcode.finflow_android.domain.model.FinFlowMarketingChoice
+import com.softdevcode.finflow_android.domain.model.FinFlowRightsRequest
+import com.softdevcode.finflow_android.domain.model.FinFlowRightsEntry
+
 interface FinFlowApi {
+    // Consent is NEVER assumed; these endpoints only read and update
+    // explicit choices made by the authenticated account owner.
+    @GET("privacy/policy")
+    suspend fun getPrivacyPolicy(): FinFlowPrivacyPolicy
+
+    @GET("privacy/status")
+    suspend fun getPrivacyStatus(): FinFlowPrivacyStatus
+
+    @POST("privacy/marketing")
+    suspend fun setMarketing(@Body choice: FinFlowMarketingChoice): retrofit2.Response<okhttp3.ResponseBody>
+
+    @GET("privacy/rights-requests")
+    suspend fun getPrivacyRequests(): List<FinFlowRightsEntry>
+
+    @POST("privacy/rights-request")
+    suspend fun createPrivacyRequest(@Body request: FinFlowRightsRequest): retrofit2.Response<okhttp3.ResponseBody>
+
+
     // Accounts and transfers: owned by the authenticated user on the server.
     @GET("accounts")
     suspend fun getAccounts(): List<FinancialAccount>
@@ -156,6 +180,7 @@ interface FinFlowApi {
         @Query("month") month: Int? = null,
         @Query("year") year: Int? = null,
         @Query("categoryId") categoryId: Int? = null,
+        @Query("search") search: String? = null,
     ): retrofit2.Response<okhttp3.ResponseBody>
 
     // ── Categories ────────────────────────────────────────────────────────────
