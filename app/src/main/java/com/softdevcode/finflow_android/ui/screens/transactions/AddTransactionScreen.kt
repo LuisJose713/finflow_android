@@ -40,6 +40,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.softdevcode.finflow_android.domain.model.Category
 import com.softdevcode.finflow_android.domain.model.CreateTransactionRequest
+import com.softdevcode.finflow_android.domain.model.FinancialAccount
 import java.time.LocalDate
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -79,6 +80,8 @@ fun AddTransactionScreen(
     var categoryExpanded by remember {
         mutableStateOf(false)
     }
+    var accountExpanded by remember { mutableStateOf(false) }
+    var selectedAccount by remember { mutableStateOf<FinancialAccount?>(null) }
 
     val uiState by viewModel.uiState
         .collectAsStateWithLifecycle()
@@ -380,6 +383,41 @@ fun AddTransactionScreen(
                 }
             }
 
+            // Assign to one of the user's real wallets (optional, same as Web).
+            ExposedDropdownMenuBox(
+                expanded = accountExpanded,
+                onExpandedChange = { accountExpanded = !accountExpanded },
+            ) {
+                OutlinedTextField(
+                    value = selectedAccount?.name ?: "Sin cuenta",
+                    onValueChange = {},
+                    readOnly = true,
+                    modifier = Modifier.fillMaxWidth().menuAnchor(),
+                    label = { Text("Cuenta / billetera (opcional)") },
+                    trailingIcon = {
+                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = accountExpanded)
+                    },
+                )
+                ExposedDropdownMenu(
+                    expanded = accountExpanded,
+                    onDismissRequest = { accountExpanded = false },
+                ) {
+                    DropdownMenuItem(text = { Text("Sin cuenta") }, onClick = {
+                        selectedAccount = null
+                        accountExpanded = false
+                    })
+                    uiState.accounts.forEach { account ->
+                        DropdownMenuItem(
+                            text = { Text(account.name + " · " + account.currency) },
+                            onClick = {
+                                selectedAccount = account
+                                accountExpanded = false
+                            },
+                        )
+                    }
+                }
+            }
+
             // ─────────────────────────────────────────────────────
             // FECHA
             // ─────────────────────────────────────────────────────
@@ -499,6 +537,8 @@ fun AddTransactionScreen(
                                     .ifBlank {
                                         null
                                     },
+                            accountId = selectedAccount?.id,
+                            currency = "COP",
                         )
                     )
                 },
