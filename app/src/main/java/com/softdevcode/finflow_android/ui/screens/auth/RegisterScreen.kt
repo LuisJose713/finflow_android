@@ -1,7 +1,14 @@
 package com.softdevcode.finflow_android.ui.screens.auth
 
+import android.content.Intent
+import android.net.Uri
+
 import androidx.compose.animation.*
 import androidx.compose.foundation.*
+import androidx.compose.foundation.Image
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.platform.LocalContext
+import com.softdevcode.finflow_android.R
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -30,6 +37,10 @@ fun RegisterScreen(
 ) {
     val uiState      by viewModel.uiState.collectAsStateWithLifecycle()
     val focusManager = LocalFocusManager.current
+    val context = LocalContext.current
+    var privacyAccepted by remember { mutableStateOf(false) }
+    var marketingConsent by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) { viewModel.loadRegistrationPolicy() }
 
     var name        by remember { mutableStateOf("") }
     var email       by remember { mutableStateOf("") }
@@ -71,37 +82,22 @@ fun RegisterScreen(
 
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(
-                    modifier = Modifier
-                        .size(40.dp)
+                    modifier = Modifier.size(54.dp)
                         .background(
-                            Brush.linearGradient(
-                                listOf(
-                                    com.softdevcode.finflow_android.ui.theme.Primary,
-                                    com.softdevcode.finflow_android.ui.theme.PrimaryDark,
-                                )
-                            ),
-                            RoundedCornerShape(12.dp),
+                            com.softdevcode.finflow_android.ui.theme.FinFlowNavy,
+                            RoundedCornerShape(16.dp)
                         ),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Text(
-                        "F",
-                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
-                        color = androidx.compose.ui.graphics.Color.White,
-                    )
-                    Box(
-                        modifier = Modifier
-                            .align(Alignment.TopEnd)
-                            .padding(top = 7.dp, end = 7.dp)
-                            .size(6.dp)
-                            .background(com.softdevcode.finflow_android.ui.theme.Warning, CircleShape),
+                    Image(
+                        painter = painterResource(id = R.drawable.finflow_brand_symbol),
+                        contentDescription = "Marca de FinFlow",
+                        modifier = Modifier.size(46.dp),
                     )
                 }
-                Spacer(Modifier.width(10.dp))
-                Text(
-                    "FinFlow",
-                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
-                )
+                Spacer(Modifier.width(12.dp))
+                Text("FinFlow", style = MaterialTheme.typography.titleLarge.copy(
+                    fontWeight = FontWeight.ExtraBold))
             }
 
             Spacer(Modifier.height(26.dp))
@@ -187,9 +183,81 @@ fun RegisterScreen(
                 isError = !passwordsMatch,
                 supportingText = if (!passwordsMatch) { { Text("Las contraseñas no coinciden", color = MaterialTheme.colorScheme.error) } } else null,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus(); if (passwordsMatch && name.isNotBlank() && email.isNotBlank() && password.isNotBlank()) viewModel.register(email, password, name) }),
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus(); if (passwordsMatch && name.isNotBlank() && email.isNotBlank() && password.isNotBlank() &&
+                        uiState.registrationPolicy != null &&
+                        (uiState.registrationPolicy?.ready != true || privacyAccepted))
+                        viewModel.register(email, password, name, confirmPass, privacyAccepted, marketingConsent) }),
                 singleLine = true, modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(14.dp), colors = finFlowTextFieldColors())
+
+            Spacer(Modifier.height(20.dp))
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+            ) {
+                Column(
+                    modifier = Modifier.fillMaxWidth().padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                ) {
+                    Text("PRIVACIDAD · TU DECISIÓN",
+                        color = com.softdevcode.finflow_android.ui.theme.FinFlowGold,
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold)
+                    Text("Tratamiento de datos personales",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold)
+                    val policy = uiState.registrationPolicy
+                    if (uiState.isLoadingRegistrationPolicy) {
+                        LinearProgressIndicator(Modifier.fillMaxWidth())
+                        Text("Consultando la política vigente…")
+                    } else if (policy == null) {
+                        Text(uiState.registrationPolicyError ?: "No se pudo cargar la política.",
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall)
+                        OutlinedButton(onClick = { viewModel.loadRegistrationPolicy() }) {
+                            Text("Reintentar")
+                        }
+                    } else {
+                        Text((policy.controllerName.ifBlank { "FinFlow" }) +
+                            " · NIT " + policy.controllerNit,
+                            style = MaterialTheme.typography.bodySmall)
+                        Text("Política versión " + policy.version +
+                            if (policy.ready) " · Publicada" else " · En revisión",
+                            style = MaterialTheme.typography.bodySmall)
+                        OutlinedButton(onClick = {
+                            context.startActivity(Intent(Intent.ACTION_VIEW,
+                                Uri.parse("https://finflow-opal-five.vercel.app/privacy")))
+                        }) {
+                            Text("Leer política completa")
+                        }
+                        if (policy.ready) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Checkbox(checked = privacyAccepted,
+                                    onCheckedChange = { privacyAccepted = it })
+                                Text(
+                                    "He leído y autorizo expresamente el tratamiento " +
+                                    "necesario para utilizar FinFlow.",
+                                    style = MaterialTheme.typography.bodySmall,
+                                )
+                            }
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Checkbox(checked = marketingConsent,
+                                    onCheckedChange = { marketingConsent = it })
+                                Text("Opcional: acepto comunicaciones comerciales.",
+                                    style = MaterialTheme.typography.bodySmall)
+                            }
+                        } else {
+                            Text(
+                                "La política formal aún está en revisión. No se registrará " +
+                                "una autorización legal anticipada.",
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                style = MaterialTheme.typography.bodySmall,
+                            )
+                        }
+                    }
+                }
+            }
 
             AnimatedVisibility(visible = uiState.error != null, enter = fadeIn() + expandVertically(), exit = fadeOut() + shrinkVertically()) {
                 Spacer(Modifier.height(10.dp))
@@ -204,10 +272,14 @@ fun RegisterScreen(
 
             Spacer(Modifier.height(32.dp))
 
-            val canRegister = !uiState.isLoading && name.isNotBlank() && email.isNotBlank() && password.isNotBlank() && passwordsMatch && confirmPass.isNotBlank()
+            val canRegister = !uiState.isLoading && !uiState.isLoadingRegistrationPolicy &&
+                uiState.registrationPolicy != null && name.isNotBlank() &&
+                email.isNotBlank() && password.isNotBlank() && passwordsMatch &&
+                confirmPass.isNotBlank() &&
+                (uiState.registrationPolicy?.ready != true || privacyAccepted)
 
             Button(
-                onClick = { viewModel.register(email, password, name) },
+                onClick = { viewModel.register(email, password, name, confirmPass, privacyAccepted, marketingConsent) },
                 enabled = canRegister,
                 modifier = Modifier.fillMaxWidth().height(52.dp),
                 shape = RoundedCornerShape(14.dp),
