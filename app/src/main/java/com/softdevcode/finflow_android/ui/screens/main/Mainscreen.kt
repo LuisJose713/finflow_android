@@ -422,7 +422,10 @@ fun MainScreen(
             // ─────────────────────────────────────────────────────────────────
             // Financial modules — account balances, budgets, recurring, categories & AI.
             composable(Screen.More.route) {
-                FinFlowModulesScreen(userId = uiState.user?.id)
+                FinFlowModulesScreen(
+                    userId = uiState.user?.id,
+                    onReauthenticate = { authViewModel.logout() },
+                )
             }
 
             // Advisor legacy route, available for compatibility.
