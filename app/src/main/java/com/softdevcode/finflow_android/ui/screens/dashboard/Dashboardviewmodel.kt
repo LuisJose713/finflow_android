@@ -10,14 +10,6 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import javax.inject.Inject
 
-data class DashboardUiState(
-    val isLoading: Boolean = true,
-    val stats: TransactionStats? = null,
-    val recentTransactions: List<Transaction> = emptyList(),
-    val categories: List<Category> = emptyList(),
-    val error: String? = null,
-)
-
 @HiltViewModel
 class DashboardViewModel @Inject constructor(
     private val transactionRepository: TransactionRepository,
@@ -25,13 +17,16 @@ class DashboardViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(DashboardUiState())
     val uiState: StateFlow<DashboardUiState> = _uiState.asStateFlow()
+    private var loadJob: Job? = null
 
     init {
         load()
     }
 
     fun load() {
-        viewModelScope.launch {
+        // Initial composition and ON_RESUME can arrive together. Keep one request in flight.
+        if (loadJob?.isActive == true) return
+        loadJob = viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
 
             try {
@@ -56,26 +51,17 @@ class DashboardViewModel @Inject constructor(
                     )
                 }
 
+                ensureActive()
                 _uiState.update { state ->
-                    state.copy(
-                        isLoading = false,
-                        stats = statsResult.getOrNull(),
-                        recentTransactions = (txResult.getOrNull() ?: emptyList()).take(5),
-                        categories = catsResult.getOrNull() ?: emptyList(),
-                        error = when {
-                            statsResult is Result.Error -> statsResult.message
-                            txResult is Result.Error -> txResult.message
-                            catsResult is Result.Error -> catsResult.message
-                            else -> null
-                        }
-                    )
+                    state.withResults(statsResult, txResult, catsResult, System.currentTimeMillis())
                 }
-
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 _uiState.update {
                     it.copy(
                         isLoading = false,
-                        error = e.message ?: "Error cargando dashboard"
+                        error = "Revisa tu conexión y vuelve a intentarlo."
                     )
                 }
             }
