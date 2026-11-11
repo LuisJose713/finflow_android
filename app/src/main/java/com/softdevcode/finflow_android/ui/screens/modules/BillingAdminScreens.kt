@@ -23,15 +23,7 @@ private fun billingCop(value: Long): String =
 
 @Composable
 private fun BillingPanel(content: @Composable ColumnScope.() -> Unit) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-    ) {
-        Column(Modifier.fillMaxWidth().padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(9.dp),
-            content = content)
-    }
+    com.softdevcode.finflow_android.ui.theme.FinFlowV4Card(content = content)
 }
 
 @Composable
