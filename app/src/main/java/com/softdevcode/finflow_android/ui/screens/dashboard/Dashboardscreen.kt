@@ -1,6 +1,9 @@
 package com.softdevcode.finflow_android.ui.screens.dashboard
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.Image
+import androidx.compose.ui.res.painterResource
+import com.softdevcode.finflow_android.R
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -109,8 +112,8 @@ fun DashboardScreen(
             }
             uiState.stats?.let { stats ->
                 DashboardCard {
-                    Text("TU PRÓXIMO PASO", style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                    Text("PLAN FINANCIERO", style = MaterialTheme.typography.labelMedium,
+                        color = FinFlowGold, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
                     Text(if (amountsVisible && stats.balance < 0) "Recupera margen para lo que viene" else "Tu dinero, con un plan",
                         style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                     Text(
@@ -138,14 +141,20 @@ fun DashboardScreen(
 private fun DashboardTopBar(userName: String, isDark: Boolean, onToggleTheme: () -> Unit, onLogout: () -> Unit) {
     Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 18.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(Modifier.size(44.dp).clip(RoundedCornerShape(14.dp))
-                .background(Brush.linearGradient(listOf(Primary, PrimaryDark))), contentAlignment = Alignment.Center) {
-                Text("F", color = Color.White, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.ExtraBold)
+            Box(Modifier.size(52.dp).clip(RoundedCornerShape(16.dp))
+                .background(FinFlowNavy), contentAlignment = Alignment.Center) {
+                Image(
+                    painter = painterResource(id = R.drawable.finflow_brand_symbol),
+                    contentDescription = "Marca FinFlow",
+                    modifier = Modifier.size(45.dp)
+                )
             }
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
-                Text("FinFlow", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.ExtraBold)
-                Text("Tu espacio financiero", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text("FinFlow", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.ExtraBold,
+                    letterSpacing = (-0.8).sp)
+                Text("TU ESPACIO FINANCIERO", style = MaterialTheme.typography.labelSmall,
+                    color = FinFlowGold, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
             }
             IconButton(onClick = onToggleTheme) {
                 Icon(if (isDark) Icons.Outlined.LightMode else Icons.Outlined.DarkMode,
@@ -154,9 +163,13 @@ private fun DashboardTopBar(userName: String, isDark: Boolean, onToggleTheme: ()
             IconButton(onClick = onLogout) { Icon(Icons.Outlined.Logout, "Cerrar sesión") }
         }
         Spacer(Modifier.height(24.dp))
+        Text("BIENVENIDO A FINFLOW", style = MaterialTheme.typography.labelSmall,
+            color = FinFlowGold, fontWeight = FontWeight.Bold, letterSpacing = 1.8.sp)
+        Spacer(Modifier.height(5.dp))
         Text("Hola, ${userName.trim().substringBefore(' ').ifBlank { "Usuario" }}",
             style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-        Text("Tus finanzas, paso a paso.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text("Tu dinero merece un plan extraordinario.", style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 
@@ -164,11 +177,11 @@ private fun DashboardTopBar(userName: String, isDark: Boolean, onToggleTheme: ()
 private fun HeroBalance(stats: TransactionStats, visible: Boolean, onToggleVisibility: () -> Unit) {
     var showCalculation by rememberSaveable { mutableStateOf(false) }
     Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp).clip(RoundedCornerShape(26.dp))
-        .background(Brush.linearGradient(listOf(Color(0xFF0A244E), Color(0xFF194B9A), PrimaryDark))).padding(24.dp),
+        .background(Brush.linearGradient(listOf(FinFlowNavy, FinFlowNavy2, Color(0xFF22394D)))).padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text("BALANCE REGISTRADO", Modifier.weight(1f), style = MaterialTheme.typography.labelMedium,
-                color = Color.White.copy(alpha = .85f), fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
+            Text("TU BALANCE  /  FINFLOW", Modifier.weight(1f), style = MaterialTheme.typography.labelMedium,
+                color = FinFlowGoldSoft, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
             IconButton(onClick = onToggleVisibility) {
                 Icon(if (visible) Icons.Outlined.Visibility else Icons.Outlined.VisibilityOff,
                     if (visible) "Ocultar importes del inicio" else "Mostrar importes del inicio", tint = Color.White)
@@ -185,7 +198,7 @@ private fun HeroBalance(stats: TransactionStats, visible: Boolean, onToggleVisib
                 else -> "${formatPercent(stats.savingsRate)} de margen de ahorro"
             },
             style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold,
-            color = if (stats.savingsRate < 0 && visible) Color(0xFFFECACA) else Color(0xFFBBF7D0))
+            color = if (stats.savingsRate < 0 && visible) Color(0xFFFECACA) else FinFlowGoldSoft)
         TextButton(onClick = { showCalculation = !showCalculation },
             colors = ButtonDefaults.textButtonColors(contentColor = Color.White)) {
             Text(if (showCalculation) "Ocultar cálculo" else "Ver cómo se calcula")
