@@ -37,6 +37,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import com.softdevcode.finflow_android.ui.theme.FinFlowV4Hero
+import com.softdevcode.finflow_android.ui.theme.FinFlowV4Card
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
@@ -146,6 +148,7 @@ fun TransactionsScreen(
     Scaffold(
 
         topBar = {
+            Column {
 
             TopAppBar(
 
@@ -154,7 +157,7 @@ fun TransactionsScreen(
                         Text("MOVIMIENTOS Y CONTROL", style = MaterialTheme.typography.labelSmall,
                             color = FinFlowGold, fontWeight = FontWeight.Bold)
                         Text("Tus movimientos", style = MaterialTheme.typography.titleLarge,
-                            color = Color.White, fontWeight = FontWeight.Bold)
+                            color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.Bold)
                     }
                 },
 
@@ -169,12 +172,21 @@ fun TransactionsScreen(
                         Icon(
                             imageVector = Icons.Outlined.Refresh,
                             contentDescription = "Actualizar",
-                            tint = Color.White,
+                            tint = MaterialTheme.colorScheme.onBackground,
                         )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = FinFlowNavy),
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background,
+                ),
             )
+            FinFlowV4Hero(
+                "MOVIMIENTOS Y CONTROL",
+                "Cada movimiento, en su lugar.",
+                "Consulta, filtra y exporta tu historial con total claridad.",
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+            )
+            }
         },
 
         floatingActionButton = {
