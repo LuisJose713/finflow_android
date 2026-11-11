@@ -38,7 +38,8 @@ class TransactionsViewModel @Inject constructor(
     init {
         load()
         viewModelScope.launch {
-            if (val result = transactionRepository.getCategories(); result is Result.Success) {
+            val result = transactionRepository.getCategories()
+            if (result is Result.Success) {
                 _uiState.update { it.copy(categories = result.data) }
             }
         }
