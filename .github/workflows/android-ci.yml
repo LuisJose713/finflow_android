@@ -43,7 +43,7 @@ jobs:
         if: github.event_name != 'pull_request'
         uses: actions/upload-artifact@v4
         with:
-          name: FinFlow-Android-QA-${{ github.run_number }}
+          name: FinFlow-Android-UI-v1.2.0-${{ github.run_number }}
           path: app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
           retention-days: 14
