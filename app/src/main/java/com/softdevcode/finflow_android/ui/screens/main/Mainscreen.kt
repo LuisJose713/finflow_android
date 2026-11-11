@@ -8,6 +8,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.SmartToy
@@ -24,6 +25,7 @@ import androidx.compose.material.icons.outlined.TrackChanges
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -62,7 +64,7 @@ private data class BottomTab(
 private val tabs = listOf(
     BottomTab(
         Screen.Dashboard,
-        "Dashboard",
+        "Inicio",
         Icons.Outlined.GridView,
         Icons.Filled.GridView
     ),
@@ -135,7 +137,22 @@ fun MainScreen(
     // ─────────────────────────────────────────────────────────────────────────
 
     Scaffold(
-
+        containerColor = MaterialTheme.colorScheme.background,
+        floatingActionButton = {
+            // The dashboard shares the existing transaction form with Movimientos.
+            val isDashboard = currentDestination?.hierarchy?.any {
+                it.route == Screen.Dashboard.route
+            } == true
+            if (isDashboard) {
+                ExtendedFloatingActionButton(
+                    onClick = { navController.navigate(Screen.AddTransaction.route) },
+                    icon = { Icon(Icons.Filled.Add, contentDescription = null) },
+                    text = { Text("Nuevo movimiento", fontWeight = FontWeight.SemiBold) },
+                    containerColor = Primary,
+                    contentColor = Color.White,
+                )
+            }
+        },
         bottomBar = {
 
             NavigationBar(
