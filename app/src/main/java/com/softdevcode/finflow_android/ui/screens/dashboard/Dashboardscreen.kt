@@ -1,6 +1,7 @@
 package com.softdevcode.finflow_android.ui.screens.dashboard
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.Image
 import androidx.compose.ui.res.painterResource
 import com.softdevcode.finflow_android.R
@@ -50,6 +51,8 @@ fun DashboardScreen(
     onViewTransactions: () -> Unit,
     onViewPlannedExpenses: () -> Unit,
     onViewGoals: () -> Unit,
+    onViewAccounts: () -> Unit,
+    onViewAdvisor: () -> Unit,
     viewModel: DashboardViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -76,8 +79,15 @@ fun DashboardScreen(
         ) {
             DashboardTopBar(userName, isDark, onToggleTheme, onLogout)
             uiState.stats?.let { stats ->
+                Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    FinFlowV4Overline("TU DINERO EN PERSPECTIVA")
+                    Text("Panorama general", style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.ExtraBold)
+                }
                 HeroBalance(stats, amountsVisible) { amountsVisible = !amountsVisible }
                 MiniStatsRow(stats, amountsVisible)
+                FinFlowQuickLinks(onViewAccounts, onViewGoals, onViewAdvisor)
             }
             uiState.lastUpdatedAt?.let {
                 Row(
@@ -127,6 +137,7 @@ fun DashboardScreen(
                     }
                 }
                 ActivitySummary(stats, amountsVisible)
+                FinFlowTrendChart(stats.monthlyData, amountsVisible)
             }
             if (uiState.hasLoadedTransactions) {
                 RecentTransactionsCard(uiState.recentTransactions, viewModel::categoryName,
@@ -141,35 +152,82 @@ fun DashboardScreen(
 private fun DashboardTopBar(userName: String, isDark: Boolean, onToggleTheme: () -> Unit, onLogout: () -> Unit) {
     Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 18.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(Modifier.size(52.dp).clip(RoundedCornerShape(16.dp))
-                .background(FinFlowNavy), contentAlignment = Alignment.Center) {
-                Image(
-                    painter = painterResource(id = R.drawable.finflow_brand_symbol),
-                    contentDescription = "Marca FinFlow",
-                    modifier = Modifier.size(45.dp)
-                )
-            }
+            FinFlowV4BrandMark(Modifier.size(49.dp))
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
-                Text("FinFlow", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.ExtraBold,
-                    letterSpacing = (-0.8).sp)
-                Text("TU ESPACIO FINANCIERO", style = MaterialTheme.typography.labelSmall,
-                    color = FinFlowGold, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
+                Text("FinFlow", style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.ExtraBold, letterSpacing = (-0.8).sp)
+                FinFlowV4Overline("ESPACIO PERSONAL")
             }
             IconButton(onClick = onToggleTheme) {
                 Icon(if (isDark) Icons.Outlined.LightMode else Icons.Outlined.DarkMode,
                     if (isDark) "Activar tema claro" else "Activar tema oscuro")
             }
-            IconButton(onClick = onLogout) { Icon(Icons.Outlined.Logout, "Cerrar sesión") }
+            IconButton(onClick = onLogout) {
+                Icon(Icons.Outlined.Logout, "Cerrar sesión")
+            }
         }
         Spacer(Modifier.height(24.dp))
-        Text("BIENVENIDO A FINFLOW", style = MaterialTheme.typography.labelSmall,
-            color = FinFlowGold, fontWeight = FontWeight.Bold, letterSpacing = 1.8.sp)
-        Spacer(Modifier.height(5.dp))
-        Text("Hola, ${userName.trim().substringBefore(' ').ifBlank { "Usuario" }}",
-            style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-        Text("Tu dinero merece un plan extraordinario.", style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(Modifier.size(7.dp).clip(CircleShape).background(Color(0xFF34A38C)))
+            Spacer(Modifier.width(9.dp))
+            Text("FINFLOW / ESPACIO PERSONAL", style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontWeight = FontWeight.ExtraBold, letterSpacing = 1.3.sp)
+        }
+        Spacer(Modifier.height(24.dp))
+        FinFlowV4Overline("TU PANORAMA FINANCIERO")
+        Spacer(Modifier.height(6.dp))
+        Text("Tu dinero,", style = MaterialTheme.typography.headlineLarge.copy(
+            fontWeight = FontWeight.ExtraBold, letterSpacing = (-1.2).sp))
+        Text("con claridad.", style = MaterialTheme.typography.headlineLarge.copy(
+            fontWeight = FontWeight.ExtraBold, letterSpacing = (-1.2).sp,
+            brush = Brush.linearGradient(listOf(Color(0xFF376FB8), Color(0xFF7867CD))),
+        ))
+        Spacer(Modifier.height(8.dp))
+        Text(
+            "Hola, ${userName.trim().substringBefore(' ').ifBlank { "Usuario" }}. Así se mueve tu dinero.",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}
+
+@Composable
+private fun FinFlowQuickLinks(
+    onAccounts: () -> Unit,
+    onGoals: () -> Unit,
+    onAdvisor: () -> Unit,
+) {
+    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        data class Link(val title: String, val subtitle: String, val icon: androidx.compose.ui.graphics.vector.ImageVector, val onClick: () -> Unit)
+        listOf(
+            Link("Mis cuentas", "Revisa tus saldos", Icons.Outlined.AccountBalanceWallet, onAccounts),
+            Link("Mis metas", "Avanza a tu ritmo", Icons.Outlined.TrackChanges, onGoals),
+            Link("Asesor FinFlow", "Explora nuevas ideas", Icons.Outlined.AutoAwesome, onAdvisor),
+        ).forEach { link ->
+            FinFlowV4Card(modifier = Modifier.padding(horizontal = 20.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().clickable(onClick = link.onClick),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Box(Modifier.size(44.dp)
+                        .clip(RoundedCornerShape(13.dp))
+                        .background(FinFlowGold.copy(alpha = .13f)),
+                        contentAlignment = Alignment.Center) {
+                        Icon(link.icon, null, tint = FinFlowGoldMuted)
+                    }
+                    Spacer(Modifier.width(12.dp))
+                    Column(Modifier.weight(1f)) {
+                        Text(link.title, fontWeight = FontWeight.Bold)
+                        Text(link.subtitle, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            style = MaterialTheme.typography.bodySmall)
+                    }
+                    Icon(Icons.Outlined.NorthEast, "Abrir " + link.title,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            }
+        }
     }
 }
 
@@ -306,10 +364,7 @@ private fun TransactionItem(tx: Transaction, categoryName: String, visible: Bool
 
 @Composable
 private fun DashboardCard(content: @Composable ColumnScope.() -> Unit) {
-    Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp), shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
-        Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp), content = content)
-    }
+    FinFlowV4Card(modifier = Modifier.padding(horizontal = 20.dp), content = content)
 }
 
 @Composable
