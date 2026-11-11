@@ -1,5 +1,6 @@
 package com.softdevcode.finflow_android.ui.screens.transactions
 
+import com.softdevcode.finflow_android.ui.theme.FinFlowV4Hero
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Arrangement
@@ -146,6 +147,11 @@ fun AddTransactionScreen(
             verticalArrangement =
                 Arrangement.spacedBy(12.dp),
         ) {
+
+            FinFlowV4Hero(
+                "NUEVA TRANSACCIÓN", "Registra con claridad.",
+                "Cada ingreso o gasto, en su lugar.",
+            )
 
             // ─────────────────────────────────────────────────────
             // TIPO
