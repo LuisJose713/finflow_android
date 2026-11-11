@@ -230,7 +230,7 @@
                 .clip(RoundedCornerShape(26.dp))
                 .background(
                     Brush.linearGradient(
-                        listOf(Color(0xFF182B61), Color(0xFF37318F), Color(0xFF6251D6))
+                        listOf(Color(0xFF0A244E), Color(0xFF194B9A), PrimaryDark)
                     )
                 )
                 .padding(24.dp),
