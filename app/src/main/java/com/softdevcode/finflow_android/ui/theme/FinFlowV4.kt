@@ -6,6 +6,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -152,5 +155,32 @@ fun FinFlowV4BrandMark(modifier: Modifier = Modifier) {
             contentDescription = "FinFlow",
             modifier = Modifier.fillMaxSize().padding(4.dp),
         )
+    }
+}
+
+/** Native version of the official Web wordmark: gold dot over the white 'i'. */
+@Composable
+fun FinFlowV4Wordmark(
+    modifier: Modifier = Modifier,
+    color: Color = MaterialTheme.colorScheme.onBackground,
+) {
+    val style = MaterialTheme.typography.titleLarge.copy(
+        fontWeight = FontWeight.ExtraBold,
+        letterSpacing = (-0.8).sp,
+    )
+    Row(
+        modifier = modifier.semantics { contentDescription = "FinFlow" },
+        verticalAlignment = Alignment.Bottom,
+    ) {
+        Text("F", color = color, style = style)
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.padding(start = 0.dp, end = 1.dp, bottom = 2.dp),
+        ) {
+            Box(Modifier.size(5.dp).clip(CircleShape).background(FinFlowGold))
+            Spacer(Modifier.height(3.dp))
+            Box(Modifier.width(3.dp).height(15.dp).background(color))
+        }
+        Text("nFlow", color = color, style = style)
     }
 }
