@@ -148,7 +148,8 @@ class AuthViewModel @Inject constructor(
     fun logout() {
         viewModelScope.launch {
             authRepository.logout()
-            _uiState.update { AuthUiState() }
+            // Never re-enable the indefinite splash-screen gate after logout.
+            _uiState.update { AuthUiState(isCheckingAuth = false) }
         }
     }
 
