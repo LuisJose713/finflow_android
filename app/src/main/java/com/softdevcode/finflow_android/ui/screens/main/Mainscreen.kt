@@ -7,6 +7,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CalendarMonth
@@ -24,10 +25,12 @@ import androidx.compose.material.icons.outlined.SwapHoriz
 import androidx.compose.material.icons.outlined.TrackChanges
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -420,7 +423,7 @@ fun MainScreen(
                         authViewModel.toggleDarkMode()
                     },
 
-                    onLogout = {}
+                    onLogout = { authViewModel.logout() }
                 )
             }
         }
@@ -551,10 +554,52 @@ private fun PlaceholderScreen(
     ) { padding ->
 
         Box(
-            modifier =
-                Modifier
-                    .padding(padding)
-                    .fillMaxSize()
-        )
+            modifier = Modifier
+                .padding(padding)
+                .fillMaxSize(),
+            contentAlignment = Alignment.Center,
+        ) {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp),
+                shape = RoundedCornerShape(24.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(28.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Surface(
+                        shape = RoundedCornerShape(22.dp),
+                        color = Primary.copy(alpha = 0.12f),
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.SmartToy,
+                            contentDescription = null,
+                            tint = Primary,
+                            modifier = Modifier
+                                .padding(18.dp)
+                                .size(38.dp),
+                        )
+                    }
+                    Spacer(Modifier.height(20.dp))
+                    Text(
+                        "Asesor IA de FinFlow",
+                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                        textAlign = TextAlign.Center,
+                    )
+                    Spacer(Modifier.height(10.dp))
+                    Text(
+                        "Estamos preparando una experiencia de asesoría nativa para Android. Tus movimientos, metas y gastos planeados ya están disponibles en las otras pestañas.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center,
+                    )
+                }
+            }
+        }
     }
 }
