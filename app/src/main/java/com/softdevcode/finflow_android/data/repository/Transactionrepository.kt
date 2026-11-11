@@ -62,6 +62,12 @@ class TransactionRepository @Inject constructor(
         }
     )
 
+    suspend fun updateTransaction(id: Int, req: CreateTransactionRequest): Result<Transaction> =
+        runCatching { api.updateTransaction(id, req) }.fold(
+            onSuccess = { Result.Success(it) },
+            onFailure = { Result.Error("No fue posible editar la transacción") }
+        )
+
     suspend fun deleteTransaction(id: Int): Result<Unit> = runCatching {
         api.deleteTransaction(id)
     }.fold(
