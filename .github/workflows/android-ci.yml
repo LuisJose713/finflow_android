@@ -41,14 +41,14 @@ jobs:
           test -n "$APK"
           "$ANDROID_HOME/build-tools/34.0.0/apksigner" verify --verbose "$APK"
           BADGING=$("$ANDROID_HOME/build-tools/34.0.0/aapt" dump badging "$APK")
-          printf '%s\n' "$BADGING" | grep -F "versionCode='4'"
-          printf '%s\n' "$BADGING" | grep -F "versionName='1.2.1-qa'"
+          printf '%s\n' "$BADGING" | grep -F "versionCode='5'"
+          printf '%s\n' "$BADGING" | grep -F "versionName='1.2.2-finflow'"
           printf '%s\n' "$BADGING" | head -n 12
       - name: Publish APK for QA
         if: github.event_name != 'pull_request'
         uses: actions/upload-artifact@v4
         with:
-          name: FinFlow-Android-UI-v1.2.1-${{ github.run_number }}
+          name: FinFlow-Android-v1.2.2-finflow-${{ github.run_number }}
           path: app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
           retention-days: 14
@@ -79,5 +79,19 @@ jobs:
           disable-animations: true
           script: |
             ./gradlew --no-daemon assembleDebug
-            adb install -r app/build/outputs/apk/debug/app-debug.apk
+            adb wait-for-device
+            # Emulator can report "device online" before PackageManager is ready.
+            # Never treat a PackageManager startup race as a failed APK install.
+            READY=0
+            for i in $(seq 1 70); do
+              if [ "$(adb shell getprop sys.boot_completed | tr -d '\r')" = "1" ] && \
+                 adb shell pm path android 2>/dev/null | grep -q '^package:'; then
+                READY=1
+                break
+              fi
+              sleep 3
+            done
+            test "$READY" = "1" || (echo "Android emulator package manager unavailable" && exit 1)
+            adb install -r app/build/outputs/apk/debug/app-debug.apk || \
+              (sleep 8 && adb install -r app/build/outputs/apk/debug/app-debug.apk)
             adb shell monkey -p com.softdevcode.finflow_android -c android.intent.category.LAUNCHER 1
