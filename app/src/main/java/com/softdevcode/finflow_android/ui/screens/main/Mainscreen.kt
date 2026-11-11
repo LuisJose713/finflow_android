@@ -305,7 +305,11 @@ fun MainScreen(
 
                     onLogout = {
                         authViewModel.logout()
-                    }
+                    },
+                    onAddTransaction = { navController.navigate(Screen.AddTransaction.route) },
+                    onViewTransactions = { navController.navigate(Screen.Transactions.route) { launchSingleTop = true } },
+                    onViewPlannedExpenses = { navController.navigate(Screen.PlannedExpenses.route) { launchSingleTop = true } },
+                    onViewGoals = { navController.navigate(Screen.Goals.route) { launchSingleTop = true } },
                 )
             }
 

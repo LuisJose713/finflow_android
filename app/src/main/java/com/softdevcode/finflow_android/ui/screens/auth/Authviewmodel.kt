@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.softdevcode.finflow_android.data.repository.AuthRepository
 import com.softdevcode.finflow_android.data.local.TokenManager
 import com.softdevcode.finflow_android.domain.model.User
+import com.softdevcode.finflow_android.domain.model.registrationPasswordError
 import com.softdevcode.finflow_android.util.onError
 import com.softdevcode.finflow_android.util.onSuccess
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -80,6 +81,10 @@ class AuthViewModel @Inject constructor(
     }
 
     fun register(email: String, password: String, name: String) {
+        registrationPasswordError(password)?.let { message ->
+            _uiState.update { it.copy(isLoading = false, error = message) }
+            return
+        }
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
             authRepository.register(email.trim(), password, name.trim())

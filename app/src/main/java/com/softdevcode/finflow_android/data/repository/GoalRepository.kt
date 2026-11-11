@@ -1,6 +1,5 @@
 package com.softdevcode.finflow_android.data.repository
 
-import android.util.Log
 import com.softdevcode.finflow_android.data.remote.api.FinFlowApi
 import com.softdevcode.finflow_android.domain.model.ContributionRequest
 import com.softdevcode.finflow_android.domain.model.Goal
@@ -19,11 +18,9 @@ class GoalRepository @Inject constructor(
             api.getGoals()
         }.fold(
             onSuccess = {
-                Log.d("GOALS", "getGoals OK: ${it.size}")
                 Result.Success(it)
             },
             onFailure = {
-                Log.e("GOALS", "getGoals ERROR: ${it.message}", it)
                 Result.Error(
                     it.message ?: "Error al cargar las metas"
                 )
@@ -37,11 +34,9 @@ class GoalRepository @Inject constructor(
             api.createGoal(request)
         }.fold(
             onSuccess = {
-                Log.d("GOALS", "createGoal OK: ${it.id}")
                 Result.Success(it)
             },
             onFailure = {
-                Log.e("GOALS", "createGoal ERROR: ${it.message}", it)
                 Result.Error(
                     it.message ?: "Error al crear la meta"
                 )
@@ -56,11 +51,9 @@ class GoalRepository @Inject constructor(
             api.updateGoal(id, request)
         }.fold(
             onSuccess = {
-                Log.d("GOALS", "updateGoal OK: ${it.id}")
                 Result.Success(it)
             },
             onFailure = {
-                Log.e("GOALS", "updateGoal ERROR: ${it.message}", it)
                 Result.Error(
                     it.message ?: "Error al actualizar la meta"
                 )
@@ -82,18 +75,9 @@ class GoalRepository @Inject constructor(
             )
         }.fold(
             onSuccess = {
-                Log.d(
-                    "GOALS",
-                    "addContribution OK: ${it.id}"
-                )
                 Result.Success(it)
             },
             onFailure = {
-                Log.e(
-                    "GOALS",
-                    "addContribution ERROR: ${it.message}",
-                    it
-                )
                 Result.Error(
                     it.message ?: "Error al agregar dinero"
                 )
@@ -107,15 +91,9 @@ class GoalRepository @Inject constructor(
             api.deleteGoal(id)
         }.fold(
             onSuccess = {
-                Log.d("GOALS", "deleteGoal OK: $id")
                 Result.Success(Unit)
             },
             onFailure = {
-                Log.e(
-                    "GOALS",
-                    "deleteGoal ERROR: ${it.message}",
-                    it
-                )
                 Result.Error(
                     it.message ?: "Error al eliminar la meta"
                 )
