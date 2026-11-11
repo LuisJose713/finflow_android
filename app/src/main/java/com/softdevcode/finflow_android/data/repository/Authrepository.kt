@@ -62,6 +62,13 @@ class AuthRepository @Inject constructor(
         val name  = tokenManager.userName.first() ?: return null
         val email = tokenManager.userEmail.first() ?: return null
         val id    = tokenManager.userId.first() ?: return null
-        return User(id, email, name)
+        // Never infer ADMIN from persisted client data. Refresh role from authenticated
+        // /auth/me; on network failure, use a least-privilege local display fallback.
+        return try {
+            api.getMe().takeIf { it.id == id && it.email.equals(email, true) }
+                ?: User(id, email, name)
+        } catch (_: Exception) {
+            User(id, email, name)
+        }
     }
 }
