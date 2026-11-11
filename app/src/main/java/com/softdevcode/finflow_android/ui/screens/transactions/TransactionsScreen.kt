@@ -1,6 +1,7 @@
 package com.softdevcode.finflow_android.ui.screens.transactions
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -394,6 +395,9 @@ fun TransactionsScreen(
 
                             TransactionItem(
                                 transaction = transaction,
+                                categoryName = uiState.categories.firstOrNull {
+                                    it.id == transaction.categoryId
+                                }?.name ?: "Sin categoría",
                                 onEdit = { editing = transaction },
                                 onDelete = { deleting = transaction },
                             )
@@ -420,6 +424,7 @@ fun TransactionsScreen(
 @Composable
 private fun TransactionItem(
     transaction: Transaction,
+    categoryName: String,
     onEdit: () -> Unit,
     onDelete: () -> Unit,
 ) {
@@ -438,8 +443,8 @@ private fun TransactionItem(
         }
 
     Card(
-        shape = MaterialTheme.shapes.large,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.45f)),
+        shape = RoundedCornerShape(18.dp),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
 
         modifier =
             Modifier.fillMaxWidth(),
@@ -449,6 +454,7 @@ private fun TransactionItem(
                 containerColor =
                     MaterialTheme.colorScheme.surface,
             ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
     ) {
 
         Row(
@@ -502,7 +508,7 @@ private fun TransactionItem(
                 Text(
 
                     text =
-                        transaction.date ?: "",
+                        categoryName + " · " + (transaction.date ?: ""),
 
                     style =
                         MaterialTheme.typography.bodySmall,
@@ -516,7 +522,7 @@ private fun TransactionItem(
 
             Column(horizontalAlignment = Alignment.End) {
                 Text(
-                    text = formatAmount(transaction.amount),
+                    text = (if (isIncome) "+" else "−") + formatAmount(transaction.amount),
                     style = MaterialTheme.typography.titleSmall,
                     color = amountColor,
                 )
