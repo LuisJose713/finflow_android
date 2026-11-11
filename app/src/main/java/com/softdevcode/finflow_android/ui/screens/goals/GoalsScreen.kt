@@ -32,6 +32,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import com.softdevcode.finflow_android.ui.theme.FinFlowV4Hero
+import com.softdevcode.finflow_android.ui.theme.FinFlowV4Card
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -59,13 +61,14 @@ fun GoalsScreen(
 
     Scaffold(
         topBar = {
+            Column {
             TopAppBar(
                 title = {
                     Column {
                         Text("TUS OBJETIVOS", style = MaterialTheme.typography.labelSmall,
                             color = FinFlowGold, fontWeight = FontWeight.Bold)
                         Text("Metas", style = MaterialTheme.typography.titleLarge,
-                            color = Color.White, fontWeight = FontWeight.Bold)
+                            color = MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.Bold)
                     }
                 },
                 actions = {
@@ -77,12 +80,21 @@ fun GoalsScreen(
                         Icon(
                             imageVector = Icons.Outlined.Refresh,
                             contentDescription = "Actualizar",
-                            tint = Color.White,
+                            tint = MaterialTheme.colorScheme.onBackground,
                         )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = FinFlowNavy),
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background,
+                ),
             )
+            FinFlowV4Hero(
+                "TU FUTURO FINANCIERO",
+                "Los grandes planes empiezan hoy.",
+                "Haz seguimiento a cada objetivo y celebra tus avances.",
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+            )
+            }
         },
 
         floatingActionButton = {
