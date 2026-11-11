@@ -425,6 +425,7 @@ fun MainScreen(
                 FinFlowModulesScreen(
                     userId = uiState.user?.id,
                     onReauthenticate = { authViewModel.logout() },
+                    isAdmin = uiState.user?.role in setOf("ADMIN", "ROLE_ADMIN"),
                 )
             }
 
