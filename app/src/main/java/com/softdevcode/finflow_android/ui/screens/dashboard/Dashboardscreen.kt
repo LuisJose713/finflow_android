@@ -155,8 +155,7 @@ private fun DashboardTopBar(userName: String, isDark: Boolean, onToggleTheme: ()
             FinFlowV4BrandMark(Modifier.size(49.dp))
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
-                Text("FinFlow", style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.ExtraBold, letterSpacing = (-0.8).sp)
+                FinFlowV4Wordmark()
                 FinFlowV4Overline("ESPACIO PERSONAL")
             }
             IconButton(onClick = onToggleTheme) {
