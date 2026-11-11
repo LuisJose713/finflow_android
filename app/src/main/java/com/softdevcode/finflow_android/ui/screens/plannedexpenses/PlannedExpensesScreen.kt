@@ -24,7 +24,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -64,7 +64,11 @@ fun PlannedExpensesScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Text("Gastos planeados")
+                    Column {
+                        Text("Gastos planeados", style = MaterialTheme.typography.titleLarge)
+                        Text("Anticípate a tus próximos pagos", style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
                 },
                 actions = {
                     IconButton(
@@ -82,14 +86,13 @@ fun PlannedExpensesScreen(
         },
 
         floatingActionButton = {
-            FloatingActionButton(
+            ExtendedFloatingActionButton(
                 onClick = onAddPlannedExpense,
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.Add,
-                    contentDescription = "Agregar gasto planeado",
-                )
-            }
+                icon = { Icon(Icons.Outlined.Add, contentDescription = null) },
+                text = { Text("Planear gasto") },
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+            )
         }
     ) { paddingValues ->
 
