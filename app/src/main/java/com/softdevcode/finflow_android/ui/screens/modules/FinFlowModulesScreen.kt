@@ -1,5 +1,7 @@
 package com.softdevcode.finflow_android.ui.screens.modules
 
+import com.softdevcode.finflow_android.ui.updates.AppUpdateViewModel
+import com.softdevcode.finflow_android.ui.updates.AppUpdatesSection
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -41,12 +43,14 @@ private val sections = listOf(
     "privacy" to "Privacidad",
     "security" to "Seguridad",
     "billing" to "Planes",
+    "updates" to "Actualizaciones",
 )
 
 @Composable
 fun FinFlowModulesScreen(
     userId: Int?,
     onReauthenticate: () -> Unit,
+    updateViewModel: AppUpdateViewModel,
     isAdmin: Boolean = false,
     initialSection: String = "accounts",
     vm: FinFlowModulesViewModel = hiltViewModel(),
@@ -82,6 +86,8 @@ fun FinFlowModulesScreen(
                 "Protege tus sesiones y credenciales.")
             "billing" -> Triple("PLANES FINFLOW", "Elige tu experiencia",
                 "Consulta precios y promociones disponibles.")
+            "updates" -> Triple("FINFLOW AL DÍA", "Siempre avanzando",
+                "Busca y descarga las nuevas versiones de la app." )
             "admin" -> Triple("ADMINISTRACIÓN", "Tu plataforma, al detalle",
                 "Monitorea FinFlow y administra sus planes.")
             else -> Triple("FINFLOW", "Tu espacio financiero",
@@ -140,6 +146,7 @@ fun FinFlowModulesScreen(
                 "privacy" -> FinFlowPrivacySection(state, vm)
                 "security" -> FinFlowSecuritySection(state, vm, onReauthenticate)
                 "billing" -> FinFlowPlansSection()
+                "updates" -> AppUpdatesSection(updateViewModel)
                 "admin" -> if (isAdmin) FinFlowAdminSection()
             }
             Spacer(Modifier.height(22.dp))

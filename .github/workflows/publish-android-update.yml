@@ -1,0 +1,62 @@
+name: Publish Android update notice (existing APK)
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Published stable release tag containing the signed APK
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: android-update-publication
+  cancel-in-progress: false
+
+jobs:
+  publish-manifest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: github.event_name == 'workflow_dispatch' || (!github.event.release.prerelease && !github.event.release.draft)
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Validate publisher
+        run: python3 scripts/test-update-manifest.py
+      - name: Validate release and download its existing APK
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.tag || github.event.release.tag_name }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$RELEASE_TAG" =~ ^[A-Za-z0-9._-]+$ ]]
+          git merge-base --is-ancestor "refs/tags/$RELEASE_TAG" origin/main
+          mkdir -p update-publication
+          gh api "repos/$GITHUB_REPOSITORY/releases/tags/$RELEASE_TAG" > update-publication/release.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          release = json.loads(Path("update-publication/release.json").read_text())
+          assert not release["draft"] and not release["prerelease"], "Publish a stable release"
+          assert len([a for a in release["assets"] if a["name"].lower().endswith(".apk")]) == 1, "Attach exactly one APK"
+          PY
+          gh release download "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --pattern '*.apk' --dir update-publication
+      - name: Generate update manifest from the signed binary
+        shell: bash
+        run: |
+          set -euo pipefail
+          BUILD_TOOLS_DIR=$(find "$ANDROID_HOME/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -1)
+          APK_PATH=$(find update-publication -maxdepth 1 -name '*.apk' -type f)
+          python3 scripts/create-update-manifest.py --apk "$APK_PATH" --release-json update-publication/release.json --build-tools "$BUILD_TOOLS_DIR" --output update-publication/finflow-update.json
+      - name: Publish the notice next to the APK
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.tag || github.event.release.tag_name }}
+        run: gh release upload "$RELEASE_TAG" update-publication/finflow-update.json --repo "$GITHUB_REPOSITORY" --clobber

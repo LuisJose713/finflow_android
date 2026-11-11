@@ -1,5 +1,6 @@
 package com.softdevcode.finflow_android.ui.screens.navigation
 
+import com.softdevcode.finflow_android.ui.updates.AppUpdateViewModel
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.*
@@ -36,6 +37,7 @@ fun FinFlowNavGraph(
     startDestination: String,
     navController: NavHostController = rememberNavController(),
     authViewModel: AuthViewModel,
+    updateViewModel: AppUpdateViewModel,
 ) {
     NavHost(
         navController    = navController,
@@ -75,6 +77,7 @@ fun FinFlowNavGraph(
                     }
                 },
                 authViewModel = authViewModel,
+                updateViewModel = updateViewModel,
             )
         }
     }

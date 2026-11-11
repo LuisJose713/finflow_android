@@ -5,6 +5,7 @@ import com.softdevcode.finflow_android.domain.model.*
 import com.softdevcode.finflow_android.util.Result
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.CancellationException
 
 @Singleton
 class TransactionRepository @Inject constructor(
@@ -24,6 +25,7 @@ class TransactionRepository @Inject constructor(
             Result.Success(it ?: emptyList())
         },
         onFailure = {
+            if (it is CancellationException) throw it
             Result.Error(it.message ?: "Error al cargar transacciones")
         }
     )
@@ -36,6 +38,7 @@ class TransactionRepository @Inject constructor(
             else Result.Error("Stats vacías")
         },
         onFailure = {
+            if (it is CancellationException) throw it
             Result.Error(it.message ?: "Error al cargar estadísticas")
         }
     )
@@ -47,6 +50,7 @@ class TransactionRepository @Inject constructor(
             Result.Success(it ?: emptyList())
         },
         onFailure = {
+            if (it is CancellationException) throw it
             Result.Error(it.message ?: "Error al cargar categorías")
         }
     )

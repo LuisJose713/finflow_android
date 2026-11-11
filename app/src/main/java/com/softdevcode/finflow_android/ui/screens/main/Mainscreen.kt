@@ -2,108 +2,38 @@ package com.softdevcode.finflow_android.ui.screens.main
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.CalendarMonth
-import androidx.compose.material.icons.filled.GridView
-import androidx.compose.material.icons.filled.SmartToy
-import androidx.compose.material.icons.filled.MoreHoriz
-import androidx.compose.material.icons.filled.SwapHoriz
-import androidx.compose.material.icons.filled.TrackChanges
-import androidx.compose.material.icons.outlined.CalendarMonth
-import androidx.compose.material.icons.outlined.DarkMode
-import androidx.compose.material.icons.outlined.GridView
-import androidx.compose.material.icons.outlined.LightMode
-import androidx.compose.material.icons.outlined.Logout
-import androidx.compose.material.icons.outlined.SmartToy
-import androidx.compose.material.icons.outlined.MoreHoriz
-import androidx.compose.material.icons.outlined.SwapHoriz
-import androidx.compose.material.icons.outlined.TrackChanges
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.softdevcode.finflow_android.ui.screens.goals.GoalsScreen
 import com.softdevcode.finflow_android.ui.screens.auth.AuthViewModel
 import com.softdevcode.finflow_android.ui.screens.dashboard.DashboardScreen
-import com.softdevcode.finflow_android.ui.screens.modules.FinFlowModulesScreen
 import com.softdevcode.finflow_android.ui.screens.goals.CreateGoalScreen
 import com.softdevcode.finflow_android.ui.screens.goals.GoalDetailScreen
+import com.softdevcode.finflow_android.ui.screens.goals.GoalsScreen
+import com.softdevcode.finflow_android.ui.screens.modules.FinFlowModulesScreen
+import com.softdevcode.finflow_android.ui.screens.navigation.navigateToTopLevel
 import com.softdevcode.finflow_android.ui.screens.navigation.Screen
 import com.softdevcode.finflow_android.ui.screens.plannedexpenses.CreatePlannedExpenseScreen
 import com.softdevcode.finflow_android.ui.screens.plannedexpenses.PlannedExpensesScreen
 import com.softdevcode.finflow_android.ui.screens.transactions.AddTransactionScreen
 import com.softdevcode.finflow_android.ui.screens.transactions.TransactionsScreen
-import com.softdevcode.finflow_android.ui.theme.FinFlowNavy
-import com.softdevcode.finflow_android.ui.theme.FinFlowGoldPale
-import com.softdevcode.finflow_android.ui.theme.FinFlowGold
 import com.softdevcode.finflow_android.ui.theme.Primary
-import com.softdevcode.finflow_android.ui.theme.Warning
-
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Bottom navigation
-// ─────────────────────────────────────────────────────────────────────────────
-
-private data class BottomTab(
-    val screen: Screen,
-    val label: String,
-    val icon: ImageVector,
-    val iconSelected: ImageVector,
-)
-
-private val tabs = listOf(
-    BottomTab(
-        Screen.Dashboard,
-        "Inicio",
-        Icons.Outlined.GridView,
-        Icons.Filled.GridView
-    ),
-    BottomTab(
-        Screen.Transactions,
-        "Movimientos",
-        Icons.Outlined.SwapHoriz,
-        Icons.Filled.SwapHoriz
-    ),
-    BottomTab(
-        Screen.Goals,
-        "Metas",
-        Icons.Outlined.TrackChanges,
-        Icons.Filled.TrackChanges
-    ),
-    BottomTab(
-        Screen.PlannedExpenses,
-        "Planeados",
-        Icons.Outlined.CalendarMonth,
-        Icons.Filled.CalendarMonth
-    ),
-    BottomTab(
-        Screen.More,
-        "Más",
-        Icons.Outlined.MoreHoriz,
-        Icons.Filled.MoreHoriz
-    ),
-)
-
+import com.softdevcode.finflow_android.ui.updates.AppUpdateViewModel
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Main Screen
@@ -113,6 +43,7 @@ private val tabs = listOf(
 @Composable
 fun MainScreen(
     onLogout: () -> Unit,
+    updateViewModel: AppUpdateViewModel,
     authViewModel: AuthViewModel = hiltViewModel(),
 ) {
 
@@ -166,86 +97,7 @@ fun MainScreen(
         },
         bottomBar = {
 
-            NavigationBar(
-                containerColor = FinFlowNavy,
-                tonalElevation = 0.dp,
-            ) {
-
-                tabs.forEach { tab ->
-
-                    val isSelected =
-                        currentDestination
-                            ?.hierarchy
-                            ?.any { it.route == tab.screen.route } == true
-
-
-                    NavigationBarItem(
-
-                        selected = isSelected,
-
-                        onClick = {
-
-                            navController.navigate(tab.screen.route) {
-
-                                popUpTo(
-                                    navController.graph.findStartDestination().id
-                                ) {
-                                    saveState = true
-                                }
-
-                                launchSingleTop = true
-
-                                restoreState = true
-                            }
-                        },
-
-                        icon = {
-
-                            Icon(
-                                imageVector =
-                                    if (isSelected) {
-                                        tab.iconSelected
-                                    } else {
-                                        tab.icon
-                                    },
-
-                                contentDescription = tab.label,
-                            )
-                        },
-
-                        label = {
-
-                            Text(
-                                text = tab.label,
-
-                                style =
-                                    MaterialTheme.typography.labelSmall.copy(
-                                        fontWeight =
-                                            if (isSelected) {
-                                                FontWeight.SemiBold
-                                            } else {
-                                                FontWeight.Normal
-                                            }
-                                    )
-                            )
-                        },
-
-                        colors =
-                            NavigationBarItemDefaults.colors(
-
-                                selectedIconColor = FinFlowGoldPale,
-
-                                selectedTextColor = Color.White,
-
-                                indicatorColor = Color(0xFF22334A),
-
-                                unselectedIconColor = Color(0xFFAEBED2),
-
-                                unselectedTextColor = Color(0xFFAEBED2),
-                            )
-                    )
-                }
-            }
+            MainBottomBar(navController)
         }
     ) { innerPadding ->
 
@@ -308,16 +160,16 @@ fun MainScreen(
                         authViewModel.logout()
                     },
                     onAddTransaction = { navController.navigate(Screen.AddTransaction.route) },
-                    onViewTransactions = { navController.navigate(Screen.Transactions.route) { launchSingleTop = true } },
-                    onViewPlannedExpenses = { navController.navigate(Screen.PlannedExpenses.route) { launchSingleTop = true } },
-                    onViewGoals = { navController.navigate(Screen.Goals.route) { launchSingleTop = true } },
+                    onViewTransactions = { navController.navigateToTopLevel(Screen.Transactions.route) },
+                    onViewPlannedExpenses = { navController.navigateToTopLevel(Screen.PlannedExpenses.route) },
+                    onViewGoals = { navController.navigateToTopLevel(Screen.Goals.route) },
                     onViewAccounts = {
                         requestedModule = "accounts"
-                        navController.navigate(Screen.More.route) { launchSingleTop = true }
+                        navController.navigateToTopLevel(Screen.More.route)
                     },
                     onViewAdvisor = {
                         requestedModule = "advisor"
-                        navController.navigate(Screen.More.route) { launchSingleTop = true }
+                        navController.navigateToTopLevel(Screen.More.route)
                     },
                 )
             }
@@ -433,6 +285,7 @@ fun MainScreen(
             // Financial modules — account balances, budgets, recurring, categories & AI.
             composable(Screen.More.route) {
                 FinFlowModulesScreen(
+                    updateViewModel = updateViewModel,
                     userId = uiState.user?.id,
                     onReauthenticate = { authViewModel.logout() },
                     isAdmin = uiState.user?.role in setOf("ADMIN", "ROLE_ADMIN"),
@@ -446,6 +299,7 @@ fun MainScreen(
 
             composable(Screen.Advisor.route) {
                 FinFlowModulesScreen(
+                    updateViewModel = updateViewModel,
                     userId = uiState.user?.id,
                     onReauthenticate = { authViewModel.logout() },
                     isAdmin = uiState.user?.role in setOf("ADMIN", "ROLE_ADMIN"),

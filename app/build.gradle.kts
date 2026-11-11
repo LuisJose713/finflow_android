@@ -14,8 +14,8 @@ android {
         applicationId = "com.softdevcode.finflow_android"
         minSdk = 24
         targetSdk = 34
-        versionCode = 5
-        versionName = "1.2.2-finflow"
+        versionCode = 6
+        versionName = "1.2.3-finflow"
     }
 
     buildTypes {
@@ -45,11 +45,20 @@ android {
         compose = true
         buildConfig = true
     }
+
+    testOptions {
+        unitTests.isIncludeAndroidResources = true
+    }
 }
 
 dependencies {
     // JUnit 4 for local JVM unit tests (src/test)
     testImplementation("junit:junit:4.13.2")
+    testImplementation("org.robolectric:robolectric:4.13")
+    testImplementation("androidx.test:core:1.6.1")
+    testImplementation("androidx.navigation:navigation-testing:2.7.7")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.1")
+    testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
 
     // Compose BOM
     implementation(platform(libs.compose.bom))

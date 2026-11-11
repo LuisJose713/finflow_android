@@ -30,17 +30,18 @@ class DashboardViewModel @Inject constructor(
             _uiState.update { it.copy(isLoading = true, error = null) }
 
             try {
-                val (statsResult, txResult, catsResult) = coroutineScope {
+                // Retrofit suspend calls already perform network I/O off the main thread.
+                val (statsResult, txResult, catsResult) = withTimeout(15_000L) {
 
-                    val statsDeferred = async(Dispatchers.IO) {
+                    val statsDeferred = async {
                         transactionRepository.getStats()
                     }
 
-                    val txDeferred = async(Dispatchers.IO) {
+                    val txDeferred = async {
                         transactionRepository.getTransactions()
                     }
 
-                    val catsDeferred = async(Dispatchers.IO) {
+                    val catsDeferred = async {
                         transactionRepository.getCategories()
                     }
 
@@ -52,8 +53,14 @@ class DashboardViewModel @Inject constructor(
                 }
 
                 ensureActive()
-                _uiState.update { state ->
-                    state.withResults(statsResult, txResult, catsResult, System.currentTimeMillis())
+                // Sorting a large transaction history must not stall menu input.
+                val updated = withContext(Dispatchers.Default) {
+                    _uiState.value.withResults(statsResult, txResult, catsResult, System.currentTimeMillis())
+                }
+                _uiState.value = updated
+            } catch (e: TimeoutCancellationException) {
+                _uiState.update {
+                    it.copy(isLoading = false, error = "La consulta tardó demasiado. Puedes reintentar sin salir de Inicio.")
                 }
             } catch (e: CancellationException) {
                 throw e

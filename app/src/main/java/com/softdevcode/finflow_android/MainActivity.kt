@@ -12,6 +12,8 @@ import com.softdevcode.finflow_android.ui.screens.auth.AuthViewModel
 import com.softdevcode.finflow_android.ui.screens.navigation.FinFlowNavGraph
 import com.softdevcode.finflow_android.ui.screens.navigation.Screen
 import com.softdevcode.finflow_android.ui.theme.FinFlowTheme
+import com.softdevcode.finflow_android.ui.updates.AppUpdateHost
+import com.softdevcode.finflow_android.ui.updates.AppUpdateViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -24,6 +26,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val authViewModel: AuthViewModel = hiltViewModel()
+            val updateViewModel: AppUpdateViewModel = hiltViewModel()
             val uiState by authViewModel.uiState.collectAsStateWithLifecycle()
             val darkMode by authViewModel.darkMode.collectAsStateWithLifecycle()
 
@@ -35,6 +38,7 @@ class MainActivity : ComponentActivity() {
             }
 
             FinFlowTheme(darkTheme = darkMode) {
+                AppUpdateHost(updateViewModel)
                 if (isReady) {
 
                     val startDestination = if (uiState.isAuthenticated)
@@ -44,6 +48,7 @@ class MainActivity : ComponentActivity() {
                         startDestination = startDestination,
                         navController    = navController, // ✅ reutilizado
                         authViewModel    = authViewModel,
+                        updateViewModel  = updateViewModel,
                     )
                 }
             }
