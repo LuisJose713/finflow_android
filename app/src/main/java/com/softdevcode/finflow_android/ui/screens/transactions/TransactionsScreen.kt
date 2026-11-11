@@ -132,8 +132,7 @@ fun TransactionsScreen(
                 contentColor = MaterialTheme.colorScheme.onPrimary,
             )
         },
-
-        ) { paddingValues ->
+    ) { paddingValues ->
 
         Box(
             modifier = Modifier
