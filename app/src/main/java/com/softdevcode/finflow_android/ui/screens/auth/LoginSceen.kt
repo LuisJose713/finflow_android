@@ -19,6 +19,7 @@ import androidx.compose.ui.res.painterResource
 import com.softdevcode.finflow_android.R
 import com.softdevcode.finflow_android.ui.theme.FinFlowNavy
 import com.softdevcode.finflow_android.ui.theme.FinFlowGold
+import com.softdevcode.finflow_android.ui.theme.FinFlowGoldMuted
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.*
@@ -286,8 +287,8 @@ fun LoginScreen(
 // ── TextField colors helper ───────────────────────────────────────────────────
 @Composable
 fun finFlowTextFieldColors() = OutlinedTextFieldDefaults.colors(
-    focusedBorderColor   = Primary,
-    focusedLabelColor    = Primary,
-    cursorColor          = Primary,
+    focusedBorderColor   = FinFlowGoldMuted,
+    focusedLabelColor    = FinFlowGoldMuted,
+    cursorColor          = FinFlowGoldMuted,
     unfocusedBorderColor = MaterialTheme.colorScheme.outline,
 )
