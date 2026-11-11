@@ -1,6 +1,7 @@
 package com.softdevcode.finflow_android.ui.screens.modules
 
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -302,7 +303,7 @@ private fun EditAdminPromotionDialog(
         onDismissRequest = close,
         title = { Text(if (current == null) "Nueva promoción" else "Editar promoción") },
         text = {
-            Column(Modifier.heightIn(max = 460.dp),
+            Column(Modifier.heightIn(max = 460.dp).verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedTextField(code, { if (current == null)
                     code = it.uppercase(Locale.ROOT).take(32) },
@@ -344,13 +345,14 @@ private fun EditAdminPromotionDialog(
         },
         confirmButton = {
             val value = discount.toLongOrNull()
-            val ISO = starts.endsWith("Z") && ends.endsWith("Z") &&
-                runCatching { java.time.Instant.parse(starts) < java.time.Instant.parse(ends) }
-                    .getOrDefault(false)
+            // No java.time API 26 dependency: preserve Android 7+ support.
+            // The server validates actual Instant ranges before saving.
+            val isoPattern = Regex("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z")
+            val isoValid = isoPattern.matches(starts) && isoPattern.matches(ends) && starts < ends
             TextButton(
                 enabled = code.matches(Regex("[A-Z0-9_-]{4,32}")) &&
                     title.trim().length in 2..90 && value != null &&
-                    value > 0 && ISO && (limit.isBlank() || limit.toIntOrNull() in 1..100000),
+                    value > 0 && isoValid && (limit.isBlank() || (limit.toIntOrNull()?.let { it in 1..100000 } == true)),
                 onClick = {
                     submit(BillingPromotion(code.trim(), title.trim(), plan, discountType,
                         value ?: 0L, starts, ends, limit.toIntOrNull(),
