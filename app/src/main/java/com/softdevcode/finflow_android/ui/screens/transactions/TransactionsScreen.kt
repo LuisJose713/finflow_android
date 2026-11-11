@@ -1,5 +1,6 @@
 package com.softdevcode.finflow_android.ui.screens.transactions
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -340,6 +341,8 @@ private fun TransactionItem(
         }
 
     Card(
+        shape = MaterialTheme.shapes.large,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.45f)),
 
         modifier =
             Modifier.fillMaxWidth(),
