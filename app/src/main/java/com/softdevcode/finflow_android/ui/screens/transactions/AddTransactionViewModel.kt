@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.softdevcode.finflow_android.data.repository.CategoryRepository
 import com.softdevcode.finflow_android.data.repository.TransactionRepository
+import com.softdevcode.finflow_android.data.remote.api.FinFlowApi
+import com.softdevcode.finflow_android.domain.model.FinancialAccount
 import com.softdevcode.finflow_android.domain.model.Category
 import com.softdevcode.finflow_android.domain.model.CreateTransactionRequest
 import com.softdevcode.finflow_android.util.onError
@@ -23,6 +25,7 @@ data class AddTransactionUiState(
     val isLoadingCategories: Boolean = false,
 
     val categories: List<Category> = emptyList(),
+    val accounts: List<FinancialAccount> = emptyList(),
 
     val error: String? = null,
 
@@ -35,6 +38,7 @@ class AddTransactionViewModel @Inject constructor(
     private val transactionRepository: TransactionRepository,
 
     private val categoryRepository: CategoryRepository,
+    private val api: FinFlowApi,
 
     ) : ViewModel() {
 
@@ -48,6 +52,7 @@ class AddTransactionViewModel @Inject constructor(
 
     init {
         loadCategories()
+        loadAccounts()
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -89,6 +94,19 @@ class AddTransactionViewModel @Inject constructor(
                                 ?: "No se pudieron cargar las categorías",
                     )
                 }
+            }
+        }
+    }
+
+    private fun loadAccounts() {
+        viewModelScope.launch {
+            try {
+                _uiState.update {
+                    it.copy(accounts = api.getAccounts().filter { account -> !account.archived })
+                }
+            } catch (e: Exception) {
+                // Legacy users can still create movements without a wallet.
+                _uiState.update { it.copy(accounts = emptyList()) }
             }
         }
     }
