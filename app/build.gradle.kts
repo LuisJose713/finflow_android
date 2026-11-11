@@ -14,17 +14,17 @@ android {
         applicationId = "com.softdevcode.finflow_android"
         minSdk = 24
         targetSdk = 34
-        versionCode = 4
-        versionName = "1.2.1-qa"
+        versionCode = 5
+        versionName = "1.2.2-finflow"
     }
 
     buildTypes {
         debug {
-            buildConfigField("String", "BASE_URL", "\"https://finflow-backend-yqhi.onrender.com/\"")
+            buildConfigField("String", "BASE_URL", "\"https://finflow-backend-production.up.railway.app/\"")
         }
         release {
             isMinifyEnabled = true
-            buildConfigField("String", "BASE_URL", "\"https://finflow-backend-yqhi.onrender.com/\"")
+            buildConfigField("String", "BASE_URL", "\"https://finflow-backend-production.up.railway.app/\"")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
