@@ -30,10 +30,15 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import com.softdevcode.finflow_android.ui.theme.FinFlowGold
+import com.softdevcode.finflow_android.ui.theme.FinFlowNavy
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -55,9 +60,10 @@ fun GoalsScreen(
             TopAppBar(
                 title = {
                     Column {
-                        Text("Metas", style = MaterialTheme.typography.titleLarge)
-                        Text("Convierte tus planes en logros", style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text("TUS OBJETIVOS", style = MaterialTheme.typography.labelSmall,
+                            color = FinFlowGold, fontWeight = FontWeight.Bold)
+                        Text("Metas", style = MaterialTheme.typography.titleLarge,
+                            color = Color.White, fontWeight = FontWeight.Bold)
                     }
                 },
                 actions = {
@@ -69,9 +75,11 @@ fun GoalsScreen(
                         Icon(
                             imageVector = Icons.Outlined.Refresh,
                             contentDescription = "Actualizar",
+                            tint = Color.White,
                         )
                     }
                 },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = FinFlowNavy),
             )
         },
 
