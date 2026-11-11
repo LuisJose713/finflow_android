@@ -4,6 +4,8 @@ import android.app.Activity
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
@@ -128,6 +130,13 @@ fun FinFlowTheme(
         MaterialTheme(
             colorScheme = colorScheme,
             typography  = FinFlowTypography,
+            shapes = Shapes(
+                extraSmall = RoundedCornerShape(8.dp),
+                small = RoundedCornerShape(12.dp),
+                medium = RoundedCornerShape(18.dp),
+                large = RoundedCornerShape(24.dp),
+                extraLarge = RoundedCornerShape(30.dp)
+            ),
             content     = content
         )
     }
