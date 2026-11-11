@@ -96,8 +96,7 @@ fun RegisterScreen(
                     )
                 }
                 Spacer(Modifier.width(12.dp))
-                Text("FinFlow", style = MaterialTheme.typography.titleLarge.copy(
-                    fontWeight = FontWeight.ExtraBold))
+                com.softdevcode.finflow_android.ui.theme.FinFlowV4Wordmark()
             }
 
             Spacer(Modifier.height(26.dp))
