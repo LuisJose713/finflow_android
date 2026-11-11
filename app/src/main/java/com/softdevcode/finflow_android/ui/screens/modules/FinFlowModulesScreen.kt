@@ -36,10 +36,15 @@ private val sections = listOf(
     "advisor" to "Asesor IA",
     "reports" to "Reportes",
     "privacy" to "Privacidad",
+    "security" to "Seguridad",
 )
 
 @Composable
-fun FinFlowModulesScreen(userId: Int?, vm: FinFlowModulesViewModel = hiltViewModel()) {
+fun FinFlowModulesScreen(
+    userId: Int?,
+    onReauthenticate: () -> Unit,
+    vm: FinFlowModulesViewModel = hiltViewModel(),
+) {
     val state by vm.state.collectAsStateWithLifecycle()
     val cal = remember { Calendar.getInstance(TimeZone.getTimeZone("America/Bogota")) }
     var selected by rememberSaveable { mutableStateOf("accounts") }
@@ -113,6 +118,7 @@ fun FinFlowModulesScreen(userId: Int?, vm: FinFlowModulesViewModel = hiltViewMod
                 "advisor" -> AdvisorSection(state, vm)
                 "reports" -> FinFlowReportsSection(state, vm)
                 "privacy" -> FinFlowPrivacySection(state, vm)
+                "security" -> FinFlowSecuritySection(state, vm, onReauthenticate)
             }
             Spacer(Modifier.height(22.dp))
         }
