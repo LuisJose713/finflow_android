@@ -18,6 +18,12 @@ import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.ArrowDownward
 import androidx.compose.material.icons.outlined.ArrowUpward
 import androidx.compose.material.icons.outlined.Refresh
+import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -33,6 +39,10 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -59,6 +69,43 @@ fun TransactionsScreen(
     viewModel: TransactionsViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    var editing by remember { mutableStateOf<Transaction?>(null) }
+    var deleting by remember { mutableStateOf<Transaction?>(null) }
+    var search by rememberSaveable { mutableStateOf("") }
+    var typeFilter by rememberSaveable { mutableStateOf("") }
+    val visibleTransactions = uiState.transactions.filter { tx ->
+        (typeFilter.isBlank() || tx.type == typeFilter) &&
+        (search.isBlank() || tx.description.contains(search.trim(), ignoreCase = true))
+    }
+
+    editing?.let { transaction ->
+        EditTransactionDialog(
+            transaction = transaction,
+            categories = uiState.categories,
+            onDismiss = { editing = null },
+            onSave = { request ->
+                viewModel.updateTransaction(transaction.id, request)
+                editing = null
+            },
+        )
+    }
+    deleting?.let { transaction ->
+        AlertDialog(
+            onDismissRequest = { deleting = null },
+            title = { Text("Eliminar movimiento") },
+            text = { Text("¿Eliminar '" + transaction.description +
+                "'? Esta acción no se puede deshacer.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    viewModel.deleteTransaction(transaction.id)
+                    deleting = null
+                }) { Text("Eliminar") }
+            },
+            dismissButton = {
+                TextButton(onClick = { deleting = null }) { Text("Cancelar") }
+            },
+        )
+    }
 
     val lifecycleOwner = LocalLifecycleOwner.current
 
@@ -297,8 +344,35 @@ fun TransactionsScreen(
                             Arrangement.spacedBy(10.dp),
                     ) {
 
+                        item {
+                            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                                OutlinedTextField(
+                                    value = search, onValueChange = { search = it },
+                                    label = { Text("Buscar por descripción") },
+                                    singleLine = true, modifier = Modifier.fillMaxWidth(),
+                                )
+                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    listOf("" to "Todos", "income" to "Ingresos",
+                                        "expense" to "Gastos").forEach { (value, label) ->
+                                        FilterChip(
+                                            selected = typeFilter == value,
+                                            onClick = { typeFilter = value },
+                                            label = { Text(label) },
+                                        )
+                                    }
+                                }
+                                Text(visibleTransactions.size.toString() + " movimientos",
+                                    style = MaterialTheme.typography.bodySmall)
+                            }
+                        }
+                        if (visibleTransactions.isEmpty()) {
+                            item {
+                                Text("No hay movimientos con estos filtros.",
+                                    style = MaterialTheme.typography.bodyMedium)
+                            }
+                        }
                         items(
-                            items = uiState.transactions,
+                            items = visibleTransactions,
 
                             key = {
                                 it.id
@@ -308,6 +382,8 @@ fun TransactionsScreen(
 
                             TransactionItem(
                                 transaction = transaction,
+                                onEdit = { editing = transaction },
+                                onDelete = { deleting = transaction },
                             )
                         }
 
@@ -332,6 +408,8 @@ fun TransactionsScreen(
 @Composable
 private fun TransactionItem(
     transaction: Transaction,
+    onEdit: () -> Unit,
+    onDelete: () -> Unit,
 ) {
 
     val isIncome =
@@ -424,17 +502,23 @@ private fun TransactionItem(
                 )
             }
 
-            Text(
-
-                text =
-                    formatAmount(transaction.amount),
-
-                style =
-                    MaterialTheme.typography.titleSmall,
-
-                color =
-                    amountColor,
-            )
+            Column(horizontalAlignment = Alignment.End) {
+                Text(
+                    text = formatAmount(transaction.amount),
+                    style = MaterialTheme.typography.titleSmall,
+                    color = amountColor,
+                )
+                Row {
+                    IconButton(onClick = onEdit) {
+                        Icon(Icons.Outlined.Edit, contentDescription = "Editar movimiento",
+                            tint = MaterialTheme.colorScheme.primary)
+                    }
+                    IconButton(onClick = onDelete) {
+                        Icon(Icons.Outlined.Delete, contentDescription = "Eliminar movimiento",
+                            tint = MaterialTheme.colorScheme.error)
+                    }
+                }
+            }
         }
     }
 }
