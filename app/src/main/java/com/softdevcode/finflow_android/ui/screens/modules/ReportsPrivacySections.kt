@@ -119,7 +119,7 @@ fun FinFlowReportsSection(state: ModulesState, vm: FinFlowModulesViewModel) {
                 label = { Text("Buscar por descripción (opcional)") },
                 singleLine = true, modifier = Modifier.fillMaxWidth(),
             )
-            val validMonth = month.isBlank() || month.toIntOrNull() in 1..12
+            val validMonth = month.isBlank() || (month.toIntOrNull()?.let { it in 1..12 } == true)
             val validYear = year.isBlank() || (year.toIntOrNull()?.let { it in 2000..2100 } == true)
             val ready = !state.busy && validMonth && validYear
             Button(
