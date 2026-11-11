@@ -49,6 +49,8 @@ import com.softdevcode.finflow_android.ui.screens.plannedexpenses.CreatePlannedE
 import com.softdevcode.finflow_android.ui.screens.plannedexpenses.PlannedExpensesScreen
 import com.softdevcode.finflow_android.ui.screens.transactions.AddTransactionScreen
 import com.softdevcode.finflow_android.ui.screens.transactions.TransactionsScreen
+import com.softdevcode.finflow_android.ui.theme.FinFlowNavy
+import com.softdevcode.finflow_android.ui.theme.FinFlowGold
 import com.softdevcode.finflow_android.ui.theme.Primary
 import com.softdevcode.finflow_android.ui.theme.Warning
 
@@ -159,7 +161,7 @@ fun MainScreen(
         bottomBar = {
 
             NavigationBar(
-                containerColor = MaterialTheme.colorScheme.surface,
+                containerColor = FinFlowNavy,
                 tonalElevation = 0.dp,
             ) {
 
@@ -225,22 +227,15 @@ fun MainScreen(
                         colors =
                             NavigationBarItemDefaults.colors(
 
-                                selectedIconColor = Primary,
+                                selectedIconColor = FinFlowGold,
 
-                                selectedTextColor = Primary,
+                                selectedTextColor = FinFlowGold,
 
-                                indicatorColor =
-                                    Primary.copy(alpha = 0.12f),
+                                indicatorColor = Color.White.copy(alpha = 0.10f),
 
-                                unselectedIconColor =
-                                    MaterialTheme.colorScheme
-                                        .onSurface
-                                        .copy(alpha = 0.4f),
+                                unselectedIconColor = Color.White.copy(alpha = 0.72f),
 
-                                unselectedTextColor =
-                                    MaterialTheme.colorScheme
-                                        .onSurface
-                                        .copy(alpha = 0.4f),
+                                unselectedTextColor = Color.White.copy(alpha = 0.72f),
                             )
                     )
                 }
