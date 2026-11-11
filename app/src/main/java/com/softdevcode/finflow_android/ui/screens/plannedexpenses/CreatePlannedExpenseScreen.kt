@@ -92,7 +92,12 @@ fun CreatePlannedExpenseScreen(
             TopAppBar(
 
                 title = {
-                    Text("Nuevo gasto planeado")
+                    Column {
+                        Text("Nuevo gasto planeado", style = MaterialTheme.typography.titleLarge)
+                        Text("Organiza tus próximos pagos",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
                 },
 
                 navigationIcon = {
