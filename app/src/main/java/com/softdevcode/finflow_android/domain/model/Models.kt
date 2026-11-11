@@ -36,6 +36,7 @@ data class Transaction(
     val currency: String? = null,
     val status: String? = null,
     val userId: Int? = null,
+    val accountId: Int? = null,
 )
 
 data class CreateTransactionRequest(
@@ -45,6 +46,8 @@ data class CreateTransactionRequest(
     val categoryId: Int,
     val date: String,
     val notes: String? = null,
+    val accountId: Int? = null,
+    val currency: String? = "COP",
 )
 
 data class MonthlyData(
