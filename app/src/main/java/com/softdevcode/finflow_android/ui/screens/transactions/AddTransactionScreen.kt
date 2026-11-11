@@ -101,7 +101,12 @@ fun AddTransactionScreen(
             TopAppBar(
 
                 title = {
-                    Text("Agregar transacción")
+                    Column {
+                        Text("Nueva transacción", style = MaterialTheme.typography.titleLarge)
+                        Text("Registra un ingreso o un gasto",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
                 },
 
                 navigationIcon = {
