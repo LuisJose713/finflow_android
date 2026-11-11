@@ -22,6 +22,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.softdevcode.finflow_android.domain.model.*
 import com.softdevcode.finflow_android.ui.theme.FinFlowGold
 import com.softdevcode.finflow_android.ui.theme.FinFlowNavy
+import com.softdevcode.finflow_android.ui.theme.FinFlowV4Hero
+import com.softdevcode.finflow_android.ui.theme.FinFlowV4Card
+import com.softdevcode.finflow_android.ui.theme.FinFlowV4Overline
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -45,11 +48,12 @@ fun FinFlowModulesScreen(
     userId: Int?,
     onReauthenticate: () -> Unit,
     isAdmin: Boolean = false,
+    initialSection: String = "accounts",
     vm: FinFlowModulesViewModel = hiltViewModel(),
 ) {
     val state by vm.state.collectAsStateWithLifecycle()
     val cal = remember { Calendar.getInstance(TimeZone.getTimeZone("America/Bogota")) }
-    var selected by rememberSaveable { mutableStateOf("accounts") }
+    var selected by rememberSaveable(initialSection) { mutableStateOf(initialSection) }
     var year by rememberSaveable { mutableIntStateOf(cal.get(Calendar.YEAR)) }
     var month by rememberSaveable { mutableIntStateOf(cal.get(Calendar.MONTH) + 1) }
 
@@ -59,20 +63,32 @@ fun FinFlowModulesScreen(
     }
 
     Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
-        Column(
-            Modifier.fillMaxWidth().background(FinFlowNavy)
-                .padding(horizontal = 20.dp, vertical = 20.dp),
-        ) {
-            Text("FINFLOW  /  ESPACIO FINANCIERO",
-                color = FinFlowGold, style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.Bold)
-            Spacer(Modifier.height(6.dp))
-            Text("Gestiona tu dinero", color = Color.White,
-                style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-            Text("Tu FinFlow Web, también en Android.",
-                color = Color.White.copy(alpha = 0.75f),
-                style = MaterialTheme.typography.bodySmall)
+        val intro = when (selected) {
+            "accounts" -> Triple("CUENTAS Y BILLETERAS", "Cada peso en su lugar",
+                "Controla tus cuentas, saldos y transferencias.")
+            "budgets" -> Triple("PRESUPUESTOS MENSUALES", "Tu dinero tiene un plan",
+                "Organiza límites para cada categoría de gasto.")
+            "recurring" -> Triple("MOVIMIENTOS RECURRENTES", "Lo importante, bajo control",
+                "Programa los pagos y cobros de cada mes.")
+            "categories" -> Triple("TUS CATEGORÍAS", "Un orden que se nota",
+                "Personaliza la forma de clasificar tus movimientos.")
+            "advisor" -> Triple("FINFLOW IA", "Tu asesor financiero",
+                "Ideas y análisis para entender mejor tus decisiones.")
+            "reports" -> Triple("REPORTES FINANCIEROS", "Tus números, con claridad",
+                "Exporta el PDF solo lectura o Excel editable.")
+            "privacy" -> Triple("PRIVACIDAD Y DATOS", "Tu información, tus reglas",
+                "Consulta y gestiona tus derechos en FinFlow.")
+            "security" -> Triple("PROTECCIÓN DE CUENTA", "Tu seguridad primero",
+                "Protege tus sesiones y credenciales.")
+            "billing" -> Triple("PLANES FINFLOW", "Elige tu experiencia",
+                "Consulta precios y promociones disponibles.")
+            "admin" -> Triple("ADMINISTRACIÓN", "Tu plataforma, al detalle",
+                "Monitorea FinFlow y administra sus planes.")
+            else -> Triple("FINFLOW", "Tu espacio financiero",
+                "Organiza cada movimiento, proyecto y meta.")
         }
+        FinFlowV4Hero(intro.first, intro.second, intro.third,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
         Row(
             Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())
                 .padding(horizontal = 14.dp, vertical = 9.dp),
@@ -145,16 +161,7 @@ private fun Header(title: String, subtitle: String, refresh: () -> Unit) {
 
 @Composable
 private fun Panel(content: @Composable ColumnScope.() -> Unit) {
-    Card(
-        Modifier.fillMaxWidth(), shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-    ) {
-        Column(
-            Modifier.fillMaxWidth().padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(9.dp),
-            content = content,
-        )
-    }
+    FinFlowV4Card(content = content)
 }
 
 @Composable
