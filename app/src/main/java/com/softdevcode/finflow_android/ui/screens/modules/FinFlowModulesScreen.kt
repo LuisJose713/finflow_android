@@ -645,5 +645,5 @@ private fun AdvisorSection(state: ModulesState, vm: FinFlowModulesViewModel) {
         modifier = Modifier.fillMaxWidth())
     Button(onClick = { vm.sendChat(prompt); prompt = "" },
         enabled = prompt.isNotBlank() && !state.busy,
-        modifier = Modifier.align(Alignment.End)) { Text("Enviar") }
+        modifier = Modifier.fillMaxWidth()) { Text("Enviar") }
 }
