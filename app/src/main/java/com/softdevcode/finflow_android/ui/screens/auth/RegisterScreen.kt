@@ -3,6 +3,7 @@ package com.softdevcode.finflow_android.ui.screens.auth
 import androidx.compose.animation.*
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -67,6 +68,43 @@ fun RegisterScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Spacer(Modifier.height(60.dp))
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .background(
+                            Brush.linearGradient(
+                                listOf(
+                                    com.softdevcode.finflow_android.ui.theme.Primary,
+                                    com.softdevcode.finflow_android.ui.theme.PrimaryDark,
+                                )
+                            ),
+                            RoundedCornerShape(12.dp),
+                        ),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(
+                        "F",
+                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
+                        color = androidx.compose.ui.graphics.Color.White,
+                    )
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(top = 7.dp, end = 7.dp)
+                            .size(6.dp)
+                            .background(com.softdevcode.finflow_android.ui.theme.Warning, CircleShape),
+                    )
+                }
+                Spacer(Modifier.width(10.dp))
+                Text(
+                    "FinFlow",
+                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
+                )
+            }
+
+            Spacer(Modifier.height(26.dp))
 
             Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 IconButton(onClick = onNavigateToLogin) {
