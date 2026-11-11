@@ -22,7 +22,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -98,7 +98,11 @@ fun TransactionsScreen(
             TopAppBar(
 
                 title = {
-                    Text("Movimientos")
+                    Column {
+                        Text("Movimientos", style = MaterialTheme.typography.titleLarge)
+                        Text("Registra y consulta cada movimiento", style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
                 },
 
                 actions = {
@@ -120,15 +124,13 @@ fun TransactionsScreen(
 
         floatingActionButton = {
 
-            FloatingActionButton(
+            ExtendedFloatingActionButton(
                 onClick = onAddTransaction,
-            ) {
-
-                Icon(
-                    imageVector = Icons.Outlined.Add,
-                    contentDescription = "Agregar transacción",
-                )
-            }
+                icon = { Icon(Icons.Outlined.Add, contentDescription = null) },
+                text = { Text("Nueva transacción") },
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+            )
         },
 
         ) { paddingValues ->
