@@ -33,9 +33,18 @@ class AuthRepository @Inject constructor(
             onFailure = { Result.Error(it.message ?: "Error al iniciar sesión") }
         )
 
-    suspend fun register(email: String, password: String, name: String): Result<AuthResponse> =
+    suspend fun register(
+        email: String, password: String, name: String, confirmPassword: String,
+        privacyAccepted: Boolean?, privacyVersion: String?, marketingConsent: Boolean?,
+    ): Result<AuthResponse> =
         runCatching {
-            val response = api.register(RegisterRequest(email, password, name))
+            val response = api.register(RegisterRequest(
+                email = email, password = password, name = name,
+                confirmPassword = confirmPassword,
+                privacyAccepted = privacyAccepted,
+                privacyVersion = privacyVersion,
+                marketingConsent = marketingConsent,
+            ))
             tokenManager.saveAuth(
                 token = response.token,
                 name  = response.user.name,
