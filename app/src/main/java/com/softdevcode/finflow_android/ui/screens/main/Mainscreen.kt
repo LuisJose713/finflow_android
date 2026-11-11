@@ -13,6 +13,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.SmartToy
+import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.material.icons.filled.TrackChanges
 import androidx.compose.material.icons.outlined.CalendarMonth
@@ -21,6 +22,7 @@ import androidx.compose.material.icons.outlined.GridView
 import androidx.compose.material.icons.outlined.LightMode
 import androidx.compose.material.icons.outlined.Logout
 import androidx.compose.material.icons.outlined.SmartToy
+import androidx.compose.material.icons.outlined.MoreHoriz
 import androidx.compose.material.icons.outlined.SwapHoriz
 import androidx.compose.material.icons.outlined.TrackChanges
 import androidx.compose.material3.*
@@ -43,6 +45,7 @@ import androidx.navigation.compose.rememberNavController
 import com.softdevcode.finflow_android.ui.screens.goals.GoalsScreen
 import com.softdevcode.finflow_android.ui.screens.auth.AuthViewModel
 import com.softdevcode.finflow_android.ui.screens.dashboard.DashboardScreen
+import com.softdevcode.finflow_android.ui.screens.modules.FinFlowModulesScreen
 import com.softdevcode.finflow_android.ui.screens.goals.CreateGoalScreen
 import com.softdevcode.finflow_android.ui.screens.navigation.Screen
 import com.softdevcode.finflow_android.ui.screens.plannedexpenses.CreatePlannedExpenseScreen
@@ -92,10 +95,10 @@ private val tabs = listOf(
         Icons.Filled.CalendarMonth
     ),
     BottomTab(
-        Screen.Advisor,
-        "Asesor IA",
-        Icons.Outlined.SmartToy,
-        Icons.Filled.SmartToy
+        Screen.More,
+        "Más",
+        Icons.Outlined.MoreHoriz,
+        Icons.Filled.MoreHoriz
     ),
 )
 
@@ -408,6 +411,12 @@ fun MainScreen(
 
 
             // ─────────────────────────────────────────────────────────────────
+            // Financial modules — account balances, budgets, recurring, categories & AI.
+            composable(Screen.More.route) {
+                FinFlowModulesScreen(userId = uiState.user?.id)
+            }
+
+            // Advisor legacy route, available for compatibility.
             // Advisor
             // ─────────────────────────────────────────────────────────────────
 
