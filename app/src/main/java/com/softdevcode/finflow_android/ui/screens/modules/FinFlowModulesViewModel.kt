@@ -6,6 +6,8 @@ import com.softdevcode.finflow_android.data.remote.api.FinFlowApi
 import com.softdevcode.finflow_android.domain.model.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -23,6 +25,9 @@ data class ModulesState(
     val rules: List<RecurringRule> = emptyList(),
     val categories: List<Category> = emptyList(),
     val chat: List<ChatLine> = emptyList(),
+    val privacyPolicy: FinFlowPrivacyPolicy? = null,
+    val privacyStatus: FinFlowPrivacyStatus? = null,
+    val privacyRequests: List<FinFlowRightsEntry> = emptyList(),
     val busy: Boolean = false,
     val error: String? = null,
     val notice: String? = null,
@@ -65,6 +70,14 @@ class FinFlowModulesViewModel @Inject constructor(private val api: FinFlowApi) :
                     }
                     "categories" -> {
                         _state.update { it.copy(categories = api.getCategories()) }
+                    }
+                    "privacy" -> {
+                        val policy = api.getPrivacyPolicy()
+                        val status = api.getPrivacyStatus()
+                        val requests = api.getPrivacyRequests()
+                        _state.update {
+                            it.copy(privacyPolicy = policy, privacyStatus = status, privacyRequests = requests)
+                        }
                     }
                 }
             } catch (e: CancellationException) {
@@ -168,6 +181,48 @@ class FinFlowModulesViewModel @Inject constructor(private val api: FinFlowApi) :
         runAction("categories", "Categoría eliminada") {
             if (!api.deleteCategory(id).isSuccessful) error("No se pudo eliminar")
         }
+
+    fun setMarketingChoice(marketingConsent: Boolean) =
+        runAction("privacy", "Preferencia de comunicaciones actualizada") {
+            if (!api.setMarketing(FinFlowMarketingChoice(marketingConsent)).isSuccessful) {
+                error("No se pudo cambiar la autorización")
+            }
+        }
+
+    fun requestPrivacyRight(type: String, description: String) =
+        runAction("privacy", "Solicitud registrada para revisión") {
+            val response = api.createPrivacyRequest(
+                FinFlowRightsRequest(type, description.trim().take(500))
+            )
+            if (!response.isSuccessful) error("No se pudo registrar la solicitud")
+        }
+
+    fun exportReport(
+        format: String, type: String?, month: Int?, year: Int?, search: String?,
+        onReady: (ByteArray) -> Unit,
+    ) {
+        viewModelScope.launch {
+            _state.update { it.copy(busy = true, error = null, notice = null) }
+            try {
+                val response = if (format == "pdf") {
+                    api.exportPdf(type, month, year, null, search)
+                } else {
+                    api.exportXlsx(type, month, year, null, search)
+                }
+                if (!response.isSuccessful) error("Exportación no disponible")
+                val bytes = withContext(Dispatchers.IO) { response.body()?.bytes() }
+                    ?: error("Archivo vacío")
+                if (bytes.isEmpty()) error("Archivo vacío")
+                onReady(bytes)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                _state.update { it.copy(error = "No se pudo generar el informe. Intenta de nuevo.") }
+            } finally {
+                _state.update { it.copy(busy = false) }
+            }
+        }
+    }
 
     fun sendChat(text: String) {
         val message = text.trim().take(4096)
