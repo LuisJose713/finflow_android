@@ -5,6 +5,7 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -86,6 +87,7 @@ fun FinFlowReportsSection(state: ModulesState, vm: FinFlowModulesViewModel) {
     Card(
         Modifier.fillMaxWidth(), shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
     ) {
         Column(
             Modifier.padding(18.dp),
@@ -169,6 +171,7 @@ fun FinFlowPrivacySection(state: ModulesState, vm: FinFlowModulesViewModel) {
     Card(
         Modifier.fillMaxWidth(), shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
     ) {
         Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Text("TRATAMIENTO DE DATOS", fontWeight = FontWeight.Bold,
@@ -205,6 +208,7 @@ fun FinFlowPrivacySection(state: ModulesState, vm: FinFlowModulesViewModel) {
         Card(
             Modifier.fillMaxWidth(), shape = RoundedCornerShape(20.dp),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
         ) {
             Row(Modifier.padding(18.dp), verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
@@ -239,6 +243,7 @@ fun FinFlowPrivacySection(state: ModulesState, vm: FinFlowModulesViewModel) {
     Card(
         Modifier.fillMaxWidth(), shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
     ) {
         Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Text("SOLICITUD DE DERECHOS", color = FinFlowGold,
@@ -279,6 +284,7 @@ fun FinFlowPrivacySection(state: ModulesState, vm: FinFlowModulesViewModel) {
         state.privacyRequests.forEach { request ->
             Card(Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
                 shape = RoundedCornerShape(14.dp)) {
                 Column(Modifier.padding(15.dp)) {
                     Text("Solicitud #" + request.id + " · " + request.requestType,
