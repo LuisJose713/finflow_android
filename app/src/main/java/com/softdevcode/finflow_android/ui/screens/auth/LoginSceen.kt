@@ -101,7 +101,7 @@ fun LoginScreen(
                 )
             )
             Text(
-                text = "TU ESPACIO FINANCIERO",
+                text = "TU DINERO, CON OTRO NIVEL DE CLARIDAD",
                 style = MaterialTheme.typography.labelSmall.copy(
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 2.sp,
@@ -109,15 +109,21 @@ fun LoginScreen(
                 color = FinFlowGold,
             )
 
-            Spacer(Modifier.height(6.dp))
-
+            Spacer(Modifier.height(20.dp))
             Text(
                 text = "Bienvenido de nuevo",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.ExtraBold,
+                color = MaterialTheme.colorScheme.onBackground,
             )
-
-            Spacer(Modifier.height(48.dp))
+            Spacer(Modifier.height(6.dp))
+            Text(
+                text = "Tu espacio financiero está listo para ti.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+            )
+            Spacer(Modifier.height(28.dp))
 
             // ── Email ─────────────────────────────────────────────────────
             OutlinedTextField(
@@ -265,7 +271,7 @@ fun LoginScreen(
 
             // ── Footer ────────────────────────────────────────────────────
             Text(
-                text = "FINFLOW  •  AEVQOR",
+                text = "CREADO POR AEVQOR",
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurface.copy(0.25f),
                 textAlign = TextAlign.Center,
