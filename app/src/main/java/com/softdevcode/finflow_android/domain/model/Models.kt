@@ -66,6 +66,7 @@ data class Category(
     val id: Int,
     val name: String,
     val type: String,
+    val userId: Int? = null, // null means a protected, global category
 )
 
 // ── Goal ──────────────────────────────────────────────────────────────────────
