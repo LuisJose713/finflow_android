@@ -15,7 +15,7 @@ import androidx.core.view.WindowCompat
 private val LightColorScheme = lightColorScheme(
     primary            = Primary,
     onPrimary          = Color.White,
-    primaryContainer   = Color(0xFFE0E7FF),
+    primaryContainer   = Color(0xFFF3E6D3),
     onPrimaryContainer = PrimaryDark,
     secondary          = Color(0xFF64748B),
     onSecondary        = Color.White,
@@ -33,10 +33,10 @@ private val LightColorScheme = lightColorScheme(
 
 // ── Dark color scheme ─────────────────────────────────────────────────────────
 private val DarkColorScheme = darkColorScheme(
-    primary            = PrimaryLight,
-    onPrimary          = Color.White,
-    primaryContainer   = Color(0xFF312E81),
-    onPrimaryContainer = Color(0xFFC7D2FE),
+    primary            = FinFlowGoldPale,
+    onPrimary          = FinFlowNavy,
+    primaryContainer   = Color(0xFF22334A),
+    onPrimaryContainer = Color(0xFFE2BD83),
     secondary          = Color(0xFF94A3B8),
     onSecondary        = Color(0xFF1E293B),
     background         = BackgroundDark,
