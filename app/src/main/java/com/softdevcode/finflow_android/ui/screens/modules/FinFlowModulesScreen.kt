@@ -37,12 +37,14 @@ private val sections = listOf(
     "reports" to "Reportes",
     "privacy" to "Privacidad",
     "security" to "Seguridad",
+    "billing" to "Planes",
 )
 
 @Composable
 fun FinFlowModulesScreen(
     userId: Int?,
     onReauthenticate: () -> Unit,
+    isAdmin: Boolean = false,
     vm: FinFlowModulesViewModel = hiltViewModel(),
 ) {
     val state by vm.state.collectAsStateWithLifecycle()
@@ -52,7 +54,8 @@ fun FinFlowModulesScreen(
     var month by rememberSaveable { mutableIntStateOf(cal.get(Calendar.MONTH) + 1) }
 
     LaunchedEffect(selected) {
-        if (selected != "reports" && selected != "advisor") vm.refresh(selected, year, month)
+        if (selected in listOf("accounts", "budgets", "recurring", "categories", "privacy"))
+            vm.refresh(selected, year, month)
     }
 
     Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
@@ -75,7 +78,8 @@ fun FinFlowModulesScreen(
                 .padding(horizontal = 14.dp, vertical = 9.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            sections.forEach { (key, label) ->
+            (sections + if (isAdmin) listOf("admin" to "Administración") else emptyList())
+                .forEach { (key, label) ->
                 FilterChip(
                     selected = selected == key, onClick = { selected = key },
                     label = { Text(label) },
@@ -119,6 +123,8 @@ fun FinFlowModulesScreen(
                 "reports" -> FinFlowReportsSection(state, vm)
                 "privacy" -> FinFlowPrivacySection(state, vm)
                 "security" -> FinFlowSecuritySection(state, vm, onReauthenticate)
+                "billing" -> FinFlowPlansSection()
+                "admin" -> if (isAdmin) FinFlowAdminSection()
             }
             Spacer(Modifier.height(22.dp))
         }
