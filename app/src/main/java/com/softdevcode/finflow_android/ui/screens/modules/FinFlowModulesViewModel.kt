@@ -182,6 +182,46 @@ class FinFlowModulesViewModel @Inject constructor(private val api: FinFlowApi) :
             if (!api.deleteCategory(id).isSuccessful) error("No se pudo eliminar")
         }
 
+    fun changePassword(
+        current: String, next: String, confirmation: String, onReauthenticate: () -> Unit,
+    ) {
+        viewModelScope.launch {
+            _state.update { it.copy(busy = true, error = null) }
+            try {
+                val response = api.changeFinFlowPassword(
+                    ChangeFinFlowPasswordRequest(current, next, confirmation)
+                )
+                if (!response.isSuccessful) error("Contraseña actual o nueva inválida")
+                onReauthenticate() // New token version invalidates this and other sessions.
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                _state.update { it.copy(error = "No se pudo cambiar la contraseña.") }
+            } finally {
+                _state.update { it.copy(busy = false) }
+            }
+        }
+    }
+
+    fun revokeSessions(password: String, onReauthenticate: () -> Unit) {
+        viewModelScope.launch {
+            _state.update { it.copy(busy = true, error = null) }
+            try {
+                val response = api.revokeFinFlowSessions(
+                    ConfirmFinFlowPasswordRequest(password)
+                )
+                if (!response.isSuccessful) error("Contraseña incorrecta")
+                onReauthenticate() // Never keep using a revoked JWT.
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                _state.update { it.copy(error = "No fue posible cerrar las sesiones.") }
+            } finally {
+                _state.update { it.copy(busy = false) }
+            }
+        }
+    }
+
     fun setMarketingChoice(marketingConsent: Boolean) =
         runAction("privacy", "Preferencia de comunicaciones actualizada") {
             if (!api.setMarketing(FinFlowMarketingChoice(marketingConsent)).isSuccessful) {
