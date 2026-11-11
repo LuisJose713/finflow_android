@@ -47,6 +47,7 @@ import com.softdevcode.finflow_android.ui.screens.auth.AuthViewModel
 import com.softdevcode.finflow_android.ui.screens.dashboard.DashboardScreen
 import com.softdevcode.finflow_android.ui.screens.modules.FinFlowModulesScreen
 import com.softdevcode.finflow_android.ui.screens.goals.CreateGoalScreen
+import com.softdevcode.finflow_android.ui.screens.goals.GoalDetailScreen
 import com.softdevcode.finflow_android.ui.screens.navigation.Screen
 import com.softdevcode.finflow_android.ui.screens.plannedexpenses.CreatePlannedExpenseScreen
 import com.softdevcode.finflow_android.ui.screens.plannedexpenses.PlannedExpensesScreen
@@ -374,8 +375,16 @@ fun MainScreen(
                 GoalsScreen(
                     onAddGoal = {
                         navController.navigate(Screen.CreateGoal.route)
-                    }
+                    },
+                    onOpenGoal = { id -> navController.navigate("goal_detail/" + id) }
                 )
+            }
+
+            composable("goal_detail/{goalId}") { entry ->
+                val goalId = entry.arguments?.getString("goalId")?.toIntOrNull()
+                if (goalId != null) {
+                    GoalDetailScreen(goalId = goalId, onBack = { navController.popBackStack() })
+                }
             }
 
             composable(Screen.CreateGoal.route) {
