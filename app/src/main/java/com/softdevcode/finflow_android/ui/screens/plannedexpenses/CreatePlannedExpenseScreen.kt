@@ -1,5 +1,6 @@
 package com.softdevcode.finflow_android.ui.screens.plannedexpenses
 
+import com.softdevcode.finflow_android.ui.theme.FinFlowV4Hero
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -125,6 +126,11 @@ fun CreatePlannedExpenseScreen(
 
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
+
+            FinFlowV4Hero(
+                "PLANIFICACIÓN INTELIGENTE", "Anticípate a lo que viene.",
+                "Organiza tus compromisos antes de gastar.",
+            )
 
             OutlinedTextField(
                 value = title,
