@@ -5,6 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.softdevcode.finflow_android.data.repository.TransactionRepository
 import com.softdevcode.finflow_android.domain.model.Transaction
+import com.softdevcode.finflow_android.domain.model.Category
+import com.softdevcode.finflow_android.domain.model.CreateTransactionRequest
 import com.softdevcode.finflow_android.util.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,6 +20,9 @@ data class TransactionsUiState(
     val isLoading: Boolean = true,
     val transactions: List<Transaction> = emptyList(),
     val error: String? = null,
+    val isSaving: Boolean = false,
+    val categories: List<Category> = emptyList(),
+    val notice: String? = null,
 )
 
 @HiltViewModel
@@ -32,6 +37,11 @@ class TransactionsViewModel @Inject constructor(
 
     init {
         load()
+        viewModelScope.launch {
+            if (val result = transactionRepository.getCategories(); result is Result.Success) {
+                _uiState.update { it.copy(categories = result.data) }
+            }
+        }
     }
 
     fun load() {
@@ -64,6 +74,44 @@ class TransactionsViewModel @Inject constructor(
                     }
                 }
 
+                else -> {}
+            }
+        }
+    }
+
+    fun updateTransaction(id: Int, request: CreateTransactionRequest) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isSaving = true, error = null, notice = null) }
+            when (val result = transactionRepository.updateTransaction(id, request)) {
+                is Result.Success -> {
+                    _uiState.update { it.copy(isSaving = false, notice = "Movimiento actualizado") }
+                    load()
+                }
+                is Result.Error -> {
+                    _uiState.update {
+                        it.copy(isSaving = false,
+                            error = result.message.ifBlank { "No se pudo actualizar" })
+                    }
+                }
+                else -> {}
+            }
+        }
+    }
+
+    fun deleteTransaction(id: Int) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isSaving = true, error = null, notice = null) }
+            when (val result = transactionRepository.deleteTransaction(id)) {
+                is Result.Success -> {
+                    _uiState.update { it.copy(isSaving = false, notice = "Movimiento eliminado") }
+                    load()
+                }
+                is Result.Error -> {
+                    _uiState.update {
+                        it.copy(isSaving = false,
+                            error = result.message.ifBlank { "No se pudo eliminar" })
+                    }
+                }
                 else -> {}
             }
         }
