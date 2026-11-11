@@ -67,7 +67,12 @@ fun CreateGoalScreen(
             TopAppBar(
 
                 title = {
-                    Text("Nueva meta")
+                    Column {
+                        Text("Nueva meta", style = MaterialTheme.typography.titleLarge)
+                        Text("Define un objetivo para tu futuro",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
                 },
 
                 navigationIcon = {
