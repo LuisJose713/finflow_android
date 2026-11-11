@@ -175,7 +175,8 @@ private fun HeroBalance(stats: TransactionStats, visible: Boolean, onToggleVisib
             }
         }
         PrivateAmount(formatCurrency(stats.balance), visible, Modifier.fillMaxWidth(), color = Color.White, large = true)
-        Text("Historial de ingresos y gastos", style = MaterialTheme.typography.bodySmall, color = Color.White.copy(alpha = .85f))
+        Text("Según tus movimientos registrados. No es tu saldo bancario disponible.",
+            style = MaterialTheme.typography.bodySmall, color = Color.White.copy(alpha = .85f))
         HorizontalDivider(color = Color.White.copy(alpha = .2f))
         Text(
             when {
