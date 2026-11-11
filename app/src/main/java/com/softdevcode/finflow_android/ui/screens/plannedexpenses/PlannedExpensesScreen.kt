@@ -35,6 +35,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -42,6 +43,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import com.softdevcode.finflow_android.ui.theme.FinFlowGold
+import com.softdevcode.finflow_android.ui.theme.FinFlowNavy
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -66,9 +71,10 @@ fun PlannedExpensesScreen(
             TopAppBar(
                 title = {
                     Column {
-                        Text("Gastos planeados", style = MaterialTheme.typography.titleLarge)
-                        Text("Anticípate a tus próximos pagos", style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text("PLANIFICACIÓN FINANCIERA", style = MaterialTheme.typography.labelSmall,
+                            color = FinFlowGold, fontWeight = FontWeight.Bold)
+                        Text("Gastos planeados", style = MaterialTheme.typography.titleLarge,
+                            color = Color.White, fontWeight = FontWeight.Bold)
                     }
                 },
                 actions = {
@@ -80,9 +86,11 @@ fun PlannedExpensesScreen(
                         Icon(
                             imageVector = Icons.Outlined.Refresh,
                             contentDescription = "Actualizar",
+                            tint = Color.White,
                         )
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = FinFlowNavy),
             )
         },
 
