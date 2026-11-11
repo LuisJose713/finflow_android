@@ -38,7 +38,21 @@ import com.softdevcode.finflow_android.domain.model.FinFlowMarketingChoice
 import com.softdevcode.finflow_android.domain.model.FinFlowRightsRequest
 import com.softdevcode.finflow_android.domain.model.FinFlowRightsEntry
 
+import com.softdevcode.finflow_android.domain.model.ChangeFinFlowPasswordRequest
+import com.softdevcode.finflow_android.domain.model.ConfirmFinFlowPasswordRequest
+
 interface FinFlowApi {
+    @POST("auth/change-password")
+    suspend fun changeFinFlowPassword(
+        @Body request: ChangeFinFlowPasswordRequest,
+    ): retrofit2.Response<okhttp3.ResponseBody>
+
+    @POST("auth/revoke-sessions")
+    suspend fun revokeFinFlowSessions(
+        @Body request: ConfirmFinFlowPasswordRequest,
+    ): retrofit2.Response<okhttp3.ResponseBody>
+
+
     // Consent is NEVER assumed; these endpoints only read and update
     // explicit choices made by the authenticated account owner.
     @GET("privacy/policy")
