@@ -1,6 +1,7 @@
 package com.softdevcode.finflow_android.ui.screens.goals
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -50,6 +51,7 @@ import java.util.Locale
 @Composable
 fun GoalsScreen(
     onAddGoal: () -> Unit,
+    onOpenGoal: (Int) -> Unit,
     viewModel: GoalsViewModel = hiltViewModel(),
 
 ) {
@@ -231,6 +233,7 @@ fun GoalsScreen(
 
                             GoalCard(
                                 goal = goal,
+                                onClick = { onOpenGoal(goal.id) },
                             )
                         }
 
@@ -249,11 +252,12 @@ fun GoalsScreen(
 @Composable
 private fun GoalCard(
     goal: Goal,
+    onClick: () -> Unit,
 ) {
     Card(
         shape = MaterialTheme.shapes.large,
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.45f)),
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick),
 
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface,
