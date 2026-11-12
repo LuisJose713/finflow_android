@@ -115,6 +115,11 @@ interface FinFlowApi {
         @Body request: ConfirmFinFlowPasswordRequest,
     ): retrofit2.Response<okhttp3.ResponseBody>
 
+    @HTTP(method = "DELETE", path = "auth/account", hasBody = true)
+    suspend fun deleteFinFlowAccount(
+        @Body request: ConfirmFinFlowPasswordRequest,
+    ): retrofit2.Response<Void>
+
 
     // Consent is NEVER assumed; these endpoints only read and update
     // explicit choices made by the authenticated account owner.

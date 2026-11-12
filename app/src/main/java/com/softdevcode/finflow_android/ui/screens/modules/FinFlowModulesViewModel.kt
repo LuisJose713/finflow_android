@@ -41,7 +41,7 @@ class FinFlowModulesViewModel @Inject constructor(private val api: FinFlowApi) :
     private var selectedMonth = 1
     private var selectedYear = 2026
 
-    fun clearMessages() = _state.update { it.copy(error = null, notice = null) }
+    fun clearMessages() = _state.update { it.copy(chat = emptyList(), error = null, notice = null) }
 
     fun refresh(section: String, year: Int = selectedYear, month: Int = selectedMonth) {
         selectedYear = year
@@ -216,6 +216,41 @@ class FinFlowModulesViewModel @Inject constructor(private val api: FinFlowApi) :
                 throw e
             } catch (e: Exception) {
                 _state.update { it.copy(error = "No fue posible cerrar las sesiones.") }
+            } finally {
+                _state.update { it.copy(busy = false) }
+            }
+        }
+    }
+
+    /**
+     * The server verifies the password and deletes only the authenticated owner.
+     * Never clear local credentials until the API confirms HTTP 204.
+     */
+    fun deleteAccount(password: String, onReauthenticate: () -> Unit) {
+        if (password.isBlank() || password.toByteArray(Charsets.UTF_8).size > 72) {
+            _state.update { it.copy(error = "Introduce tu contraseña actual (máximo 72 bytes).") }
+            return
+        }
+        viewModelScope.launch {
+            _state.update { it.copy(busy = true, error = null, notice = null) }
+            try {
+                val response = api.deleteFinFlowAccount(ConfirmFinFlowPasswordRequest(password))
+                if (response.isSuccessful) {
+                    onReauthenticate()
+                } else {
+                    _state.update {
+                        it.copy(error = when (response.code()) {
+                            403 -> "Contraseña incorrecta."
+                            429 -> "Demasiados intentos. Inténtalo más tarde."
+                            else -> "No pudimos eliminar tu cuenta. Comprueba la conexión."
+                        })
+                    }
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (_: Exception) {
+                _state.update { it.copy(error =
+                    "No pudimos confirmar la eliminación. Comprueba tu cuenta antes de reintentar.") }
             } finally {
                 _state.update { it.copy(busy = false) }
             }

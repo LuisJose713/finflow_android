@@ -24,6 +24,9 @@ fun FinFlowSecuritySection(
     var confirm by remember { mutableStateOf("") }
     var revoke by remember { mutableStateOf("") }
     var showRevokeConfirmation by remember { mutableStateOf(false) }
+    var deletePassword by remember { mutableStateOf("") }
+    var deletePhrase by remember { mutableStateOf("") }
+    var showDeleteConfirmation by remember { mutableStateOf(false) }
 
     Text("Protección de tu cuenta",
         style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
@@ -100,6 +103,64 @@ fun FinFlowSecuritySection(
             }
         }
     }
+
+    // Clearly separated from routine security actions: irreversible deletion.
+    Card(
+        Modifier.fillMaxWidth(), shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = .55f)),
+    ) {
+        Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Text("ELIMINAR CUENTA", color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
+            Text("Se eliminarán permanentemente tu perfil, movimientos, billeteras, " +
+                "presupuestos y metas, y se cerrarán todas tus sesiones. No se puede deshacer.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant)
+            OutlinedTextField(
+                deletePassword, { deletePassword = it },
+                label = { Text("Contraseña actual") },
+                visualTransformation = PasswordVisualTransformation(),
+                singleLine = true, modifier = Modifier.fillMaxWidth(),
+            )
+            OutlinedTextField(
+                deletePhrase, { deletePhrase = it.take(8) },
+                label = { Text("Escribe ELIMINAR") },
+                singleLine = true, modifier = Modifier.fillMaxWidth(),
+            )
+            OutlinedButton(
+                onClick = { showDeleteConfirmation = true },
+                enabled = !state.busy && deletePassword.isNotBlank() &&
+                    deletePassword.toByteArray(Charsets.UTF_8).size <= 72 &&
+                    deletePhrase == "ELIMINAR",
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = MaterialTheme.colorScheme.error),
+            ) {
+                Text("Eliminar mi cuenta definitivamente")
+            }
+        }
+    }
+
+    if (showDeleteConfirmation) {
+        AlertDialog(
+            onDismissRequest = { showDeleteConfirmation = false },
+            title = { Text("¿Eliminar definitivamente tu cuenta?") },
+            text = { Text("Se borrarán tus datos financieros y se cerrarán tus sesiones. Esta acción es irreversible.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    showDeleteConfirmation = false
+                    vm.deleteAccount(deletePassword, onReauthenticate)
+                    deletePassword = ""
+                    deletePhrase = ""
+                }) { Text("Sí, eliminar cuenta", color = MaterialTheme.colorScheme.error) }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteConfirmation = false }) { Text("Cancelar") }
+            },
+        )
+    }
+
 
     if (showRevokeConfirmation) {
         AlertDialog(
