@@ -12,6 +12,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.OpenInFull
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -57,9 +58,19 @@ fun FinFlowV4Hero(
     val controls = LocalPresentationControls.current
     val customizable = cardId != null && controls.state.enabled
     if (customizable && cardId in controls.state.hidden) {
-        Column(modifier.fillMaxWidth()) {
-            TextButton(onClick = { controls.setHidden(cardId!!, false) }, enabled = cardId !in controls.state.saving) {
-                Text("Mostrar presentación")
+        Row(
+            modifier = modifier.fillMaxWidth().heightIn(min = 44.dp),
+            horizontalArrangement = Arrangement.End,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            IconButton(
+                onClick = { controls.setHidden(cardId!!, false) },
+                enabled = cardId !in controls.state.saving,
+                modifier = Modifier.size(44.dp),
+            ) {
+                Icon(Icons.Outlined.OpenInFull, contentDescription = "Mostrar presentación",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(20.dp))
             }
         }
         return
