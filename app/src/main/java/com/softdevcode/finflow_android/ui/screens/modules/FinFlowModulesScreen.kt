@@ -12,6 +12,8 @@ import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.ChevronLeft
 import androidx.compose.material.icons.outlined.ChevronRight
 import androidx.compose.material.icons.outlined.Refresh
+import androidx.compose.material.icons.outlined.AutoAwesome
+import androidx.compose.material.icons.outlined.Send
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -51,6 +53,13 @@ fun FinFlowModulesScreen(
     LaunchedEffect(selected) {
         if (selected in listOf("accounts", "budgets", "recurring", "categories", "privacy"))
             vm.refresh(selected, year, month)
+    }
+
+    // The assistant is a conversation, not a long settings page. Give it its
+    // own viewport, with independent message scrolling and a fixed composer.
+    if (selected == "advisor") {
+        AdvisorConversationScreen(state, vm)
+        return
     }
 
     Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)
@@ -111,7 +120,7 @@ fun FinFlowModulesScreen(
                     })
                 "recurring" -> RecurringSection(state, vm)
                 "categories" -> CategoriesSection(state, vm, userId)
-                "advisor" -> AdvisorSection(state, vm)
+                "advisor" -> AdvisorConversationScreen(state, vm)
                 "reports" -> FinFlowReportsSection(state, vm)
                 "privacy" -> FinFlowPrivacySection(state, vm)
                 "security" -> FinFlowSecuritySection(state, vm, onReauthenticate)
@@ -615,38 +624,148 @@ private fun CategoryForm(
 }
 
 @Composable
-private fun AdvisorSection(state: ModulesState, vm: FinFlowModulesViewModel) {
+private fun AdvisorConversationScreen(state: ModulesState, vm: FinFlowModulesViewModel) {
     var prompt by rememberSaveable { mutableStateOf("") }
-    Header("Asesor IA", "Respuestas financieras desde FinFlow.",
-        refresh = { vm.clearMessages() })
-    Panel {
-        Text("ASESOR FINFLOW", color = FinFlowGold,
-            style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
-        Text("Tu dinero, con una segunda perspectiva.",
-            fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
-        Text("No compartas claves, códigos bancarios ni información personal sensible.",
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            style = MaterialTheme.typography.bodySmall)
+    val listState = androidx.compose.foundation.lazy.rememberLazyListState()
+
+    LaunchedEffect(state.chat.size, state.busy) {
+        val count = state.chat.size + if (state.busy) 1 else 0
+        if (count > 0) listState.animateScrollToItem(count - 1)
     }
-    state.chat.forEach { message ->
-        Surface(
-            Modifier.fillMaxWidth(), shape = RoundedCornerShape(14.dp),
-            color = if (message.user) MaterialTheme.colorScheme.primaryContainer
-                else MaterialTheme.colorScheme.surface,
+
+    Column(
+        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background),
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            Column(Modifier.padding(14.dp)) {
-                Text(if (message.user) "Tú" else "FinFlow IA", fontWeight = FontWeight.Bold,
-                    style = MaterialTheme.typography.labelSmall)
-                Spacer(Modifier.height(5.dp))
-                Text(message.text)
+            Box(
+                modifier = Modifier.size(42.dp)
+                    .background(MaterialTheme.colorScheme.primaryContainer,
+                        RoundedCornerShape(12.dp)),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(Icons.Outlined.AutoAwesome, contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary)
+            }
+            Column(Modifier.weight(1f)) {
+                Text("FinFlow AI", style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold)
+                Text("Tu asistente financiero", style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            TextButton(onClick = vm::clearMessages,
+                enabled = state.chat.isNotEmpty() && !state.busy) {
+                Icon(Icons.Outlined.Add, contentDescription = null,
+                    modifier = Modifier.size(18.dp))
+                Spacer(Modifier.width(4.dp))
+                Text("Nuevo chat")
             }
         }
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+
+        state.error?.let { error ->
+            Text(error,
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 8.dp),
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall)
+        }
+
+        androidx.compose.foundation.lazy.LazyColumn(
+            modifier = Modifier.weight(1f).fillMaxWidth(),
+            state = listState,
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 18.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp),
+        ) {
+            if (state.chat.isEmpty()) {
+                item {
+                    Column(
+                        modifier = Modifier.fillMaxWidth().padding(top = 90.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        Icon(Icons.Outlined.AutoAwesome, contentDescription = null,
+                            tint = FinFlowGold, modifier = Modifier.size(40.dp))
+                        Text("¿En qué puedo ayudarte?",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.SemiBold)
+                        Text("Pregunta lo que quieras sobre tus finanzas.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                }
+            }
+            items(state.chat.size) { index ->
+                val message = state.chat[index]
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement =
+                        if (message.user) Arrangement.End else Arrangement.Start,
+                ) {
+                    Surface(
+                        modifier = Modifier.widthIn(max = 660.dp)
+                            .padding(start = if (message.user) 38.dp else 0.dp,
+                                end = if (message.user) 0.dp else 38.dp),
+                        shape = RoundedCornerShape(
+                            topStart = if (message.user) 16.dp else 5.dp,
+                            topEnd = if (message.user) 5.dp else 16.dp,
+                            bottomStart = 16.dp, bottomEnd = 16.dp),
+                        color = if (message.user) MaterialTheme.colorScheme.primaryContainer
+                            else MaterialTheme.colorScheme.surfaceVariant,
+                    ) {
+                        Text(message.text,
+                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 11.dp),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurface)
+                    }
+                }
+            }
+            if (state.busy) {
+                item {
+                    Text("FinFlow está escribiendo…",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.bodySmall)
+                }
+            }
+        }
+
+        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+        Row(
+            modifier = Modifier.fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.Bottom,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            OutlinedTextField(
+                value = prompt,
+                onValueChange = { prompt = it.take(2000) },
+                placeholder = { Text("Escribe tu mensaje…") },
+                modifier = Modifier.weight(1f),
+                shape = RoundedCornerShape(15.dp),
+                minLines = 1, maxLines = 4,
+            )
+            FilledIconButton(
+                onClick = {
+                    val message = prompt.trim()
+                    if (message.isNotBlank()) {
+                        vm.sendChat(message)
+                        prompt = ""
+                    }
+                },
+                enabled = prompt.isNotBlank() && !state.busy,
+                modifier = Modifier.size(52.dp),
+            ) {
+                Icon(Icons.Outlined.Send, contentDescription = "Enviar mensaje")
+            }
+        }
+        Text("La IA puede equivocarse. Verifica la información importante.",
+            modifier = Modifier.fillMaxWidth().padding(bottom = 7.dp),
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
-    OutlinedTextField(prompt, { prompt = it.take(4096) },
-        label = { Text("Pregunta al asesor") }, minLines = 2,
-        modifier = Modifier.fillMaxWidth())
-    Button(onClick = { vm.sendChat(prompt); prompt = "" },
-        enabled = prompt.isNotBlank() && !state.busy,
-        modifier = Modifier.fillMaxWidth()) { Text("Enviar") }
 }
 
