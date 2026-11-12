@@ -1,15 +1,16 @@
 package com.softdevcode.finflow_android
 
 import android.graphics.Bitmap
+import android.graphics.Canvas
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.test.*
-import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.unit.Density
 import com.softdevcode.finflow_android.ui.screens.main.MainMenu
 import com.softdevcode.finflow_android.ui.screens.navigation.Screen
@@ -27,7 +28,7 @@ import java.io.File
 @Config(sdk = [34], qualifiers = "w320dp-h640dp-mdpi", application = android.app.Application::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 class MainMenuTest {
-    @get:Rule val compose = createComposeRule()
+    @get:Rule val compose = createAndroidComposeRule<ComponentActivity>()
 
     @Test fun verticalMenuRemainsUsableAt320DpWithLargeTextAndUpdatesAreReachable() {
         var route by mutableStateOf(Screen.Dashboard.route)
@@ -47,9 +48,14 @@ class MainMenuTest {
             }
         }
         compose.onNodeWithContentDescription("Cerrar menú").assertIsDisplayed()
-        val screenshot = compose.onRoot().captureToImage().asAndroidBitmap()
-        val output = File("build/reports/menu/android-menu-320-dark.png").apply { parentFile.mkdirs() }
-        output.outputStream().use { screenshot.compress(Bitmap.CompressFormat.PNG, 100, it) }
+        compose.runOnIdle {
+            // PixelCopy requires hardware frame callbacks unavailable in Robolectric.
+            val view = compose.activity.window.decorView
+            val screenshot = Bitmap.createBitmap(view.width, view.height, Bitmap.Config.ARGB_8888)
+            view.draw(Canvas(screenshot))
+            val output = File("build/reports/menu/android-menu-320-dark.png").apply { parentFile?.mkdirs() }
+            output.outputStream().use { screenshot.compress(Bitmap.CompressFormat.PNG, 100, it) }
+        }
         compose.onNodeWithText("Movimientos").performClick()
         compose.onNodeWithText("Movimientos").assertIsSelected()
         compose.onNodeWithText("Actualizaciones").performScrollTo().performClick()
