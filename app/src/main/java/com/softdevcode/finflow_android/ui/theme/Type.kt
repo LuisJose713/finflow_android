@@ -83,17 +83,17 @@ val FinFlowTypography = Typography(
     bodyMedium = TextStyle(
         fontFamily = InterFamily,
         fontWeight = FontWeight.Normal,
-        fontSize   = 14.sp,
+        fontSize   = 15.sp,
     ),
     bodySmall = TextStyle(
         fontFamily = InterFamily,
         fontWeight = FontWeight.Normal,
-        fontSize   = 12.sp,
+        fontSize   = 13.sp,
     ),
     labelLarge = TextStyle(
         fontFamily = InterFamily,
         fontWeight = FontWeight.Medium,
-        fontSize   = 14.sp,
+        fontSize   = 15.sp,
         letterSpacing = 0.1.sp,
     ),
     labelMedium = TextStyle(
@@ -105,7 +105,7 @@ val FinFlowTypography = Typography(
     labelSmall = TextStyle(
         fontFamily = InterFamily,
         fontWeight = FontWeight.Medium,
-        fontSize   = 10.sp,
+        fontSize   = 11.sp,
         letterSpacing = 0.5.sp,
     ),
 )
