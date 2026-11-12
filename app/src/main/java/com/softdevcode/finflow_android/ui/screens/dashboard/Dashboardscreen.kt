@@ -197,33 +197,48 @@ private fun FinFlowQuickLinks(
     onGoals: () -> Unit,
     onAdvisor: () -> Unit,
 ) {
-    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        data class Link(val title: String, val subtitle: String, val icon: androidx.compose.ui.graphics.vector.ImageVector, val onClick: () -> Unit)
-        listOf(
-            Link("Mis cuentas", "Revisa tus saldos", Icons.Outlined.AccountBalanceWallet, onAccounts),
-            Link("Mis metas", "Avanza a tu ritmo", Icons.Outlined.TrackChanges, onGoals),
-            Link("Asesor FinFlow", "Explora nuevas ideas", Icons.Outlined.AutoAwesome, onAdvisor),
-        ).forEach { link ->
-            FinFlowV4Card(modifier = Modifier.padding(horizontal = 20.dp)) {
-                Row(
-                    modifier = Modifier.fillMaxWidth().clickable(onClick = link.onClick),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Box(Modifier.size(44.dp)
-                        .clip(RoundedCornerShape(13.dp))
+    data class QuickLink(
+        val title: String,
+        val subtitle: String,
+        val icon: androidx.compose.ui.graphics.vector.ImageVector,
+        val onClick: () -> Unit,
+    )
+    val links = listOf(
+        QuickLink("Mis cuentas", "Revisa tus saldos", Icons.Outlined.AccountBalanceWallet, onAccounts),
+        QuickLink("Mis metas", "Avanza a tu ritmo", Icons.Outlined.TrackChanges, onGoals),
+        QuickLink("Asesor FinFlow", "Explora nuevas ideas", Icons.Outlined.AutoAwesome, onAdvisor),
+    )
+    // Same rhythm as the mobile drawer: one surface, accessible rows and
+    // understated separators instead of three bulky detached cards.
+    FinFlowV4Card(modifier = Modifier.padding(horizontal = 20.dp)) {
+        links.forEachIndexed { index, link ->
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 60.dp)
+                    .clickable(onClick = link.onClick)
+                    .padding(vertical = 7.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Box(
+                    Modifier.size(40.dp)
+                        .clip(RoundedCornerShape(12.dp))
                         .background(FinFlowGold.copy(alpha = .13f)),
-                        contentAlignment = Alignment.Center) {
-                        Icon(link.icon, null, tint = FinFlowGoldMuted)
-                    }
-                    Spacer(Modifier.width(12.dp))
-                    Column(Modifier.weight(1f)) {
-                        Text(link.title, fontWeight = FontWeight.Bold)
-                        Text(link.subtitle, color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            style = MaterialTheme.typography.bodySmall)
-                    }
-                    Icon(Icons.Outlined.NorthEast, "Abrir " + link.title,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(link.icon, null, tint = FinFlowGoldMuted, modifier = Modifier.size(22.dp))
                 }
+                Spacer(Modifier.width(12.dp))
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                    Text(link.title, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold)
+                    Text(link.subtitle, color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.bodySmall)
+                }
+                Icon(Icons.Outlined.NorthEast, contentDescription = "Abrir " + link.title,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(20.dp))
+            }
+            if (index < links.lastIndex) {
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             }
         }
     }
@@ -269,9 +284,18 @@ private fun HeroBalance(stats: TransactionStats, visible: Boolean, onToggleVisib
 
 @Composable
 private fun MiniStatsRow(stats: TransactionStats, visible: Boolean) {
-    Row(Modifier.fillMaxWidth().padding(horizontal = 20.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-        StatCard("Ingresos", stats.totalIncome, visible, MaterialTheme.extras.success, Modifier.weight(1f))
-        StatCard("Gastos", stats.totalExpenses, visible, MaterialTheme.extras.danger, Modifier.weight(1f))
+    BoxWithConstraints(Modifier.fillMaxWidth().padding(horizontal = 20.dp)) {
+        if (maxWidth < 350.dp) {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                StatCard("Ingresos", stats.totalIncome, visible, MaterialTheme.extras.success, Modifier.fillMaxWidth())
+                StatCard("Gastos", stats.totalExpenses, visible, MaterialTheme.extras.danger, Modifier.fillMaxWidth())
+            }
+        } else {
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                StatCard("Ingresos", stats.totalIncome, visible, MaterialTheme.extras.success, Modifier.weight(1f))
+                StatCard("Gastos", stats.totalExpenses, visible, MaterialTheme.extras.danger, Modifier.weight(1f))
+            }
+        }
     }
 }
 
