@@ -423,16 +423,19 @@ private fun CompactTransactionItem(tx: Transaction, categoryName: String, visibl
                 Text(title, style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.SemiBold, maxLines = 1,
                     overflow = TextOverflow.Ellipsis)
-                Text(categoryName + " · " + formatDate(tx.date ?: tx.createdAt),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1, overflow = TextOverflow.Ellipsis)
-                if (narrow) {
-                    PrivateAmount(
-                        (if (isIncome) "+" else "−") + formatCurrency(tx.amount),
-                        visible, color = tint,
-                        modifier = Modifier.align(Alignment.End),
-                    )
+                Row(verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                    Text(categoryName + " · " + formatDate(tx.date ?: tx.createdAt),
+                        modifier = Modifier.weight(1f, fill = false),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    if (narrow) {
+                        PrivateAmount(
+                            (if (isIncome) "+" else "−") + formatCurrency(tx.amount),
+                            visible, color = tint,
+                        )
+                    }
                 }
             }
             if (!narrow) {
