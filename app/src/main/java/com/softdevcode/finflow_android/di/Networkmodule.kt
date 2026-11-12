@@ -34,7 +34,7 @@ object NetworkModule {
             val request = chain.request()
                 .newBuilder()
                 .apply {
-                    if (token != null) {
+                    if (token != null && chain.request().url.encodedPath !in setOf("/auth/login", "/auth/register", "/auth/refresh", "/auth/logout")) {
                         addHeader("Authorization", "Bearer $token")
                         addHeader("X-Client-Type", "mobile")
                     }
@@ -47,10 +47,12 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideOkHttpClient(
-        authInterceptor: Interceptor
+        authInterceptor: Interceptor,
+        sessionAuthenticator: SessionAuthenticator,
     ): OkHttpClient =
         OkHttpClient.Builder()
             .addInterceptor(authInterceptor)
+            .authenticator(sessionAuthenticator)
             .addInterceptor(
                 HttpLoggingInterceptor().apply {
                     level = HttpLoggingInterceptor.Level.NONE
@@ -58,6 +60,7 @@ object NetworkModule {
             )
             .connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
+            .callTimeout(40, TimeUnit.SECONDS)
             .build()
 
     @Provides

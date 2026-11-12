@@ -66,7 +66,7 @@ internal fun MainMenu(
             drawerState = drawerState,
             gesturesEnabled = gesturesEnabled,
             drawerContent = {
-                ModalDrawerSheet(modifier = Modifier.width(drawerWidth).fillMaxHeight()) {
+                ModalDrawerSheet(modifier = Modifier.width(drawerWidth).fillMaxHeight(), drawerContainerColor = MaterialTheme.colorScheme.surface) {
                     Column(
                         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 12.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp),

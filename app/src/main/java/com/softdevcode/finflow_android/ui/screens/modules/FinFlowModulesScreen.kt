@@ -81,7 +81,7 @@ fun FinFlowModulesScreen(
             else -> Triple("FINFLOW", "Tu espacio financiero",
                 "Organiza cada movimiento, proyecto y meta.")
         }
-        FinFlowV4Hero(intro.first, intro.second, intro.third,
+        FinFlowV4Hero(intro.first, intro.second, intro.third, cardId = selected + ".intro",
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
 
         Column(

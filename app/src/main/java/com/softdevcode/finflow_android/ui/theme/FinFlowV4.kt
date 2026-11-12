@@ -10,6 +10,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.material3.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Close
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -50,7 +52,18 @@ fun FinFlowV4Hero(
     title: String,
     subtitle: String,
     modifier: Modifier = Modifier,
+    cardId: String? = null,
 ) {
+    val controls = LocalPresentationControls.current
+    val customizable = cardId != null && controls.state.enabled
+    if (customizable && cardId in controls.state.hidden) {
+        Column(modifier.fillMaxWidth()) {
+            TextButton(onClick = { controls.setHidden(cardId!!, false) }, enabled = cardId !in controls.state.saving) {
+                Text("Mostrar presentación")
+            }
+        }
+        return
+    }
     val shape = RoundedCornerShape(20.dp)
     Box(
         modifier = modifier.fillMaxWidth()
@@ -76,7 +89,8 @@ fun FinFlowV4Hero(
             )
         }
         Column(
-            modifier = Modifier.fillMaxWidth().padding(22.dp),
+            modifier = Modifier.fillMaxWidth().padding(start = 22.dp, top = 22.dp, bottom = 22.dp,
+                end = if (customizable) 56.dp else 22.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             FinFlowV4Overline(kicker, FinFlowGoldPale)
@@ -93,7 +107,13 @@ fun FinFlowV4Hero(
                 color = Color(0xFFC3D1E3),
                 style = MaterialTheme.typography.bodyMedium,
             )
+            cardId?.let { controls.state.errors[it] }?.let { Text(it, color = FinFlowGoldPale, style = MaterialTheme.typography.bodySmall) }
         }
+        if (customizable) IconButton(
+            onClick = { controls.setHidden(cardId!!, true) },
+            enabled = cardId !in controls.state.saving,
+            modifier = Modifier.align(Alignment.TopEnd).padding(4.dp),
+        ) { Icon(Icons.Outlined.Close, "Ocultar presentación", tint = Color.White) }
     }
 }
 
@@ -184,3 +204,4 @@ fun FinFlowV4Wordmark(
         Text("nFlow", color = color, style = style)
     }
 }
+

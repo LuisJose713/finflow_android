@@ -28,6 +28,7 @@ import com.softdevcode.finflow_android.ui.screens.navigation.*
 import com.softdevcode.finflow_android.ui.screens.plannedexpenses.*
 import com.softdevcode.finflow_android.ui.screens.transactions.*
 import com.softdevcode.finflow_android.ui.theme.Primary
+import com.softdevcode.finflow_android.ui.theme.*
 import com.softdevcode.finflow_android.ui.updates.AppUpdateViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -45,6 +46,9 @@ fun MainScreen(
     val darkMode by authViewModel.darkMode.collectAsStateWithLifecycle()
     val isAdmin = uiState.user?.role in setOf("ADMIN", "ROLE_ADMIN")
     val keyboardVisible = WindowInsets.ime.getBottom(LocalDensity.current) > 0
+    val preferences: UiPreferencesViewModel = hiltViewModel()
+    val presentationState by preferences.state.collectAsStateWithLifecycle()
+    LaunchedEffect(uiState.user?.id) { preferences.load(uiState.user?.id) }
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val module = entry?.arguments?.getString("section")
@@ -69,6 +73,7 @@ fun MainScreen(
         if (!uiState.isAuthenticated) onLogout()
     }
 
+    CompositionLocalProvider(LocalPresentationControls provides PresentationControls(presentationState, preferences::setHidden)) {
     MainMenu(
         drawerState = drawerState,
         gesturesEnabled = isMainDestination(route) && !keyboardVisible,
@@ -86,7 +91,7 @@ fun MainScreen(
         Scaffold(
             containerColor = MaterialTheme.colorScheme.background,
             topBar = {
-                if (title != null) TopAppBar(
+                if (title != null && route !in setOf(Screen.Goals.route, Screen.Transactions.route, Screen.PlannedExpenses.route)) TopAppBar(
                     title = { Text(title, fontWeight = FontWeight.SemiBold) },
                     navigationIcon = {
                         IconButton(onClick = { scope.launch { drawerState.open() } }) {
@@ -137,7 +142,7 @@ fun MainScreen(
                     )
                 }
                 composable(Screen.Transactions.route) {
-                    TransactionsScreen(onAddTransaction = {
+                    TransactionsScreen(onOpenMenu = { scope.launch { drawerState.open() } }, onAddTransaction = {
                         navController.navigate(Screen.AddTransaction.route) { launchSingleTop = true }
                     })
                 }
@@ -146,6 +151,7 @@ fun MainScreen(
                 }
                 composable(Screen.Goals.route) {
                     GoalsScreen(
+                    onOpenMenu = { scope.launch { drawerState.open() } },
                         onAddGoal = { navController.navigate(Screen.CreateGoal.route) { launchSingleTop = true } },
                         onOpenGoal = { navController.navigate("goal_detail/$it") { launchSingleTop = true } },
                     )
@@ -159,7 +165,7 @@ fun MainScreen(
                     CreateGoalScreen(onBack = { navController.popBackStack() })
                 }
                 composable(Screen.PlannedExpenses.route) {
-                    PlannedExpensesScreen(onAddPlannedExpense = {
+                    PlannedExpensesScreen(onOpenMenu = { scope.launch { drawerState.open() } }, onAddPlannedExpense = {
                         navController.navigate(Screen.CreatePlannedExpense.route) { launchSingleTop = true }
                     })
                 }
@@ -194,6 +200,7 @@ fun MainScreen(
                     )
                 }
             }
+    }
     }
     }
 }

@@ -51,6 +51,18 @@ import com.softdevcode.finflow_android.domain.model.AdminOverview
 import com.softdevcode.finflow_android.domain.model.AdminPlatformHealth
 
 interface FinFlowApi {
+    @POST("auth/session")
+    suspend fun adoptSession(@Body empty: Map<String, String> = emptyMap()): AuthResponse
+
+    @POST("auth/logout")
+    suspend fun logoutSession(@Body input: Map<String, String>): retrofit2.Response<Void>
+
+    @GET("preferences/ui")
+    suspend fun getUiPreferences(): com.softdevcode.finflow_android.ui.theme.UiPreferencesResponse
+
+    @PUT("preferences/ui/{cardId}")
+    suspend fun setCardVisibility(@Path("cardId") cardId: String, @Body input: Map<String, Boolean>): retrofit2.Response<okhttp3.ResponseBody>
+
     // Pricing is informative only: billing checkout is disabled on the server.
     @GET("billing/catalog")
     suspend fun getBillingCatalog(): BillingCatalog

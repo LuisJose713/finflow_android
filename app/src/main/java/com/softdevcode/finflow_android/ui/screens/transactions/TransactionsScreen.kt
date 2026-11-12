@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.ArrowDownward
@@ -68,6 +69,7 @@ import java.util.Locale
 @Composable
 fun TransactionsScreen(
     onAddTransaction: () -> Unit,
+    onOpenMenu: (() -> Unit)? = null,
     viewModel: TransactionsViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -151,6 +153,11 @@ fun TransactionsScreen(
             Column {
 
             TopAppBar(
+                navigationIcon = {
+                    onOpenMenu?.let { open -> IconButton(onClick = open) {
+                        Icon(Icons.Outlined.Menu, "Abrir menú")
+                    } }
+                },
 
                 title = {
                     Column {
@@ -184,6 +191,7 @@ fun TransactionsScreen(
                 "MOVIMIENTOS Y CONTROL",
                 "Cada movimiento, en su lugar.",
                 "Consulta, filtra y exporta tu historial con total claridad.",
+                cardId = "transactions.intro",
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
             )
             }

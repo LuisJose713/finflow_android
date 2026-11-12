@@ -14,8 +14,8 @@ android {
         applicationId = "com.softdevcode.finflow_android"
         minSdk = 24
         targetSdk = 34
-        versionCode = 7
-        versionName = "1.2.4-finflow"
+        versionCode = 8
+        versionName = "1.2.5-finflow"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 

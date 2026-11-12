@@ -35,6 +35,7 @@ class AuthViewModel @Inject constructor(
     private val api: FinFlowApi,
 ) : ViewModel() {
 
+    private var authOperation = 0L
     private val _uiState = MutableStateFlow(AuthUiState())
     val uiState: StateFlow<AuthUiState> = _uiState.asStateFlow()
 
@@ -47,11 +48,13 @@ class AuthViewModel @Inject constructor(
     }
 
     private fun checkAuth() {
+        val operation = authOperation
         viewModelScope.launch {
             val loggedIn = authRepository.isLoggedIn()
 
             if (loggedIn) {
                 val user = authRepository.getCurrentUser()
+                if (operation != authOperation) return@launch
                 _uiState.update {
                     it.copy(
                         isAuthenticated = true,
@@ -60,6 +63,7 @@ class AuthViewModel @Inject constructor(
                     )
                 }
             } else {
+                if (operation != authOperation) return@launch
                 _uiState.update {
                     it.copy(isCheckingAuth = false)
                 }
@@ -68,6 +72,7 @@ class AuthViewModel @Inject constructor(
     }
 
     fun login(email: String, password: String) {
+        authOperation++
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
             authRepository.login(email.trim(), password)
@@ -146,6 +151,7 @@ class AuthViewModel @Inject constructor(
     }
 
     fun logout() {
+        authOperation++
         viewModelScope.launch {
             authRepository.logout()
             // Never re-enable the indefinite splash-screen gate after logout.
@@ -161,3 +167,4 @@ class AuthViewModel @Inject constructor(
 
     fun clearError() = _uiState.update { it.copy(error = null) }
 }
+

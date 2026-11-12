@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Delete
@@ -60,6 +61,7 @@ import java.util.Locale
 @Composable
 fun PlannedExpensesScreen(
     onAddPlannedExpense: () -> Unit,
+    onOpenMenu: (() -> Unit)? = null,
     viewModel: PlannedExpensesViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -72,6 +74,11 @@ fun PlannedExpensesScreen(
         topBar = {
             Column {
             TopAppBar(
+                navigationIcon = {
+                    onOpenMenu?.let { open -> IconButton(onClick = open) {
+                        Icon(Icons.Outlined.Menu, "Abrir menú")
+                    } }
+                },
                 title = {
                     Column {
                         Text("PLANIFICACIÓN FINANCIERA", style = MaterialTheme.typography.labelSmall,
@@ -101,6 +108,7 @@ fun PlannedExpensesScreen(
                 "PLANIFICACIÓN INTELIGENTE",
                 "Anticípate a lo que viene.",
                 "Ordena tus compromisos y mantén el control antes de gastar.",
+                cardId = "planned-expenses.intro",
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
             )
             }

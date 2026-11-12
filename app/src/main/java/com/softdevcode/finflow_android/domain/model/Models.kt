@@ -12,6 +12,7 @@ data class User(
 data class AuthResponse(
     val token: String,
     val user: User,
+    val refreshToken: String? = null,
 )
 
 data class LoginRequest(
