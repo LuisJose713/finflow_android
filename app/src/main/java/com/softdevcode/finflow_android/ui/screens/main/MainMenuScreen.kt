@@ -1,6 +1,8 @@
 package com.softdevcode.finflow_android.ui.screens.main
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -13,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.softdevcode.finflow_android.ui.screens.navigation.Screen
 import com.softdevcode.finflow_android.ui.theme.FinFlowV4Overline
 import com.softdevcode.finflow_android.ui.theme.FinFlowV4Wordmark
@@ -78,11 +81,34 @@ internal fun MainMenu(
                             FinFlowV4Wordmark(modifier = Modifier.weight(1f))
                             IconButton(onClick = onClose) { Icon(Icons.Outlined.Close, "Cerrar menú") }
                         }
-                        if (userName.isNotBlank()) Text(
-                            userName, modifier = Modifier.padding(start = 12.dp, end = 12.dp, bottom = 10.dp),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
+                        Row(
+                            Modifier.fillMaxWidth().padding(start = 12.dp, end = 12.dp, bottom = 12.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        ) {
+                            val initials = userName.trim().split(Regex("\\s+")).take(2)
+                                .mapNotNull { it.firstOrNull()?.uppercase() }.joinToString("")
+                                .ifBlank { "F" }
+                            Box(
+                                Modifier.size(44.dp).background(MaterialTheme.colorScheme.primaryContainer, CircleShape),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                Text(initials, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
+                            }
+                            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                                Text(
+                                    userName.ifBlank { "Tu espacio financiero" },
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.SemiBold,
+                                    maxLines = 1,
+                                )
+                                Text(
+                                    "Tu dinero, con claridad",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                        }
                         DrawerGroup("Tu panorama", mainItems, currentRoute) { onNavigate(it); onClose() }
                         HorizontalDivider(Modifier.padding(vertical = 4.dp))
                         DrawerGroup("Tu dinero", financeItems,
@@ -128,12 +154,26 @@ internal fun MainMenu(
 @Composable
 private fun DrawerGroup(title: String, items: List<MenuItem>, selectedKey: String?, onSelect: (String) -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Box(Modifier.padding(start = 16.dp, top = 8.dp, bottom = 4.dp)) { FinFlowV4Overline(title) }
+        Text(
+            title.uppercase(),
+            modifier = Modifier.padding(start = 16.dp, top = 12.dp, bottom = 6.dp),
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.Bold,
+            letterSpacing = 1.sp,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
         items.forEach { item ->
             NavigationDrawerItem(
                 selected = selectedKey == item.key,
                 onClick = { onSelect(item.key) },
-                label = { Text(item.title, fontWeight = if (selectedKey == item.key) FontWeight.Bold else FontWeight.Medium) },
+                label = {
+                    Text(
+                        item.title,
+                        fontSize = 16.sp,
+                        fontWeight = if (selectedKey == item.key) FontWeight.SemiBold else FontWeight.Medium,
+                        maxLines = 1,
+                    )
+                },
                 icon = { Icon(item.icon, contentDescription = null) },
                 colors = NavigationDrawerItemDefaults.colors(
                     selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
