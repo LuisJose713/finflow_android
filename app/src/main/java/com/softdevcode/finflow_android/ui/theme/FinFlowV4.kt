@@ -75,7 +75,7 @@ fun FinFlowV4Hero(
         }
         return
     }
-    val shape = RoundedCornerShape(20.dp)
+    val shape = RoundedCornerShape(18.dp)
     Box(
         modifier = modifier.fillMaxWidth()
             .border(1.dp, FinFlowGold.copy(alpha = 0.24f), shape)
@@ -100,17 +100,17 @@ fun FinFlowV4Hero(
             )
         }
         Column(
-            modifier = Modifier.fillMaxWidth().padding(start = 22.dp, top = 22.dp, bottom = 22.dp,
-                end = if (customizable) 56.dp else 22.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.fillMaxWidth().padding(start = 18.dp, top = 16.dp, bottom = 16.dp,
+                end = if (customizable) 52.dp else 18.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
             FinFlowV4Overline(kicker, FinFlowGoldPale)
             Text(
                 title,
                 color = Color.White,
-                style = MaterialTheme.typography.headlineMedium.copy(
-                    fontWeight = FontWeight.ExtraBold,
-                    letterSpacing = (-1.1).sp,
+                style = MaterialTheme.typography.headlineSmall.copy(
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = (-0.5).sp,
                 ),
             )
             Text(
