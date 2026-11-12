@@ -132,10 +132,10 @@ fun FinFlowTheme(
             typography  = FinFlowTypography,
             shapes = Shapes(
                 extraSmall = RoundedCornerShape(8.dp),
-                small = RoundedCornerShape(12.dp),
-                medium = RoundedCornerShape(18.dp),
-                large = RoundedCornerShape(24.dp),
-                extraLarge = RoundedCornerShape(30.dp)
+                small = RoundedCornerShape(13.dp),
+                medium = RoundedCornerShape(17.dp),
+                large = RoundedCornerShape(22.dp),
+                extraLarge = RoundedCornerShape(26.dp)
             ),
             content     = content
         )

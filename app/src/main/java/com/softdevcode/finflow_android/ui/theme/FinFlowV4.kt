@@ -30,8 +30,8 @@ import com.softdevcode.finflow_android.R
 
 /**
  * Design-contract implementation of FinFlow Web V4 (src/styles.scss):
- * --ff-v4-navy #09162a, raised #172b4a, gold #d7a94d, radius 18px,
- * canvas #f5f7fb, navy-to-slate premium hero and delicate 1px card borders.
+ * The approved drawer palette: navy #0e192b, raised #1b2b43, gold #dcc29a,
+ * warm ivory #f6f3ed, 17dp cards and delicate 1dp borders.
  *
  * Only the presentation is shared; Android retains native, accessible controls.
  */
@@ -75,7 +75,7 @@ fun FinFlowV4Hero(
         }
         return
     }
-    val shape = RoundedCornerShape(18.dp)
+    val shape = RoundedCornerShape(17.dp)
     Box(
         modifier = modifier.fillMaxWidth()
             .border(1.dp, FinFlowGold.copy(alpha = 0.24f), shape)
@@ -135,10 +135,10 @@ fun FinFlowV4Card(
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(18.dp),
+        shape = RoundedCornerShape(17.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
     ) {
         Column(
             Modifier.fillMaxWidth().padding(16.dp),
@@ -160,10 +160,10 @@ fun FinFlowV4PrimaryButton(
         onClick = onClick,
         enabled = enabled,
         modifier = modifier.heightIn(min = 46.dp),
-        shape = RoundedCornerShape(11.dp),
+        shape = RoundedCornerShape(13.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = FinFlowNavy,
-            contentColor = Color.White,
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = MaterialTheme.colorScheme.onPrimary,
         ),
     ) {
         icon?.invoke()
@@ -215,4 +215,5 @@ fun FinFlowV4Wordmark(
         Text("nFlow", color = color, style = style)
     }
 }
+
 

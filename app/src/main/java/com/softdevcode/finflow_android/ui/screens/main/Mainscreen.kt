@@ -2,9 +2,6 @@ package com.softdevcode.finflow_android.ui.screens.main
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -122,10 +119,10 @@ fun MainScreen(
                 navController = navController,
                 startDestination = Screen.Dashboard.route,
                 modifier = Modifier.padding(innerPadding).consumeWindowInsets(innerPadding).imePadding(),
-                enterTransition = { fadeIn(tween(120)) },
-                exitTransition = { fadeOut(tween(120)) },
-                popEnterTransition = { fadeIn(tween(120)) },
-                popExitTransition = { fadeOut(tween(120)) },
+                enterTransition = { finFlowScreenEnter() },
+                exitTransition = { finFlowScreenExit() },
+                popEnterTransition = { finFlowScreenEnter() },
+                popExitTransition = { finFlowScreenExit() },
             ) {
                 composable(Screen.Dashboard.route) {
                     DashboardScreen(
@@ -204,3 +201,4 @@ fun MainScreen(
     }
     }
 }
+
