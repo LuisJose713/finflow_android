@@ -12,16 +12,17 @@ import org.junit.Test
  */
 class FinFlowV4DesignContractTest {
     @Test fun officialBrandPaletteMatchesWebV4() {
-        assertEquals(Color(0xFF09162A), FinFlowNavy)
-        assertEquals(Color(0xFF172B4A), FinFlowNavy2)
-        assertEquals(Color(0xFF273A5B), FinFlowHeroEnd)
-        assertEquals(Color(0xFFD7A94D), FinFlowGold)
-        assertEquals(Color(0xFF122944), Primary)
-        assertEquals(Color(0xFFF5F7FB), BackgroundLight)
-        assertEquals(Color(0xFF13243B), TextPrimaryLight)
-        assertEquals(Color(0xFFE2E8F0), BorderLight)
-        assertEquals(Color(0xFF101C30), BackgroundDark)
-        assertEquals(Color(0xFF17253B), SurfaceDark)
-        assertEquals(Color(0xFF2C405A), BorderDark)
+        assertEquals(Color(0xFF0E192B), FinFlowNavy)
+        assertEquals(Color(0xFF1B2B43), FinFlowNavy2)
+        assertEquals(Color(0xFF1B2B43), FinFlowHeroEnd)
+        assertEquals(Color(0xFFDCC29A), FinFlowGold)
+        assertEquals(Color(0xFF0E192B), Primary)
+        assertEquals(Color(0xFFF6F3ED), BackgroundLight)
+        assertEquals(Color(0xFF14243A), TextPrimaryLight)
+        assertEquals(Color(0xFFE3DED5), BorderLight)
+        assertEquals(Color(0xFF0B1220), BackgroundDark)
+        assertEquals(Color(0xFF0E192B), SurfaceDark)
+        assertEquals(Color(0xFF26364D), BorderDark)
     }
 }
+
