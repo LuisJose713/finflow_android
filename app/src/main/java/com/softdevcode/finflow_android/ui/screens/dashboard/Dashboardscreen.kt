@@ -345,17 +345,45 @@ private fun RecentTransactionsCard(
     transactions: List<Transaction>, categoryName: (Int?) -> String, visible: Boolean,
     onAddTransaction: () -> Unit, onViewTransactions: () -> Unit,
 ) {
+    var previewCount by rememberSaveable { mutableIntStateOf(5) }
     DashboardCard {
-        Text("Movimientos recientes", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+        // Keep the heading a full row: never squeeze it into a vertical word
+        // when the device is 320dp wide and the selector is visible.
+        FinFlowV4Overline("ÚLTIMOS MOVIMIENTOS")
+        Text("Movimientos recientes", style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold)
+        if (transactions.isNotEmpty()) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(5.dp),
+            ) {
+                Text("Mostrar", style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.weight(1f))
+                listOf(2, 3, 5).forEach { count ->
+                    FilterChip(
+                        selected = previewCount == count,
+                        onClick = { previewCount = count },
+                        label = { Text(count.toString()) },
+                    )
+                }
+            }
+        }
         if (transactions.isEmpty()) {
-            Icon(Icons.Outlined.ReceiptLong, null, tint = MaterialTheme.colorScheme.primary)
+            Icon(Icons.Outlined.ReceiptLong, null, tint = FinFlowGoldMuted)
             Text("Tu primer paso empieza aquí", style = MaterialTheme.typography.titleMedium)
-            Text("Registra un ingreso o gasto para empezar a entender cómo se mueve tu dinero.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text("Registra un ingreso o gasto para comenzar a entender cómo se mueve tu dinero.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant)
             FilledTonalButton(onClick = onAddTransaction) { Text("Añadir movimiento") }
         } else {
-            transactions.forEachIndexed { index, tx ->
-                TransactionItem(tx, categoryName(tx.categoryId), visible)
-                if (index < transactions.lastIndex) HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+            val shown = transactions.take(previewCount)
+            shown.forEachIndexed { index, tx ->
+                CompactTransactionItem(tx, categoryName(tx.categoryId), visible)
+                if (index < shown.lastIndex) {
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                }
             }
             TextButton(onClick = onViewTransactions, modifier = Modifier.fillMaxWidth()) {
                 Text("Ver todos los movimientos")
@@ -367,20 +395,53 @@ private fun RecentTransactionsCard(
 }
 
 @Composable
-private fun TransactionItem(tx: Transaction, categoryName: String, visible: Boolean) {
-    val isIncome = tx.type == "income"
+private fun CompactTransactionItem(tx: Transaction, categoryName: String, visible: Boolean) {
+    val isIncome = tx.type.equals("income", ignoreCase = true)
     val tint = if (isIncome) MaterialTheme.extras.success else MaterialTheme.extras.danger
-    Column(Modifier.fillMaxWidth().padding(vertical = 4.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(if (isIncome) Icons.Outlined.ArrowDownward else Icons.Outlined.ArrowUpward,
-                if (isIncome) "Ingreso" else "Gasto", tint = tint, modifier = Modifier.size(20.dp))
-            Spacer(Modifier.width(8.dp))
-            Text(tx.description.ifBlank { if (isIncome) "Ingreso" else "Gasto" }, modifier = Modifier.weight(1f),
-                style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold, maxLines = 2, overflow = TextOverflow.Ellipsis)
+    val title = tx.description.ifBlank { if (isIncome) "Ingreso" else "Gasto" }
+    BoxWithConstraints(Modifier.fillMaxWidth().heightIn(min = 64.dp).padding(vertical = 7.dp)) {
+        val narrow = maxWidth < 335.dp
+        Row(
+            Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            Box(
+                Modifier.size(38.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(tint.copy(alpha = .12f)),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    if (isIncome) Icons.Outlined.ArrowUpward else Icons.Outlined.ArrowDownward,
+                    contentDescription = if (isIncome) "Ingreso" else "Gasto",
+                    tint = tint,
+                    modifier = Modifier.size(20.dp),
+                )
+            }
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(title, style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold, maxLines = 1,
+                    overflow = TextOverflow.Ellipsis)
+                Text(categoryName + " · " + formatDate(tx.date ?: tx.createdAt),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1, overflow = TextOverflow.Ellipsis)
+                if (narrow) {
+                    PrivateAmount(
+                        (if (isIncome) "+" else "−") + formatCurrency(tx.amount),
+                        visible, color = tint,
+                        modifier = Modifier.align(Alignment.End),
+                    )
+                }
+            }
+            if (!narrow) {
+                PrivateAmount(
+                    (if (isIncome) "+" else "−") + formatCurrency(tx.amount),
+                    visible, color = tint,
+                )
+            }
         }
-        Text("$categoryName · ${formatDate(tx.date ?: tx.createdAt)}", style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant)
-        PrivateAmount("${if (isIncome) "+" else "−"}${formatCurrency(tx.amount)}", visible, color = tint)
     }
 }
 
