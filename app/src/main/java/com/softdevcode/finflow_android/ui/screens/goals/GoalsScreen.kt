@@ -48,7 +48,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.softdevcode.finflow_android.domain.model.Goal
-import java.text.NumberFormat
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -375,7 +374,5 @@ private fun formatCurrency(
     amount: Double,
 ): String {
 
-    return NumberFormat
-        .getCurrencyInstance(Locale("es", "CO"))
-        .format(amount)
+    return com.softdevcode.finflow_android.domain.model.formatCopMoney(amount)
 }

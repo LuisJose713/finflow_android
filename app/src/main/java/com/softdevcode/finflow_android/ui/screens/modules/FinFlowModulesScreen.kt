@@ -1,5 +1,6 @@
 package com.softdevcode.finflow_android.ui.screens.modules
 
+import com.softdevcode.finflow_android.ui.components.CopAmountField
 import com.softdevcode.finflow_android.ui.updates.AppUpdateViewModel
 import com.softdevcode.finflow_android.ui.updates.AppUpdatesSection
 import androidx.compose.foundation.*
@@ -27,24 +28,10 @@ import com.softdevcode.finflow_android.ui.theme.FinFlowNavy
 import com.softdevcode.finflow_android.ui.theme.FinFlowV4Hero
 import com.softdevcode.finflow_android.ui.theme.FinFlowV4Card
 import com.softdevcode.finflow_android.ui.theme.FinFlowV4Overline
-import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 import java.util.TimeZone
-
-private val sections = listOf(
-    "accounts" to "Cuentas",
-    "budgets" to "Presupuestos",
-    "recurring" to "Recurrentes",
-    "categories" to "Categorías",
-    "advisor" to "Asesor IA",
-    "reports" to "Reportes",
-    "privacy" to "Privacidad",
-    "security" to "Seguridad",
-    "billing" to "Planes",
-    "updates" to "Actualizaciones",
-)
 
 @Composable
 fun FinFlowModulesScreen(
@@ -57,7 +44,7 @@ fun FinFlowModulesScreen(
 ) {
     val state by vm.state.collectAsStateWithLifecycle()
     val cal = remember { Calendar.getInstance(TimeZone.getTimeZone("America/Bogota")) }
-    var selected by rememberSaveable(initialSection) { mutableStateOf(initialSection) }
+    val selected = initialSection
     var year by rememberSaveable { mutableIntStateOf(cal.get(Calendar.YEAR)) }
     var month by rememberSaveable { mutableIntStateOf(cal.get(Calendar.MONTH) + 1) }
 
@@ -66,7 +53,8 @@ fun FinFlowModulesScreen(
             vm.refresh(selected, year, month)
     }
 
-    Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+    Column(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)
+        .verticalScroll(rememberScrollState())) {
         val intro = when (selected) {
             "accounts" -> Triple("CUENTAS Y BILLETERAS", "Cada peso en su lugar",
                 "Controla tus cuentas, saldos y transferencias.")
@@ -95,27 +83,9 @@ fun FinFlowModulesScreen(
         }
         FinFlowV4Hero(intro.first, intro.second, intro.third,
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
-        Row(
-            Modifier.fillMaxWidth().horizontalScroll(rememberScrollState())
-                .padding(horizontal = 14.dp, vertical = 9.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            (sections + if (isAdmin) listOf("admin" to "Administración") else emptyList())
-                .forEach { (key, label) ->
-                FilterChip(
-                    selected = selected == key, onClick = { selected = key },
-                    label = { Text(label) },
-                    colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = FinFlowNavy,
-                        selectedLabelColor = Color.White,
-                    ),
-                )
-            }
-        }
 
         Column(
-            Modifier.fillMaxSize().verticalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp, vertical = 6.dp),
+            Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 6.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             state.error?.let {
@@ -196,7 +166,7 @@ private fun ConfirmDialog(title: String, detail: String, dismiss: () -> Unit, ac
 private val accountTypes = listOf(
     "cash" to "Efectivo", "bank" to "Banco", "savings" to "Ahorros", "other" to "Otro",
 )
-private fun money(v: Double) = NumberFormat.getCurrencyInstance(Locale("es", "CO")).format(v)
+private fun money(v: Double) = com.softdevcode.finflow_android.domain.model.formatCopMoney(v)
 private fun amount(s: String): Double? = s.trim().replace(",", ".").toDoubleOrNull()
     ?.takeIf { it.isFinite() && it >= 0 && it <= 1_000_000_000_000.0 }
 private fun dateNow(): String = SimpleDateFormat("yyyy-MM-dd", Locale.US).apply {
@@ -306,7 +276,7 @@ private fun AccountForm(
                     singleLine = true, modifier = Modifier.fillMaxWidth())
                 Choices(accountTypes, type) { type = it }
                 if (current == null) {
-                    OutlinedTextField(balance, { balance = it },
+                    CopAmountField(balance, { balance = it },
                         label = { Text("Saldo inicial COP") }, singleLine = true)
                 }
             }
@@ -340,7 +310,7 @@ private fun TransferForm(
                 Choices(accounts.map { it.id.toString() to it.name }, from) { from = it }
                 Text("Hacia", fontWeight = FontWeight.Bold)
                 Choices(accounts.map { it.id.toString() to it.name }, to) { to = it }
-                OutlinedTextField(value, { value = it }, label = { Text("Importe COP") },
+                CopAmountField(value, { value = it }, label = { Text("Importe COP") },
                     singleLine = true)
                 OutlinedTextField(note, { note = it.take(255) }, label = { Text("Nota") })
                 Text("No crea ingresos ni gastos adicionales.",
@@ -435,7 +405,7 @@ private fun BudgetForm(
         mutableStateOf((existing?.categoryId ?: categories.firstOrNull()?.id ?: 0).toString())
     }
     var value by remember(existing?.id) {
-        mutableStateOf(existing?.limitAmount?.toString().orEmpty())
+        mutableStateOf(existing?.limitAmount?.let { com.softdevcode.finflow_android.domain.model.copEditableAmount(it) }.orEmpty())
     }
     val amountValue = amount(value)
     AlertDialog(
@@ -449,7 +419,7 @@ private fun BudgetForm(
                         categoryId = it
                     }
                 } else Text(existing.categoryName)
-                OutlinedTextField(value, { value = it },
+                CopAmountField(value, { value = it },
                     label = { Text("Límite mensual COP") }, singleLine = true)
             }
         },
@@ -544,7 +514,7 @@ private fun RecurringForm(
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedTextField(title, { title = it }, label = { Text("Nombre") },
                     singleLine = true)
-                OutlinedTextField(value, { value = it }, label = { Text("Monto COP") },
+                CopAmountField(value, { value = it }, label = { Text("Monto COP") },
                     singleLine = true)
                 Choices(listOf("expense" to "Gasto", "income" to "Ingreso"), type) {
                     type = it; categoryId = "0"
@@ -679,3 +649,4 @@ private fun AdvisorSection(state: ModulesState, vm: FinFlowModulesViewModel) {
         enabled = prompt.isNotBlank() && !state.busy,
         modifier = Modifier.fillMaxWidth()) { Text("Enviar") }
 }
+

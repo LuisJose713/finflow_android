@@ -38,4 +38,14 @@ jobs:
       - name: Make wrapper executable
         run: chmod +x ./gradlew
       - name: Compile Kotlin and run unit tests (without APK)
-        run: ./gradlew --no-daemon testDebugUnitTest
+        run: ./gradlew --no-daemon testDebugUnitTest compileDebugAndroidTestKotlin
+      - name: Preserve test reports and menu preview
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-checks-${{ github.run_number }}
+          path: |
+            app/build/reports/tests/testDebugUnitTest
+            app/build/reports/menu
+          if-no-files-found: ignore
+

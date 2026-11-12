@@ -17,7 +17,11 @@ data class AppUpdate(
     val versionName: String,
     val downloadUrl: String,
     val releaseNotes: String,
+    val sha256: String? = null,
+    val sizeBytes: Long? = null,
 )
+
+internal const val MAX_UPDATE_APK_BYTES = 200L * 1024 * 1024
 
 internal const val UPDATE_MANIFEST_URL =
     "https://github.com/LuisJose713/finflow_android/releases/latest/download/finflow-update.json"
@@ -40,7 +44,11 @@ internal fun parseAppUpdate(json: String, installedVersionCode: Int): AppUpdate?
     require(path.removePrefix("/LuisJose713/finflow_android/releases/download/")
         .matches(Regex("[A-Za-z0-9._-]+/[A-Za-z0-9._-]+\\.apk")))
     val notes = root["releaseNotes"]?.takeUnless { it.isJsonNull }?.asString.orEmpty().take(6_000)
-    return if (code > installedVersionCode) AppUpdate(code, name, url, notes) else null
+    val sha256 = root["sha256"]?.takeUnless { it.isJsonNull }?.asString?.lowercase()
+    require(sha256 == null || sha256.matches(Regex("[a-f0-9]{64}")))
+    val sizeBytes = root["sizeBytes"]?.takeUnless { it.isJsonNull }?.asString?.toLong()
+    require(sizeBytes == null || sizeBytes in 1..MAX_UPDATE_APK_BYTES)
+    return if (code > installedVersionCode) AppUpdate(code, name, url, notes, sha256, sizeBytes) else null
 }
 
 @Singleton
@@ -72,3 +80,4 @@ internal fun fetchUpdate(client: OkHttpClient, url: String, installedVersionCode
         return parseAppUpdate(source.readUtf8(), installedVersionCode)
     }
 }
+

@@ -4,9 +4,12 @@ import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 
-/** Shared by the bottom menu and the dashboard shortcuts. */
+/** Shared by the vertical drawer and the dashboard shortcuts. */
 internal fun NavHostController.navigateToTopLevel(route: String) {
-    if (currentDestination?.hierarchy?.any { it.route == route } == true) return
+    val currentRoute = currentDestination?.route
+    val currentModule = currentBackStackEntry?.arguments?.getString("section")
+    if (currentDestination?.hierarchy?.any { it.route == route } == true ||
+        (currentRoute == Screen.Module.route && route == "module/$currentModule")) return
 
     if (route == Screen.Dashboard.route) {
         // Home is the live root, not a saved tab stack. Restoring a stack saved under
@@ -21,8 +24,14 @@ internal fun NavHostController.navigateToTopLevel(route: String) {
     }
 
     navigate(route) {
-        popUpTo(graph.findStartDestination().id) { saveState = true }
+        popUpTo(graph.findStartDestination().id)
         launchSingleTop = true
-        restoreState = true
+        restoreState = false
     }
 }
+
+/** Forms retain their own back action and do not expose drawer gestures. */
+internal fun isMainDestination(route: String?): Boolean = route in setOf(
+    Screen.Dashboard.route, Screen.Transactions.route, Screen.Goals.route,
+    Screen.More.route, Screen.Module.route, Screen.PlannedExpenses.route, Screen.Advisor.route,
+)

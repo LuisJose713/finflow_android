@@ -14,8 +14,9 @@ android {
         applicationId = "com.softdevcode.finflow_android"
         minSdk = 24
         targetSdk = 34
-        versionCode = 6
-        versionName = "1.2.3-finflow"
+        versionCode = 7
+        versionName = "1.2.4-finflow"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
@@ -52,10 +53,17 @@ android {
 }
 
 dependencies {
+    // AndroidJUnit4 runs instrumented tests from src/androidTest.
+    androidTestImplementation("androidx.test.ext:junit:1.2.1")
+    androidTestImplementation("androidx.test:runner:1.6.2")
+    implementation("androidx.work:work-runtime-ktx:2.9.1")
+
     // JUnit 4 for local JVM unit tests (src/test)
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.robolectric:robolectric:4.13")
     testImplementation("androidx.test:core:1.6.1")
+    testImplementation("androidx.compose.ui:ui-test-junit4")
+    debugImplementation("androidx.compose.ui:ui-test-manifest")
     testImplementation("androidx.navigation:navigation-testing:2.7.7")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.1")
     testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
@@ -108,3 +116,4 @@ dependencies {
     // JWT decode
     implementation(libs.jwt.decode)
 }
+

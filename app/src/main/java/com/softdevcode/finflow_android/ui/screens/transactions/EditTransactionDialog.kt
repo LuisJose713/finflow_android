@@ -1,5 +1,6 @@
 package com.softdevcode.finflow_android.ui.screens.transactions
 
+import com.softdevcode.finflow_android.ui.components.CopAmountField
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -20,7 +21,7 @@ fun EditTransactionDialog(
     onSave: (CreateTransactionRequest) -> Unit,
 ) {
     var description by remember(transaction.id) { mutableStateOf(transaction.description) }
-    var amount by remember(transaction.id) { mutableStateOf(transaction.amount.toString()) }
+    var amount by remember(transaction.id) { mutableStateOf(com.softdevcode.finflow_android.domain.model.copEditableAmount(transaction.amount)) }
     var type by remember(transaction.id) { mutableStateOf(transaction.type) }
     var categoryId by remember(transaction.id) { mutableIntStateOf(transaction.categoryId) }
     var date by remember(transaction.id) {
@@ -51,7 +52,7 @@ fun EditTransactionDialog(
                 }
                 OutlinedTextField(description, { description = it.take(255) },
                     label = { Text("Descripción") }, singleLine = true)
-                OutlinedTextField(amount, { amount = it },
+                CopAmountField(amount, { amount = it },
                     label = { Text("Monto") }, singleLine = true)
                 Text("Categoría")
                 Row(Modifier.horizontalScroll(rememberScrollState()),
@@ -87,3 +88,4 @@ fun EditTransactionDialog(
         dismissButton = { TextButton(onClick = onDismiss) { Text("Cancelar") } },
     )
 }
+

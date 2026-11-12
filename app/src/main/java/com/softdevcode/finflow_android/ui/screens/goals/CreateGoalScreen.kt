@@ -1,5 +1,6 @@
 package com.softdevcode.finflow_android.ui.screens.goals
 
+import com.softdevcode.finflow_android.ui.components.CopAmountField
 import com.softdevcode.finflow_android.ui.theme.FinFlowV4Hero
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -118,7 +119,7 @@ fun CreateGoalScreen(
                 singleLine = true,
             )
 
-            OutlinedTextField(
+            CopAmountField(
                 value = targetAmount,
                 onValueChange = {
                     targetAmount = it
@@ -130,7 +131,7 @@ fun CreateGoalScreen(
                 singleLine = true,
             )
 
-            OutlinedTextField(
+            CopAmountField(
                 value = currentAmount,
                 onValueChange = {
                     currentAmount = it

@@ -62,7 +62,6 @@ import com.softdevcode.finflow_android.ui.theme.FinFlowGold
 import com.softdevcode.finflow_android.ui.theme.FinFlowNavy
 import com.softdevcode.finflow_android.ui.theme.Danger
 import com.softdevcode.finflow_android.ui.theme.Success
-import java.text.NumberFormat
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -550,10 +549,5 @@ private fun formatAmount(
     amount: Double
 ): String {
 
-    val formatter =
-        NumberFormat.getCurrencyInstance(
-            Locale("es", "CO")
-        )
-
-    return formatter.format(amount)
+    return com.softdevcode.finflow_android.domain.model.formatCopMoney(amount)
 }

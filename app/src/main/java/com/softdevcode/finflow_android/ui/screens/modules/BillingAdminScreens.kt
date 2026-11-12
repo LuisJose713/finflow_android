@@ -1,5 +1,6 @@
 package com.softdevcode.finflow_android.ui.screens.modules
 
+import com.softdevcode.finflow_android.ui.components.CopAmountField
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.*
@@ -15,11 +16,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.softdevcode.finflow_android.domain.model.*
 import com.softdevcode.finflow_android.ui.theme.FinFlowGold
-import java.text.NumberFormat
 import java.util.Locale
 
 private fun billingCop(value: Long): String =
-    NumberFormat.getCurrencyInstance(Locale("es", "CO")).format(value)
+    com.softdevcode.finflow_android.domain.model.formatCopMoney(value.toDouble())
 
 @Composable
 private fun BillingPanel(content: @Composable ColumnScope.() -> Unit) {
@@ -250,7 +250,7 @@ private fun EditAdminPlanDialog(
                     label = { Text("Nombre") }, singleLine = true)
                 OutlinedTextField(description, { description = it.take(240) },
                     label = { Text("Descripción") }, maxLines = 3)
-                OutlinedTextField(price, { price = it.filter(Char::isDigit).take(9) },
+                CopAmountField(price, { price = it }, allowDecimals = false,
                     label = { Text("Precio COP") }, singleLine = true)
                 Row {
                     Text("Plan activo", Modifier.weight(1f))
@@ -401,3 +401,4 @@ private fun AdminGrantDialog(
         dismissButton = { TextButton(onClick = close) { Text("Cancelar") } },
     )
 }
+

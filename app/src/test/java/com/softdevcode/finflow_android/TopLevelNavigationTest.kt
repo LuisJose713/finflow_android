@@ -24,7 +24,8 @@ class TopLevelNavigationTest {
 
     private lateinit var controller: TestNavHostController
     private val routes = listOf(Screen.Dashboard.route, Screen.Transactions.route, Screen.Goals.route,
-        Screen.PlannedExpenses.route, Screen.More.route, Screen.AddTransaction.route, Screen.CreateGoal.route)
+        Screen.PlannedExpenses.route, Screen.More.route, Screen.AddTransaction.route, Screen.CreateGoal.route,
+        Screen.Module.route)
 
     @Before fun setup() {
         controller = TestNavHostController(ApplicationProvider.getApplicationContext())
@@ -67,4 +68,27 @@ class TopLevelNavigationTest {
         controller.navigateToTopLevel(Screen.Dashboard.route)
         assertEquals(Screen.Dashboard.route, controller.currentDestination?.route)
     }
+    @Test fun drawerSwitchesModuleArgumentsAndHomeNeverRestoresAnotherSection() {
+        listOf("accounts", "advisor", "security", "budgets", "updates").forEach { section ->
+            controller.navigateToTopLevel("module/$section")
+            assertEquals(Screen.Module.route, controller.currentDestination?.route)
+            assertEquals(section, controller.currentBackStackEntry?.arguments?.getString("section"))
+        }
+        controller.navigateToTopLevel(Screen.Dashboard.route)
+        assertEquals(Screen.Dashboard.route, controller.currentDestination?.route)
+        assertNull(controller.previousBackStackEntry)
+    }
+
+    @Test fun selectingCurrentModuleDoesNotRecreateItAndLeavingAFormDoesNotRestoreIt() {
+        controller.navigateToTopLevel("module/accounts")
+        val entry = controller.currentBackStackEntry
+        repeat(5) { controller.navigateToTopLevel("module/accounts") }
+        assertSame(entry, controller.currentBackStackEntry)
+        controller.navigateToTopLevel(Screen.Goals.route)
+        controller.navigate(Screen.CreateGoal.route)
+        controller.navigateToTopLevel(Screen.Transactions.route)
+        controller.navigateToTopLevel(Screen.Goals.route)
+        assertEquals(Screen.Goals.route, controller.currentDestination?.route)
+    }
 }
+

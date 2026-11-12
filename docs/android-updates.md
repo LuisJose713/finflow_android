@@ -4,9 +4,19 @@ La app consulta en segundo plano el manifiesto de la última versión estable de
 [GitHub Releases](https://github.com/LuisJose713/finflow_android/releases).
 Al abrirla o volver a ella, busca novedades con un intervalo mínimo de 15 minutos;
 también comprueba cada 15 minutos mientras permanece abierta.
-También se puede consultar en **Más → Actualizaciones → Buscar actualizaciones**.
-Una versión mayor muestra sus cambios y **Descargar actualización** abre la APK
-en el navegador. Android confirma la instalación. No se modifica la sesión.
+Android también comprueba novedades en segundo plano mediante WorkManager cada
+6 horas (la hora exacta depende de batería, conectividad y restricciones de Android).
+Con permiso de notificaciones, envía un solo aviso por versión. En Android 13 o
+posterior solicita ese permiso al primer inicio. Se puede activar desde los ajustes
+de notificaciones de Android si se rechazó. El aviso abre FinFlow; la descarga y
+la instalación siempre se inician con la acción del usuario.
+También se puede consultar en **Menú → Actualizaciones → Buscar actualizaciones**.
+Una versión mayor muestra sus cambios y **Descargar actualización** descarga la APK dentro de FinFlow y muestra el progreso.
+Se comprueban el tamaño, SHA-256 (si está publicado), aplicación, versión y firma
+antes de ofrecer **Instalar actualización**. Android solicita el permiso para
+instalar desde FinFlow la primera vez y confirma cada instalación. No se modifica
+la sesión. La descarga continúa al cambiar de pantalla mientras el proceso de la
+app siga abierto; si Android lo cierra, se puede reintentar desde Actualizaciones.
 
 ## Publicar una versión compilada en Android Studio
 
@@ -20,7 +30,7 @@ en el navegador. Android confirma la instalación. No se modifica la sesión.
    `FinFlow-1.2.3.apk`, y publicar la release como estable y la más reciente.
 5. El workflow **Publish Android update notice (existing APK)** comprueba la
    firma y el identificador, lee la versión real de la APK y publica
-   `finflow-update.json`. No compila ni genera APKs.
+   `finflow-update.json` con tamaño y SHA-256. No compila ni genera APKs.
 6. Esperar a que termine en verde y comprobar desde una instalación anterior
    con **Buscar actualizaciones**. Si se adjuntó la APK después de publicar,
    ejecutar ese workflow manualmente indicando la etiqueta de la release.
@@ -32,3 +42,4 @@ Sin conexión la app sigue funcionando; la consulta manual permite reintentar.
 
 La instalación que todavía no incluye este mecanismo debe actualizarse
 manualmente una primera vez. A partir de ella podrá avisar de versiones futuras.
+

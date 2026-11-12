@@ -1,5 +1,6 @@
 package com.softdevcode.finflow_android.ui.screens.goals
 
+import com.softdevcode.finflow_android.ui.components.CopAmountField
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
@@ -14,7 +15,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.softdevcode.finflow_android.domain.model.Goal
 import com.softdevcode.finflow_android.ui.theme.Primary
-import java.text.NumberFormat
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -371,7 +371,7 @@ private fun ContributionDialog(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
 
-                OutlinedTextField(
+                CopAmountField(
                     value = amount,
                     onValueChange = {
                         amount = it
@@ -450,7 +450,5 @@ private fun formatAmount(
     amount: Double
 ): String {
 
-    return NumberFormat
-        .getCurrencyInstance(Locale("es", "CO"))
-        .format(amount)
+    return com.softdevcode.finflow_android.domain.model.formatCopMoney(amount)
 }

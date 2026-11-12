@@ -36,7 +36,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.softdevcode.finflow_android.domain.model.*
 import com.softdevcode.finflow_android.ui.theme.*
 import java.text.DateFormat
-import java.text.NumberFormat
 import java.util.Date
 import java.util.Locale
 
@@ -375,7 +374,7 @@ private fun PrivateAmount(text: String, visible: Boolean, modifier: Modifier = M
         fontWeight = FontWeight.Bold, color = color)
 }
 
-private fun formatCurrency(amount: Double): String = NumberFormat.getCurrencyInstance(Locale("es", "CO")).format(amount)
+private fun formatCurrency(amount: Double): String = com.softdevcode.finflow_android.domain.model.formatCopMoney(amount)
 private fun formatPercent(amount: Double): String = String.format(Locale("es", "CO"), "%.1f%%", amount)
 
 private fun formatDate(value: String?): String {
@@ -386,3 +385,4 @@ private fun formatDate(value: String?): String {
     val months = listOf("ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic")
     return months.getOrNull(month - 1)?.let { "$day $it" } ?: value
 }
+

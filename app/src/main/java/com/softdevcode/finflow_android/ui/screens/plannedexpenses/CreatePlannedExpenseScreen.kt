@@ -1,5 +1,6 @@
 package com.softdevcode.finflow_android.ui.screens.plannedexpenses
 
+import com.softdevcode.finflow_android.ui.components.CopAmountField
 import com.softdevcode.finflow_android.ui.theme.FinFlowV4Hero
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -147,7 +148,7 @@ fun CreatePlannedExpenseScreen(
                 singleLine = true,
             )
 
-            OutlinedTextField(
+            CopAmountField(
                 value = amount,
                 onValueChange = {
                     amount = it

@@ -1,5 +1,6 @@
 package com.softdevcode.finflow_android.ui.screens.transactions
 
+import com.softdevcode.finflow_android.ui.components.CopAmountField
 import com.softdevcode.finflow_android.ui.theme.FinFlowV4Hero
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -235,7 +236,7 @@ fun AddTransactionScreen(
             // MONTO
             // ─────────────────────────────────────────────────────
 
-            OutlinedTextField(
+            CopAmountField(
 
                 value = amount,
 

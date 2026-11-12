@@ -1,6 +1,7 @@
 """Describe an already built, signed APK. This script never builds an APK."""
 
 import argparse
+import hashlib
 import json
 from pathlib import Path
 import re
@@ -57,9 +58,13 @@ def main():
     badging = subprocess.check_output([str(args.build_tools / "aapt"), "dump", "badging", str(args.apk)], text=True)
     version_code, version_name = apk_identity(badging)
     manifest = make_manifest(json.loads(args.release_json.read_text()), version_code, version_name, args.apk.name)
+    with args.apk.open("rb") as binary:
+        manifest["sha256"] = hashlib.file_digest(binary, "sha256").hexdigest()
+    manifest["sizeBytes"] = args.apk.stat().st_size
     args.output.write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     print(f"Validated signed FinFlow APK: {version_name} ({version_code})")
 
 
 if __name__ == "__main__":
     main()
+
