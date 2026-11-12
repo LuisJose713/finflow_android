@@ -45,6 +45,14 @@ class AuthViewModel @Inject constructor(
 
     init {
         checkAuth()
+        viewModelScope.launch {
+            tokenManager.token.distinctUntilChanged().collect { token ->
+                if (token.isNullOrEmpty() && _uiState.value.isAuthenticated) {
+                    authOperation++
+                    _uiState.update { AuthUiState(isCheckingAuth = false) }
+                }
+            }
+        }
     }
 
     private fun checkAuth() {
@@ -57,7 +65,7 @@ class AuthViewModel @Inject constructor(
                 if (operation != authOperation) return@launch
                 _uiState.update {
                     it.copy(
-                        isAuthenticated = true,
+                        isAuthenticated = user != null,
                         user = user,
                         isCheckingAuth = false
                     )
@@ -132,6 +140,8 @@ class AuthViewModel @Inject constructor(
             _uiState.update { it.copy(error = "Debes autorizar expresamente la política vigente.") }
             return
         }
+        authOperation++
+        val operation = authOperation
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
             authRepository.register(
@@ -141,10 +151,12 @@ class AuthViewModel @Inject constructor(
                 privacyVersion = if (policy.ready) policy.version else null,
                 marketingConsent = if (policy.ready) marketingConsent else null,
             ).onSuccess { response ->
+                if (operation != authOperation) return@onSuccess
                 _uiState.update {
                     it.copy(isLoading = false, isAuthenticated = true, user = response.user)
                 }
             }.onError { msg ->
+                if (operation != authOperation) return@onError
                 _uiState.update { it.copy(isLoading = false, error = msg) }
             }
         }
