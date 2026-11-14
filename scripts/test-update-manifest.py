@@ -21,6 +21,17 @@ class UpdatePublicationTest(unittest.TestCase):
         self.assertEqual(update["releaseNotes"], "Inicio corregido.")
         self.assertTrue(update["downloadUrl"].endswith(".apk"))
 
+    def test_beta_version_can_use_base_release_tag(self):
+        release = copy.deepcopy(self.release)
+        release["tag_name"] = "v1.2.7"
+        release["assets"][0]["name"] = "app-release.apk"
+        release["assets"][0]["browser_download_url"] = "https://github.com/LuisJose713/finflow_android/releases/download/v1.2.7/app-release.apk"
+        update = manifest.make_manifest(release, 10, "1.2.7-beta", "app-release.apk")
+        self.assertEqual(update["versionCode"], 10)
+        self.assertEqual(update["versionName"], "1.2.7-beta")
+        with self.assertRaises(ValueError):
+            manifest.make_manifest(release, 10, "1.2.7-rc", "app-release.apk")
+
     def test_other_apps_are_rejected(self):
         with self.assertRaises(ValueError):
             manifest.apk_identity("package: name='other.app' versionCode='6' versionName='1.2.3'")

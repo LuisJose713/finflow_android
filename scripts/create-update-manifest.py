@@ -28,8 +28,12 @@ def make_manifest(release, version_code, version_name, apk_name):
     tag = release["tag_name"]
     if not re.fullmatch(r"[A-Za-z0-9._-]+", tag):
         raise ValueError("Use a simple version tag, for example v1.2.3-finflow")
-    if tag != f"v{version_name}":
-        raise ValueError("The release tag must be v + the versionName inside the APK")
+    valid_tags = {f"v{version_name}"}
+    # Beta APKs can be distributed via their base version tag (e.g. 1.2.7-beta -> v1.2.7).
+    if re.fullmatch(r"\d+\.\d+\.\d+-beta", version_name):
+        valid_tags.add(f"v{version_name[:-5]}")
+    if tag not in valid_tags:
+        raise ValueError("The release tag must match the APK version (optional -beta suffix)")
     if not re.fullmatch(r"[A-Za-z0-9._-]+\.apk", apk_name):
         raise ValueError("APK filenames must use letters, numbers, dots, hyphens or underscores")
     apks = [a for a in release.get("assets", []) if a["name"].lower().endswith(".apk")]
