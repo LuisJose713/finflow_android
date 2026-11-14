@@ -74,4 +74,45 @@ class MainMenuTest {
         compose.onNodeWithContentDescription("Cerrar menú").performClick()
         compose.runOnIdle { assertEquals(1, closeCount) }
     }
+    @Test
+    @Config(qualifiers = "w430dp-h900dp-mdpi")
+    fun lightModeAndAdminNavigationKeepCoreActionsAvailable() {
+        var addCount = 0
+        compose.setContent {
+            FinFlowTheme(darkTheme = false) {
+                val drawer = rememberDrawerState(DrawerValue.Open)
+                MainMenu(
+                    drawerState = drawer,
+                    gesturesEnabled = true,
+                    currentRoute = Screen.Dashboard.route,
+                    currentSection = null,
+                    userName = "Ana María",
+                    isDark = false,
+                    isAdmin = true,
+                    onClose = {},
+                    onNavigate = {},
+                    onModule = {},
+                    onNewTransaction = { addCount++ },
+                    onToggleTheme = {},
+                    onLogout = {},
+                ) { Box(Modifier.fillMaxSize()) }
+            }
+        }
+        compose.onNodeWithText("Nueva transacción").assertIsDisplayed().performClick()
+        compose.onNodeWithText("Cerrar sesión").assertIsDisplayed()
+        compose.runOnIdle {
+            assertEquals(1, addCount)
+            val view = compose.activity.window.decorView
+            val bitmap = Bitmap.createBitmap(view.width, view.height, Bitmap.Config.ARGB_8888)
+            view.draw(Canvas(bitmap))
+            val file = File("build/reports/menu/android-menu-430-light.png")
+                .apply { parentFile?.mkdirs() }
+            file.outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
+        }
+        compose.onNodeWithText("Panel de administración").performScrollTo().assertIsDisplayed()
+        // The important actions stay pinned even after scrolling all sections.
+        compose.onNodeWithText("Cerrar sesión").assertIsDisplayed()
+        compose.onNodeWithText("Nueva transacción").assertIsDisplayed()
+    }
+
 }

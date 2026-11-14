@@ -79,6 +79,7 @@ internal fun MainMenu(
     content: @Composable () -> Unit,
 ) {
     var confirmLogout by remember { mutableStateOf(false) }
+    val destinationsScroll = rememberScrollState()
     val drawerShape = RoundedCornerShape(topEnd = 22.dp, bottomEnd = 22.dp)
     BoxWithConstraints(Modifier.fillMaxSize()) {
         val drawerWidth = (maxWidth * 0.90f).coerceAtMost(370.dp)
@@ -126,7 +127,7 @@ internal fun MainMenu(
                         // even on compact devices and large accessibility text settings.
                         Column(
                             modifier = Modifier.weight(1f).fillMaxWidth()
-                                .verticalScroll(rememberScrollState())
+                                .verticalScroll(destinationsScroll)
                                 .padding(start = 12.dp, end = 12.dp, top = 4.dp, bottom = 12.dp),
                             verticalArrangement = Arrangement.spacedBy(2.dp),
                         ) {
@@ -146,6 +147,20 @@ internal fun MainMenu(
                                     listOf(MenuItem("admin", "Panel de administración", Icons.Outlined.AdminPanelSettings)),
                                     currentSection, onModule,
                                 )
+                            }
+                        }
+                        if (destinationsScroll.value < destinationsScroll.maxValue) {
+                            Row(
+                                Modifier.fillMaxWidth().padding(vertical = 3.dp),
+                                horizontalArrangement = Arrangement.Center,
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Text("Desliza para explorar", color = TextTertiaryDark,
+                                    style = MaterialTheme.typography.labelSmall)
+                                Spacer(Modifier.width(4.dp))
+                                Icon(Icons.Outlined.KeyboardArrowDown,
+                                    contentDescription = null, tint = TextTertiaryDark,
+                                    modifier = Modifier.size(16.dp))
                             }
                         }
                         DrawerFooter(

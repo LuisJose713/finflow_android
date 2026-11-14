@@ -432,7 +432,7 @@ private fun CompactTransactionItem(tx: Transaction, categoryName: String, visibl
                         maxLines = 1, overflow = TextOverflow.Ellipsis)
                     if (narrow) {
                         PrivateAmount(
-                            (if (isIncome) "+" else "−") + formatCurrency(tx.amount),
+                            formatCurrency(tx.amount),
                             visible, color = tint,
                         )
                     }
@@ -440,7 +440,7 @@ private fun CompactTransactionItem(tx: Transaction, categoryName: String, visibl
             }
             if (!narrow) {
                 PrivateAmount(
-                    (if (isIncome) "+" else "−") + formatCurrency(tx.amount),
+                    formatCurrency(tx.amount),
                     visible, color = tint,
                 )
             }

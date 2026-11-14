@@ -532,7 +532,7 @@ private fun TransactionItem(
 
             Column(horizontalAlignment = Alignment.End) {
                 Text(
-                    text = (if (isIncome) "+" else "−") + formatAmount(transaction.amount),
+                    text = formatAmount(transaction.amount),
                     style = MaterialTheme.typography.titleSmall,
                     color = amountColor,
                 )
