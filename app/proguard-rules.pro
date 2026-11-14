@@ -19,3 +19,9 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+# FinFlow API payloads are serialized by Gson using reflected field names.
+# A debug build can pass while a minified release silently breaks JSON fields.
+-keepattributes Signature,InnerClasses,EnclosingMethod,*Annotation*
+-keep class com.softdevcode.finflow_android.domain.model.** { *; }
+-keep interface com.softdevcode.finflow_android.data.remote.api.FinFlowApi { *; }
+-keepattributes SourceFile,LineNumberTable

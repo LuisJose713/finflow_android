@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -31,6 +32,7 @@ class TransactionsViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(TransactionsUiState())
+    private var loadJob: Job? = null
 
     val uiState: StateFlow<TransactionsUiState> =
         _uiState.asStateFlow()
@@ -45,8 +47,14 @@ class TransactionsViewModel @Inject constructor(
         }
     }
 
-    fun load() {
-        viewModelScope.launch {
+    fun load(force: Boolean = false) {
+        // Initial load and ON_RESUME may fire together. Keep one request active;
+        // forced reloads cancel stale responses and refresh after mutations.
+        if (loadJob?.isActive == true) {
+            if (!force) return
+            loadJob?.cancel()
+        }
+        loadJob = viewModelScope.launch {
             _uiState.update {
                 it.copy(
                     isLoading = true,
@@ -86,7 +94,7 @@ class TransactionsViewModel @Inject constructor(
             when (val result = transactionRepository.updateTransaction(id, request)) {
                 is Result.Success -> {
                     _uiState.update { it.copy(isSaving = false, notice = "Movimiento actualizado") }
-                    load()
+                    load(force = true)
                 }
                 is Result.Error -> {
                     _uiState.update {
@@ -105,7 +113,7 @@ class TransactionsViewModel @Inject constructor(
             when (val result = transactionRepository.deleteTransaction(id)) {
                 is Result.Success -> {
                     _uiState.update { it.copy(isSaving = false, notice = "Movimiento eliminado") }
-                    load()
+                    load(force = true)
                 }
                 is Result.Error -> {
                     _uiState.update {

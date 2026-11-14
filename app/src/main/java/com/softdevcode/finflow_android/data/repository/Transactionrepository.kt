@@ -62,6 +62,7 @@ class TransactionRepository @Inject constructor(
             Result.Success(it)
         },
         onFailure = {
+                if (it is CancellationException) throw it
             Result.Error(it.message ?: "Error al crear transacción")
         }
     )
@@ -69,7 +70,7 @@ class TransactionRepository @Inject constructor(
     suspend fun updateTransaction(id: Int, req: CreateTransactionRequest): Result<Transaction> =
         runCatching { api.updateTransaction(id, req) }.fold(
             onSuccess = { Result.Success(it) },
-            onFailure = { Result.Error("No fue posible editar la transacción") }
+            onFailure = { if (it is CancellationException) throw it; Result.Error("No fue posible editar la transacción") }
         )
 
     suspend fun deleteTransaction(id: Int): Result<Unit> = runCatching {
@@ -79,6 +80,7 @@ class TransactionRepository @Inject constructor(
             Result.Success(Unit)
         },
         onFailure = {
+                if (it is CancellationException) throw it
             Result.Error(it.message ?: "Error al eliminar transacción")
         }
     )
@@ -90,6 +92,7 @@ class TransactionRepository @Inject constructor(
             Result.Success(it ?: emptyList())
         },
         onFailure = {
+                if (it is CancellationException) throw it
             Result.Error(it.message ?: "Error")
         }
     )

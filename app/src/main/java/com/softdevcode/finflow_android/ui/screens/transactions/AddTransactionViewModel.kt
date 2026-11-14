@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -83,6 +84,8 @@ class AddTransactionViewModel @Inject constructor(
                     )
                 }
 
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
 
                 _uiState.update {
@@ -104,6 +107,8 @@ class AddTransactionViewModel @Inject constructor(
                 _uiState.update {
                     it.copy(accounts = api.getAccounts().filter { account -> !account.archived })
                 }
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 // Legacy users can still create movements without a wallet.
                 _uiState.update { it.copy(accounts = emptyList()) }

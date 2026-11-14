@@ -77,9 +77,12 @@ fun TransactionsScreen(
     var deleting by remember { mutableStateOf<Transaction?>(null) }
     var search by rememberSaveable { mutableStateOf("") }
     var typeFilter by rememberSaveable { mutableStateOf("") }
-    val visibleTransactions = uiState.transactions.filter { tx ->
-        (typeFilter.isBlank() || tx.type == typeFilter) &&
-        (search.isBlank() || tx.description.contains(search.trim(), ignoreCase = true))
+    val visibleTransactions = remember(uiState.transactions, typeFilter, search) {
+        val query = search.trim()
+        uiState.transactions.filter { tx ->
+            (typeFilter.isBlank() || tx.type == typeFilter) &&
+                (query.isBlank() || tx.description.contains(query, ignoreCase = true))
+        }
     }
 
     editing?.let { transaction ->
@@ -172,7 +175,7 @@ fun TransactionsScreen(
 
                     IconButton(
                         onClick = {
-                            viewModel.load()
+                            viewModel.load(force = true)
                         }
                     ) {
 

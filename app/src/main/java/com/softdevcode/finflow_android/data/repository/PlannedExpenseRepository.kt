@@ -4,6 +4,7 @@ import com.softdevcode.finflow_android.data.remote.api.FinFlowApi
 import com.softdevcode.finflow_android.domain.model.PlannedExpense
 import com.softdevcode.finflow_android.domain.model.PlannedExpenseRequest
 import com.softdevcode.finflow_android.util.Result
+import kotlinx.coroutines.CancellationException
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -20,6 +21,7 @@ class PlannedExpenseRepository @Inject constructor(
                 Result.Success(it)
             },
             onFailure = {
+                if (it is CancellationException) throw it
                 Result.Error(
                     it.message ?: "Error al cargar los gastos planeados"
                 )
@@ -36,6 +38,7 @@ class PlannedExpenseRepository @Inject constructor(
                 Result.Success(it)
             },
             onFailure = {
+                if (it is CancellationException) throw it
                 Result.Error(
                     it.message ?: "Error al crear el gasto planeado"
                 )
@@ -53,6 +56,7 @@ class PlannedExpenseRepository @Inject constructor(
                 Result.Success(it)
             },
             onFailure = {
+                if (it is CancellationException) throw it
                 Result.Error(
                     it.message ?: "Error al actualizar el gasto planeado"
                 )
@@ -69,6 +73,7 @@ class PlannedExpenseRepository @Inject constructor(
                 Result.Success(it)
             },
             onFailure = {
+                if (it is CancellationException) throw it
                 Result.Error(
                     it.message ?: "Error al ejecutar el gasto planeado"
                 )
@@ -85,6 +90,7 @@ class PlannedExpenseRepository @Inject constructor(
                 Result.Success(it)
             },
             onFailure = {
+                if (it is CancellationException) throw it
                 Result.Error(
                     it.message ?: "Error al cancelar el gasto planeado"
                 )
@@ -101,6 +107,7 @@ class PlannedExpenseRepository @Inject constructor(
                 Result.Success(Unit)
             },
             onFailure = {
+                if (it is CancellationException) throw it
                 Result.Error(
                     it.message ?: "Error al eliminar el gasto planeado"
                 )

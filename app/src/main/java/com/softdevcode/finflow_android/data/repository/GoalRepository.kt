@@ -5,6 +5,7 @@ import com.softdevcode.finflow_android.domain.model.ContributionRequest
 import com.softdevcode.finflow_android.domain.model.Goal
 import com.softdevcode.finflow_android.domain.model.GoalRequest
 import com.softdevcode.finflow_android.util.Result
+import kotlinx.coroutines.CancellationException
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -21,6 +22,7 @@ class GoalRepository @Inject constructor(
                 Result.Success(it)
             },
             onFailure = {
+                if (it is CancellationException) throw it
                 Result.Error(
                     it.message ?: "Error al cargar las metas"
                 )
@@ -37,6 +39,7 @@ class GoalRepository @Inject constructor(
                 Result.Success(it)
             },
             onFailure = {
+                if (it is CancellationException) throw it
                 Result.Error(
                     it.message ?: "Error al crear la meta"
                 )
@@ -54,6 +57,7 @@ class GoalRepository @Inject constructor(
                 Result.Success(it)
             },
             onFailure = {
+                if (it is CancellationException) throw it
                 Result.Error(
                     it.message ?: "Error al actualizar la meta"
                 )
@@ -78,6 +82,7 @@ class GoalRepository @Inject constructor(
                 Result.Success(it)
             },
             onFailure = {
+                if (it is CancellationException) throw it
                 Result.Error(
                     it.message ?: "Error al agregar dinero"
                 )
@@ -94,6 +99,7 @@ class GoalRepository @Inject constructor(
                 Result.Success(Unit)
             },
             onFailure = {
+                if (it is CancellationException) throw it
                 Result.Error(
                     it.message ?: "Error al eliminar la meta"
                 )

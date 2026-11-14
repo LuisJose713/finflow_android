@@ -57,7 +57,12 @@ class TokenManager @Inject constructor(
     }
 
     suspend fun getTokenOnce(): String? {
-        // Migrate legacy plaintext credentials once without terminating the session.
+        // Most requests only READ the encrypted token. Avoid a DataStore write
+        // transaction per API call (previously a source of unnecessary latency).
+        val current = context.dataStore.data.first()[Keys.TOKEN] ?: return null
+        if (current.startsWith("enc:v1:")) return cipher.read(current)
+
+        // One-time, concurrency-safe migration of historical plaintext values.
         context.dataStore.edit { prefs ->
             listOf(Keys.TOKEN, Keys.REFRESH, Keys.USER_NAME, Keys.USER_EMAIL).forEach { key ->
                 prefs[key]?.takeUnless { it.startsWith("enc:v1:") }?.let { prefs[key] = cipher.encrypt(it) }

@@ -7,6 +7,8 @@ import com.softdevcode.finflow_android.domain.model.LoginRequest
 import com.softdevcode.finflow_android.domain.model.RegisterRequest
 import com.softdevcode.finflow_android.domain.model.User
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.withTimeoutOrNull
 import com.softdevcode.finflow_android.util.Result
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -29,7 +31,10 @@ class AuthRepository @Inject constructor(
             response
         }.fold(
             onSuccess = { Result.Success(it) },
-            onFailure = { Result.Error(it.message ?: "Error al iniciar sesión") }
+            onFailure = {
+                if (it is CancellationException) throw it
+                Result.Error(it.message ?: "Error al iniciar sesión")
+            }
         )
 
     suspend fun register(
@@ -54,7 +59,10 @@ class AuthRepository @Inject constructor(
             response
         }.fold(
             onSuccess = { Result.Success(it) },
-            onFailure = { Result.Error(it.message ?: "Error al registrarse") }
+            onFailure = {
+                if (it is CancellationException) throw it
+                Result.Error(it.message ?: "Error al registrarse")
+            }
         )
 
     suspend fun logout() {
@@ -80,15 +88,26 @@ class AuthRepository @Inject constructor(
         // Never infer ADMIN from persisted client data. Refresh role from authenticated
         // /auth/me; on network failure, use a least-privilege local display fallback.
         return try {
-            val verified = api.getMe().takeIf { it.id == id && it.email.equals(email, true) }
-                ?: return User(id, email, name)
+            // On slow/offline networks, show the least-privilege account view
+            // instead of leaving the splash screen blocked for 40+ seconds.
+            val verified = withTimeoutOrNull(12_000L) {
+                api.getMe().takeIf { it.id == id && it.email.equals(email, true) }
+            } ?: return User(id, email, name)
             if (tokenManager.refreshToken.first() == null) {
                 val current = tokenManager.getTokenOnce()
-                if (current != null) try {
-                    tokenManager.replaceTokensIfCurrent(current, api.adoptSession())
-                } catch (_: Exception) { /* Existing access remains valid during rollout. */ }
+                if (current != null) {
+                    try {
+                        withTimeoutOrNull(5_000L) {
+                            tokenManager.replaceTokensIfCurrent(current, api.adoptSession())
+                        }
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (_: Exception) { /* Keep the verified user on transient failures. */ }
+                }
             }
             verified
+        } catch (e: CancellationException) {
+            throw e
         } catch (_: Exception) {
             User(id, email, name)
         }
