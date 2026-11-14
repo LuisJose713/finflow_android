@@ -14,6 +14,7 @@ import com.softdevcode.finflow_android.util.onError
 import com.softdevcode.finflow_android.util.onSuccess
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -28,6 +29,9 @@ data class AuthUiState(
     val registrationPolicyError: String? = null,
 )
 
+/** Prevent duplicate sign-in/register requests before the UI disables its buttons. */
+internal fun canStartAuthRequest(state: AuthUiState): Boolean = !state.isLoading && !state.isAuthenticated
+
 @HiltViewModel
 class AuthViewModel @Inject constructor(
     private val authRepository: AuthRepository,
@@ -36,6 +40,7 @@ class AuthViewModel @Inject constructor(
 ) : ViewModel() {
 
     private var authOperation = 0L
+    private var authRequestJob: Job? = null
     private val _uiState = MutableStateFlow(AuthUiState())
     val uiState: StateFlow<AuthUiState> = _uiState.asStateFlow()
 
@@ -80,11 +85,14 @@ class AuthViewModel @Inject constructor(
     }
 
     fun login(email: String, password: String) {
+        if (!canStartAuthRequest(_uiState.value)) return
         authOperation++
-        viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, error = null) }
+        val operation = authOperation
+        _uiState.update { it.copy(isLoading = true, error = null) }
+        authRequestJob = viewModelScope.launch {
             authRepository.login(email.trim(), password)
                 .onSuccess() { response ->
+                    if (operation != authOperation) return@onSuccess
                     _uiState.update {
                         it.copy(
                             isLoading = false,
@@ -94,6 +102,7 @@ class AuthViewModel @Inject constructor(
                     }
                 }
                 .onError { msg ->
+                    if (operation != authOperation) return@onError
                     _uiState.update { it.copy(isLoading = false, error = msg) }
                 }
         }
@@ -123,6 +132,7 @@ class AuthViewModel @Inject constructor(
         email: String, password: String, name: String, confirmPassword: String,
         accepted: Boolean, marketingConsent: Boolean,
     ) {
+        if (!canStartAuthRequest(_uiState.value)) return
         registrationPasswordError(password)?.let { message ->
             _uiState.update { it.copy(isLoading = false, error = message) }
             return
@@ -142,8 +152,8 @@ class AuthViewModel @Inject constructor(
         }
         authOperation++
         val operation = authOperation
-        viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, error = null) }
+        _uiState.update { it.copy(isLoading = true, error = null) }
+        authRequestJob = viewModelScope.launch {
             authRepository.register(
                 email = email.trim(), password = password, name = name.trim(),
                 confirmPassword = confirmPassword,
@@ -164,10 +174,20 @@ class AuthViewModel @Inject constructor(
 
     fun logout() {
         authOperation++
+        authRequestJob?.cancel()
+        authRequestJob = null
+        val operation = authOperation
+        // Disable new sign-ins until the previous session has been cleared.
+        _uiState.update { AuthUiState(isLoading = true, isCheckingAuth = false) }
         viewModelScope.launch {
-            authRepository.logout()
-            // Never re-enable the indefinite splash-screen gate after logout.
-            _uiState.update { AuthUiState(isCheckingAuth = false) }
+            try {
+                authRepository.logout()
+            } finally {
+                if (operation == authOperation) {
+                    // Never re-enable the indefinite splash-screen gate after logout.
+                    _uiState.update { AuthUiState(isCheckingAuth = false) }
+                }
+            }
         }
     }
 
