@@ -63,6 +63,7 @@ class MainMenuTest {
         }
         compose.onNodeWithText("Movimientos").performClick()
         compose.onNodeWithText("Movimientos").assertIsSelected()
+        compose.onNodeWithContentDescription("Expandir Tu cuenta").performScrollTo().performClick()
         compose.onNodeWithText("Actualizaciones").performScrollTo().performClick()
         compose.runOnIdle {
             assertEquals("updates", section)
@@ -109,6 +110,8 @@ class MainMenuTest {
                 .apply { parentFile?.mkdirs() }
             file.outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
         }
+        compose.onNodeWithContentDescription("Expandir Tu cuenta").performScrollTo().performClick()
+        compose.onNodeWithText("Planes y precios").performScrollTo().assertIsDisplayed()
         compose.onNodeWithText("Panel de administración").performScrollTo().assertIsDisplayed()
         // The important actions stay pinned even after scrolling all sections.
         compose.onNodeWithText("Cerrar sesión").assertIsDisplayed()

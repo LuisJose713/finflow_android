@@ -1,5 +1,6 @@
 package com.softdevcode.finflow_android.ui.screens.main
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
@@ -8,6 +9,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -17,6 +19,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -79,6 +82,10 @@ internal fun MainMenu(
     content: @Composable () -> Unit,
 ) {
     var confirmLogout by remember { mutableStateOf(false) }
+    var accountExpanded by rememberSaveable { mutableStateOf(currentSection in accountItems.map { it.key }) }
+    LaunchedEffect(currentSection) {
+        if (currentSection in accountItems.map { it.key }) accountExpanded = true
+    }
     val destinationsScroll = rememberScrollState()
     val drawerShape = RoundedCornerShape(topEnd = 22.dp, bottomEnd = 22.dp)
     BoxWithConstraints(Modifier.fillMaxSize()) {
@@ -139,7 +146,14 @@ internal fun MainMenu(
                                 onModule,
                             )
                             DrawerSeparator()
-                            DrawerGroup("Tu cuenta", accountItems, currentSection, onModule)
+                            CollapsibleDrawerGroup(
+                                title = "Tu cuenta",
+                                items = accountItems,
+                                selectedKey = currentSection,
+                                expanded = accountExpanded,
+                                onExpand = { accountExpanded = !accountExpanded },
+                                onSelect = onModule,
+                            )
                             if (isAdmin) {
                                 DrawerSeparator()
                                 DrawerGroup(
@@ -240,6 +254,41 @@ private fun DrawerSeparator() {
 }
 
 @Composable
+private fun CollapsibleDrawerGroup(
+    title: String,
+    items: List<MenuItem>,
+    selectedKey: String?,
+    expanded: Boolean,
+    onExpand: () -> Unit,
+    onSelect: (String) -> Unit,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .clickable(onClickLabel = if (expanded) "Contraer $title" else "Expandir $title", onClick = onExpand)
+            .heightIn(min = 48.dp)
+            .padding(start = 15.dp, end = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(title.uppercase(), modifier = Modifier.weight(1f),
+            style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold,
+            letterSpacing = 1.15.sp, color = TextTertiaryDark)
+        if (!expanded && selectedKey in items.map { it.key }) {
+            Box(Modifier.size(6.dp).clip(CircleShape).background(FinFlowGold))
+            Spacer(Modifier.width(8.dp))
+        }
+        Icon(if (expanded) Icons.Outlined.ExpandLess else Icons.Outlined.ExpandMore,
+            contentDescription = if (expanded) "Contraer $title" else "Expandir $title",
+            tint = TextSecondDark, modifier = Modifier.size(20.dp))
+    }
+    AnimatedVisibility(visible = expanded) {
+        Column {
+            DrawerGroup("", items, selectedKey, onSelect)
+        }
+    }
+}
+
+@Composable
 private fun DrawerGroup(
     title: String,
     items: List<MenuItem>,
@@ -247,7 +296,7 @@ private fun DrawerGroup(
     onSelect: (String) -> Unit,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
-        Text(
+        if (title.isNotBlank()) Text(
             title.uppercase(),
             modifier = Modifier.padding(start = 15.dp, top = 12.dp, bottom = 7.dp),
             style = MaterialTheme.typography.labelSmall,
