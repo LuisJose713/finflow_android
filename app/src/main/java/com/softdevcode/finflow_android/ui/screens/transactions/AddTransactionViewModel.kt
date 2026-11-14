@@ -123,18 +123,13 @@ class AddTransactionViewModel @Inject constructor(
     fun createTransaction(
         request: CreateTransactionRequest
     ) {
+        // Block rapid double taps before a coroutine can reach the server.
+        if (_uiState.value.isLoading || _uiState.value.saved) return
+        _uiState.update {
+            it.copy(isLoading = true, error = null, saved = false)
+        }
 
         viewModelScope.launch {
-
-            _uiState.update {
-
-                it.copy(
-                    isLoading = true,
-                    error = null,
-                    saved = false,
-                )
-            }
-
             transactionRepository
                 .createTransaction(request)
 

@@ -34,6 +34,8 @@ android {
     }
 
     compileOptions {
+        // java.time is used throughout the UI; support Android 7/7.1 (minSdk 24).
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
@@ -53,6 +55,7 @@ android {
 }
 
 dependencies {
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
     // AndroidJUnit4 runs instrumented tests from src/androidTest.
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test:runner:1.6.2")
