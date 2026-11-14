@@ -11,6 +11,10 @@ val FinFlowNavy   = Color(0xFF0E192B)
 val FinFlowNavy2  = Color(0xFF1B2B43)
 val FinFlowGold   = Color(0xFFDCC29A)
 val FinFlowGoldSoft = Color(0xFFF0DAB2)
+// Always-dark navigation drawer, matching the FinFlow Web sidebar.
+val FinFlowDrawerSelected = Color(0xFF22334A)
+// The Web evolution chart uses #477cff for income and #d7a94d for expenses.
+val FinFlowChartExpense = Color(0xFFD7A94D)
 
 val Success       = Color(0xFF22C55E)
 val SuccessLight  = Color(0xFF4ADE80)

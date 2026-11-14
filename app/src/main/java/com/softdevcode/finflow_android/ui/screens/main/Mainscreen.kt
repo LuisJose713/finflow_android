@@ -109,8 +109,8 @@ fun MainScreen(
                     onClick = { navController.navigate(Screen.AddTransaction.route) { launchSingleTop = true } },
                     icon = { Icon(Icons.Filled.Add, contentDescription = null) },
                     text = { Text("Nuevo movimiento", fontWeight = FontWeight.SemiBold) },
-                    containerColor = Primary,
-                    contentColor = Color.White,
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
                 )
             },
 

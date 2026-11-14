@@ -178,10 +178,10 @@ private fun DashboardTopBar(userName: String, isDark: Boolean, onToggleTheme: ()
         Spacer(Modifier.height(6.dp))
         Text("Tu dinero,", style = MaterialTheme.typography.headlineLarge.copy(
             fontWeight = FontWeight.ExtraBold, letterSpacing = (-1.2).sp))
-        Text("con claridad.", style = MaterialTheme.typography.headlineLarge.copy(
-            fontWeight = FontWeight.ExtraBold, letterSpacing = (-1.2).sp,
-            brush = Brush.linearGradient(listOf(Color(0xFF376FB8), Color(0xFF7867CD))),
-        ))
+        Text("con claridad.", color = if (isDark) FinFlowGold else FinFlowGoldMuted,
+            style = MaterialTheme.typography.headlineLarge.copy(
+                fontWeight = FontWeight.ExtraBold, letterSpacing = (-1.2).sp,
+            ))
         Spacer(Modifier.height(8.dp))
         Text(
             "Hola, ${userName.trim().substringBefore(' ').ifBlank { "Usuario" }}. Así se mueve tu dinero.",

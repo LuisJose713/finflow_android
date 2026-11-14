@@ -13,6 +13,15 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.Color
+import com.softdevcode.finflow_android.ui.theme.FinFlowNavy
+import com.softdevcode.finflow_android.ui.theme.FinFlowNavy2
+import com.softdevcode.finflow_android.ui.theme.FinFlowGold
+import com.softdevcode.finflow_android.ui.theme.FinFlowDrawerSelected
+import com.softdevcode.finflow_android.ui.theme.BorderDark
+import com.softdevcode.finflow_android.ui.theme.TextPrimaryDark
+import com.softdevcode.finflow_android.ui.theme.TextSecondDark
+import com.softdevcode.finflow_android.ui.theme.TextTertiaryDark
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -69,7 +78,7 @@ internal fun MainMenu(
             drawerState = drawerState,
             gesturesEnabled = gesturesEnabled,
             drawerContent = {
-                ModalDrawerSheet(modifier = Modifier.width(drawerWidth).fillMaxHeight(), drawerContainerColor = MaterialTheme.colorScheme.surface) {
+                ModalDrawerSheet(modifier = Modifier.width(drawerWidth).fillMaxHeight(), drawerContainerColor = FinFlowNavy) {
                     Column(
                         Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 12.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -78,8 +87,8 @@ internal fun MainMenu(
                             Modifier.fillMaxWidth().padding(start = 12.dp, top = 8.dp),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            FinFlowV4Wordmark(modifier = Modifier.weight(1f))
-                            IconButton(onClick = onClose) { Icon(Icons.Outlined.Close, "Cerrar menú") }
+                            FinFlowV4Wordmark(modifier = Modifier.weight(1f), color = TextPrimaryDark)
+                            IconButton(onClick = onClose) { Icon(Icons.Outlined.Close, "Cerrar menú", tint = TextSecondDark) }
                         }
                         Row(
                             Modifier.fillMaxWidth().padding(start = 12.dp, end = 12.dp, bottom = 12.dp),
@@ -90,14 +99,15 @@ internal fun MainMenu(
                                 .mapNotNull { it.firstOrNull()?.uppercase() }.joinToString("")
                                 .ifBlank { "F" }
                             Box(
-                                Modifier.size(44.dp).background(MaterialTheme.colorScheme.primaryContainer, CircleShape),
+                                Modifier.size(44.dp).background(FinFlowNavy2, CircleShape),
                                 contentAlignment = Alignment.Center,
                             ) {
-                                Text(initials, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
+                                Text(initials, style = MaterialTheme.typography.titleMedium, color = FinFlowGold)
                             }
                             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                                 Text(
                                     userName.ifBlank { "Tu espacio financiero" },
+                                    color = TextPrimaryDark,
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.SemiBold,
                                     maxLines = 1,
@@ -105,35 +115,45 @@ internal fun MainMenu(
                                 Text(
                                     "Tu dinero, con claridad",
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    color = TextSecondDark,
                                 )
                             }
                         }
                         DrawerGroup("Tu panorama", mainItems, currentRoute) { onNavigate(it); onClose() }
-                        HorizontalDivider(Modifier.padding(vertical = 4.dp))
+                        HorizontalDivider(Modifier.padding(vertical = 4.dp), color = BorderDark)
                         DrawerGroup("Tu dinero", financeItems,
                             if (currentRoute == Screen.Advisor.route) "advisor" else currentSection,
                         ) { onModule(it); onClose() }
-                        HorizontalDivider(Modifier.padding(vertical = 4.dp))
+                        HorizontalDivider(Modifier.padding(vertical = 4.dp), color = BorderDark)
                         DrawerGroup("Tu cuenta", accountItems, currentSection) { onModule(it); onClose() }
                         if (isAdmin) DrawerGroup("Administración", listOf(
                             MenuItem("admin", "Administración", Icons.Outlined.AdminPanelSettings),
                         ), currentSection) { onModule(it); onClose() }
-                        HorizontalDivider(Modifier.padding(vertical = 4.dp))
+                        HorizontalDivider(Modifier.padding(vertical = 4.dp), color = BorderDark)
                         Row(
                             Modifier.fillMaxWidth().padding(start = 16.dp, end = 12.dp),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(12.dp),
                         ) {
-                            Icon(Icons.Outlined.DarkMode, contentDescription = null)
-                            Text("Modo oscuro", modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
-                            Switch(checked = isDark, onCheckedChange = { onToggleTheme() })
+                            Icon(Icons.Outlined.DarkMode, contentDescription = null, tint = TextSecondDark)
+                            Text("Modo oscuro", modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium, color = TextPrimaryDark)
+                            Switch(checked = isDark, onCheckedChange = { onToggleTheme() }, colors = SwitchDefaults.colors(
+                                checkedThumbColor = FinFlowNavy,
+                                checkedTrackColor = FinFlowGold,
+                                uncheckedThumbColor = TextSecondDark,
+                                uncheckedTrackColor = FinFlowNavy2,
+                                uncheckedBorderColor = BorderDark,
+                            ))
                         }
                         NavigationDrawerItem(
                             selected = false,
                             onClick = { confirmLogout = true },
                             label = { Text("Cerrar sesión") },
                             icon = { Icon(Icons.AutoMirrored.Outlined.Logout, contentDescription = null) },
+                            colors = NavigationDrawerItemDefaults.colors(
+                                unselectedIconColor = TextSecondDark,
+                                unselectedTextColor = TextSecondDark,
+                            ),
                         )
                         Spacer(Modifier.height(12.dp))
                     }
@@ -160,7 +180,7 @@ private fun DrawerGroup(title: String, items: List<MenuItem>, selectedKey: Strin
             style = MaterialTheme.typography.labelMedium,
             fontWeight = FontWeight.Bold,
             letterSpacing = 1.sp,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            color = TextTertiaryDark,
         )
         items.forEach { item ->
             NavigationDrawerItem(
@@ -176,9 +196,12 @@ private fun DrawerGroup(title: String, items: List<MenuItem>, selectedKey: Strin
                 },
                 icon = { Icon(item.icon, contentDescription = null) },
                 colors = NavigationDrawerItemDefaults.colors(
-                    selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                    selectedIconColor = MaterialTheme.colorScheme.primary,
-                    selectedTextColor = MaterialTheme.colorScheme.onSurface,
+                    selectedContainerColor = FinFlowDrawerSelected,
+                    selectedIconColor = FinFlowGold,
+                    selectedTextColor = Color.White,
+                    unselectedContainerColor = Color.Transparent,
+                    unselectedIconColor = TextSecondDark,
+                    unselectedTextColor = TextSecondDark,
                 ),
             )
         }

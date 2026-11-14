@@ -23,6 +23,11 @@ class FinFlowV4DesignContractTest {
         assertEquals(Color(0xFF0B1220), BackgroundDark)
         assertEquals(Color(0xFF0E192B), SurfaceDark)
         assertEquals(Color(0xFF26364D), BorderDark)
+        assertEquals(Color(0xFF22334A), FinFlowDrawerSelected)
+        assertEquals(Color(0xFFAEBDD2), TextSecondDark)
+        assertEquals(Color(0xFF477CFF), FinFlowBlue)
+        assertEquals(Color(0xFFD7A94D), FinFlowChartExpense)
+        assertEquals(Color(0xFFFFFDF8), SurfaceLight)
     }
 }
 

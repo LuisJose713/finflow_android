@@ -36,10 +36,10 @@ import com.softdevcode.finflow_android.R
  * Only the presentation is shared; Android retains native, accessible controls.
  */
 @Composable
-fun FinFlowV4Overline(text: String, color: Color = FinFlowGoldMuted) {
+fun FinFlowV4Overline(text: String, color: Color? = null) {
     Text(
         text = text.uppercase(),
-        color = color,
+        color = color ?: if (MaterialTheme.colorScheme.background == BackgroundDark) FinFlowGold else FinFlowGoldMuted,
         style = MaterialTheme.typography.labelSmall.copy(
             fontWeight = FontWeight.ExtraBold,
             letterSpacing = 1.65.sp,

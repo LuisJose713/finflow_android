@@ -1,10 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="purple_200">#FFBB86FC</color>
-    <color name="purple_500">#FF6200EE</color>
-    <color name="purple_700">#FF3700B3</color>
-    <color name="teal_200">#FF03DAC5</color>
-    <color name="teal_700">#FF018786</color>
+    <!-- FinFlow Web V4 brand palette. Keep resource values aligned with Color.kt. -->
+    <color name="finflow_navy">#0E192B</color>
+    <color name="finflow_navy_raised">#1B2B43</color>
+    <color name="finflow_gold">#DCC29A</color>
+    <color name="finflow_canvas_light">#F6F3ED</color>
+    <color name="finflow_canvas_dark">#0B1220</color>
+    <!-- Legacy resource keys kept for compatibility, without stock purple/teal. -->
+    <color name="purple_200">#DCC29A</color>
+    <color name="purple_500">#0E192B</color>
+    <color name="purple_700">#1B2B43</color>
+    <color name="teal_200">#22C55E</color>
+    <color name="teal_700">#34A38C</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 </resources>

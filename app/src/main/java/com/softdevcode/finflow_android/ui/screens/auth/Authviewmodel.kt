@@ -40,8 +40,8 @@ class AuthViewModel @Inject constructor(
     val uiState: StateFlow<AuthUiState> = _uiState.asStateFlow()
 
     val darkMode: StateFlow<Boolean> = tokenManager.darkMode
-        .map { it ?: false }
-        .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+        .map { it ?: true }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, true)
 
     init {
         checkAuth()

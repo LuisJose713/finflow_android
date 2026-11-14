@@ -94,7 +94,7 @@ fun FinFlowTrendChart(monthlyData: List<MonthlyData>, amountsVisible: Boolean) {
                     }
                 }
                 renderLine({ it.income }, FinFlowBlue)
-                renderLine({ it.expenses }, FinFlowGold)
+                renderLine({ it.expenses }, FinFlowChartExpense)
             }
             Row(
                 Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
@@ -125,7 +125,7 @@ fun FinFlowTrendChart(monthlyData: List<MonthlyData>, amountsVisible: Boolean) {
                     Text(formatter.format(active.income), fontWeight = FontWeight.Bold)
                 }
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    Text("Gastos", color = FinFlowGold)
+                    Text("Gastos", color = FinFlowGoldMuted)
                     Text(formatter.format(active.expenses), fontWeight = FontWeight.Bold)
                 }
             }

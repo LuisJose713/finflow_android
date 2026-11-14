@@ -14,7 +14,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.softdevcode.finflow_android.domain.model.Goal
-import com.softdevcode.finflow_android.ui.theme.Primary
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -169,7 +168,7 @@ fun GoalDetailScreen(
             Text(
                 text = "${(goal.progress * 100).toInt()}%",
                 style = MaterialTheme.typography.headlineMedium,
-                color = Primary,
+                color = MaterialTheme.colorScheme.primary,
             )
 
             Row(
@@ -234,7 +233,7 @@ fun GoalDetailScreen(
                 Text(
                     "🎉 ¡Meta completada!",
                     style = MaterialTheme.typography.titleMedium,
-                    color = Primary,
+                    color = MaterialTheme.colorScheme.primary,
                 )
 
             } else {

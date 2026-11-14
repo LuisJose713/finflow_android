@@ -66,7 +66,7 @@ fun RegisterScreen(
                 .height(250.dp)
                 .background(
                     Brush.verticalGradient(
-                        listOf(com.softdevcode.finflow_android.ui.theme.Primary.copy(alpha = 0.07f), MaterialTheme.colorScheme.background)
+                        listOf(MaterialTheme.colorScheme.primary.copy(alpha = 0.07f), MaterialTheme.colorScheme.background)
                     )
                 )
         )
@@ -282,12 +282,12 @@ fun RegisterScreen(
                 enabled = canRegister,
                 modifier = Modifier.fillMaxWidth().height(52.dp),
                 shape = RoundedCornerShape(14.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = com.softdevcode.finflow_android.ui.theme.Primary),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
             ) {
                 if (uiState.isLoading) {
-                    CircularProgressIndicator(modifier = Modifier.size(20.dp), color = androidx.compose.ui.graphics.Color.White, strokeWidth = 2.dp)
+                    CircularProgressIndicator(modifier = Modifier.size(20.dp), color = MaterialTheme.colorScheme.onPrimary, strokeWidth = 2.dp)
                 } else {
-                    Text("Crear cuenta", style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold, fontSize = 15.sp), color = androidx.compose.ui.graphics.Color.White)
+                    Text("Crear cuenta", style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold, fontSize = 15.sp), color = MaterialTheme.colorScheme.onPrimary)
                 }
             }
 
@@ -296,7 +296,7 @@ fun RegisterScreen(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text("¿Ya tienes cuenta? ", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface.copy(0.5f))
                 TextButton(onClick = onNavigateToLogin, contentPadding = PaddingValues(0.dp)) {
-                    Text("Inicia sesión", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), color = com.softdevcode.finflow_android.ui.theme.Primary)
+                    Text("Inicia sesión", style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold), color = MaterialTheme.colorScheme.primary)
                 }
             }
 

@@ -62,7 +62,7 @@ fun LoginScreen(
                 .background(
                     Brush.verticalGradient(
                         colors = listOf(
-                            Primary.copy(alpha = 0.08f),
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.08f),
                             MaterialTheme.colorScheme.background,
                         )
                     )
@@ -218,12 +218,12 @@ fun LoginScreen(
                     .fillMaxWidth()
                     .height(52.dp),
                 shape = RoundedCornerShape(14.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Primary),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
             ) {
                 if (uiState.isLoading) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(20.dp),
-                        color = androidx.compose.ui.graphics.Color.White,
+                        color = MaterialTheme.colorScheme.onPrimary,
                         strokeWidth = 2.dp,
                     )
                 } else {
@@ -233,7 +233,7 @@ fun LoginScreen(
                             fontWeight = FontWeight.SemiBold,
                             fontSize = 15.sp,
                         ),
-                        color = androidx.compose.ui.graphics.Color.White,
+                        color = MaterialTheme.colorScheme.onPrimary,
                     )
                 }
             }
@@ -256,7 +256,7 @@ fun LoginScreen(
                     Text(
                         "Regístrate",
                         style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-                        color = Primary,
+                        color = MaterialTheme.colorScheme.primary,
                     )
                 }
             }
