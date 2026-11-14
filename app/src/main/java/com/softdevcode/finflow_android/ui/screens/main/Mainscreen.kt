@@ -48,6 +48,22 @@ fun MainScreen(
     LaunchedEffect(uiState.user?.id) { preferences.load(uiState.user?.id) }
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+    var navigatingDrawer by remember { mutableStateOf(false) }
+
+    fun navigateFromDrawer(destination: () -> Unit) {
+        // Finish the drawer animation before the destination transition begins.
+        // Ignore repeat taps while the first navigation is still in progress.
+        if (navigatingDrawer) return
+        navigatingDrawer = true
+        scope.launch {
+            try {
+                drawerState.close()
+                destination()
+            } finally {
+                navigatingDrawer = false
+            }
+        }
+    }
     val module = entry?.arguments?.getString("section")
     val title = when (route) {
         Screen.Module.route -> moduleTitle(module.orEmpty())
@@ -80,8 +96,13 @@ fun MainScreen(
         isDark = darkMode,
         isAdmin = isAdmin,
         onClose = { scope.launch { drawerState.close() } },
-        onNavigate = { navController.navigateToTopLevel(it) },
-        onModule = ::openModule,
+        onNavigate = { target -> navigateFromDrawer { navController.navigateToTopLevel(target) } },
+        onModule = { section -> navigateFromDrawer { openModule(section) } },
+        onNewTransaction = {
+            navigateFromDrawer {
+                navController.navigate(Screen.AddTransaction.route) { launchSingleTop = true }
+            }
+        },
         onToggleTheme = authViewModel::toggleDarkMode,
         onLogout = authViewModel::logout,
     ) {

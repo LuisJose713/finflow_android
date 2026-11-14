@@ -34,6 +34,7 @@ class MainMenuTest {
         var route by mutableStateOf(Screen.Dashboard.route)
         var section by mutableStateOf<String?>(null)
         var closeCount = 0
+        var createdCount = 0
         compose.setContent {
             CompositionLocalProvider(LocalDensity provides Density(1f, fontScale = 1.3f)) {
                 FinFlowTheme(darkTheme = true) {
@@ -42,12 +43,16 @@ class MainMenuTest {
                         onClose = { closeCount++ },
                         onNavigate = { route = it; section = null },
                         onModule = { route = Screen.Module.route; section = it },
+                        onNewTransaction = { createdCount++ },
                         onToggleTheme = {}, onLogout = {},
                     ) { Box(Modifier.fillMaxSize()) }
                 }
             }
         }
         compose.onNodeWithContentDescription("Cerrar menú").assertIsDisplayed()
+        compose.onNodeWithText("Cerrar sesión").assertIsDisplayed()
+        compose.onNodeWithText("Nueva transacción").performClick()
+        compose.runOnIdle { assertEquals(1, createdCount) }
         compose.runOnIdle {
             // PixelCopy requires hardware frame callbacks unavailable in Robolectric.
             val view = compose.activity.window.decorView
@@ -61,10 +66,12 @@ class MainMenuTest {
         compose.onNodeWithText("Actualizaciones").performScrollTo().performClick()
         compose.runOnIdle {
             assertEquals("updates", section)
-            assertEquals(2, closeCount)
+            assertEquals(0, closeCount)
         }
         compose.onNodeWithText("Administración").assertDoesNotExist()
         compose.onNodeWithText("Inicio").performScrollTo().performClick()
         compose.runOnIdle { assertEquals(Screen.Dashboard.route, route) }
+        compose.onNodeWithContentDescription("Cerrar menú").performClick()
+        compose.runOnIdle { assertEquals(1, closeCount) }
     }
 }

@@ -1,37 +1,43 @@
 package com.softdevcode.finflow_android.ui.screens.main
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Logout
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import com.softdevcode.finflow_android.ui.theme.FinFlowNavy
-import com.softdevcode.finflow_android.ui.theme.FinFlowNavy2
-import com.softdevcode.finflow_android.ui.theme.FinFlowGold
-import com.softdevcode.finflow_android.ui.theme.FinFlowDrawerSelected
-import com.softdevcode.finflow_android.ui.theme.BorderDark
-import com.softdevcode.finflow_android.ui.theme.TextPrimaryDark
-import com.softdevcode.finflow_android.ui.theme.TextSecondDark
-import com.softdevcode.finflow_android.ui.theme.TextTertiaryDark
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.softdevcode.finflow_android.ui.screens.navigation.Screen
-import com.softdevcode.finflow_android.ui.theme.FinFlowV4Overline
-import com.softdevcode.finflow_android.ui.theme.FinFlowV4Wordmark
+import com.softdevcode.finflow_android.ui.theme.*
 
+/**
+ * Native FinFlow navigation: Web V4 brand tokens and hierarchy, Android touch targets.
+ * Only the destinations list scrolls: the account, quick action and controls stay visible.
+ */
 private data class MenuItem(val key: String, val title: String, val icon: ImageVector)
+
 private val mainItems = listOf(
-    MenuItem(Screen.Dashboard.route, "Inicio", Icons.Outlined.Home),
+    MenuItem(Screen.Dashboard.route, "Inicio", Icons.Outlined.GridView),
     MenuItem(Screen.Transactions.route, "Movimientos", Icons.Outlined.SwapHoriz),
     MenuItem(Screen.Goals.route, "Metas", Icons.Outlined.TrackChanges),
     MenuItem(Screen.PlannedExpenses.route, "Gastos planeados", Icons.Outlined.CalendarMonth),
@@ -45,7 +51,7 @@ private val financeItems = listOf(
     MenuItem("reports", "Reportes", Icons.Outlined.Assessment),
 )
 private val accountItems = listOf(
-    MenuItem("billing", "Planes", Icons.Outlined.WorkspacePremium),
+    MenuItem("billing", "Planes y precios", Icons.Outlined.WorkspacePremium),
     MenuItem("security", "Seguridad", Icons.Outlined.Shield),
     MenuItem("privacy", "Privacidad y datos", Icons.Outlined.PrivacyTip),
     MenuItem("updates", "Actualizaciones", Icons.Outlined.SystemUpdate),
@@ -67,143 +73,283 @@ internal fun MainMenu(
     onClose: () -> Unit,
     onNavigate: (String) -> Unit,
     onModule: (String) -> Unit,
+    onNewTransaction: () -> Unit,
     onToggleTheme: () -> Unit,
     onLogout: () -> Unit,
     content: @Composable () -> Unit,
 ) {
     var confirmLogout by remember { mutableStateOf(false) }
+    val drawerShape = RoundedCornerShape(topEnd = 22.dp, bottomEnd = 22.dp)
     BoxWithConstraints(Modifier.fillMaxSize()) {
-        val drawerWidth = (maxWidth * 0.88f).coerceAtMost(360.dp)
+        val drawerWidth = (maxWidth * 0.90f).coerceAtMost(370.dp)
         ModalNavigationDrawer(
             drawerState = drawerState,
             gesturesEnabled = gesturesEnabled,
+            scrimColor = Color(0xB3020617),
             drawerContent = {
-                ModalDrawerSheet(modifier = Modifier.width(drawerWidth).fillMaxHeight(), drawerContainerColor = FinFlowNavy) {
-                    Column(
-                        Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 12.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
+                ModalDrawerSheet(
+                    modifier = Modifier.width(drawerWidth).fillMaxHeight(),
+                    drawerShape = drawerShape,
+                    drawerContainerColor = FinFlowNavy,
+                ) {
+                    Column(Modifier.fillMaxSize().background(FinFlowNavy)) {
+                        // Brand always stays visible when browsing long navigation menus.
                         Row(
-                            Modifier.fillMaxWidth().padding(start = 12.dp, top = 8.dp),
+                            Modifier.fillMaxWidth().padding(start = 18.dp, end = 10.dp, top = 16.dp, bottom = 10.dp),
                             verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(11.dp),
                         ) {
-                            FinFlowV4Wordmark(modifier = Modifier.weight(1f), color = TextPrimaryDark)
-                            IconButton(onClick = onClose) { Icon(Icons.Outlined.Close, "Cerrar menú", tint = TextSecondDark) }
-                        }
-                        Row(
-                            Modifier.fillMaxWidth().padding(start = 12.dp, end = 12.dp, bottom = 12.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        ) {
-                            val initials = userName.trim().split(Regex("\\s+")).take(2)
-                                .mapNotNull { it.firstOrNull()?.uppercase() }.joinToString("")
-                                .ifBlank { "F" }
-                            Box(
-                                Modifier.size(44.dp).background(FinFlowNavy2, CircleShape),
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                Text(initials, style = MaterialTheme.typography.titleMedium, color = FinFlowGold)
-                            }
-                            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                                Text(
-                                    userName.ifBlank { "Tu espacio financiero" },
-                                    color = TextPrimaryDark,
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.SemiBold,
-                                    maxLines = 1,
-                                )
-                                Text(
-                                    "Tu dinero, con claridad",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = TextSecondDark,
-                                )
+                            FinFlowV4BrandMark(Modifier.size(42.dp))
+                            FinFlowV4Wordmark(Modifier.weight(1f), color = TextPrimaryDark)
+                            IconButton(onClick = onClose, modifier = Modifier.size(48.dp)) {
+                                Icon(Icons.Outlined.Close, "Cerrar menú", tint = TextSecondDark)
                             }
                         }
-                        DrawerGroup("Tu panorama", mainItems, currentRoute) { onNavigate(it); onClose() }
-                        HorizontalDivider(Modifier.padding(vertical = 4.dp), color = BorderDark)
-                        DrawerGroup("Tu dinero", financeItems,
-                            if (currentRoute == Screen.Advisor.route) "advisor" else currentSection,
-                        ) { onModule(it); onClose() }
-                        HorizontalDivider(Modifier.padding(vertical = 4.dp), color = BorderDark)
-                        DrawerGroup("Tu cuenta", accountItems, currentSection) { onModule(it); onClose() }
-                        if (isAdmin) DrawerGroup("Administración", listOf(
-                            MenuItem("admin", "Administración", Icons.Outlined.AdminPanelSettings),
-                        ), currentSection) { onModule(it); onClose() }
-                        HorizontalDivider(Modifier.padding(vertical = 4.dp), color = BorderDark)
-                        Row(
-                            Modifier.fillMaxWidth().padding(start = 16.dp, end = 12.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        ) {
-                            Icon(Icons.Outlined.DarkMode, contentDescription = null, tint = TextSecondDark)
-                            Text("Modo oscuro", modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium, color = TextPrimaryDark)
-                            Switch(checked = isDark, onCheckedChange = { onToggleTheme() }, colors = SwitchDefaults.colors(
-                                checkedThumbColor = FinFlowNavy,
-                                checkedTrackColor = FinFlowGold,
-                                uncheckedThumbColor = TextSecondDark,
-                                uncheckedTrackColor = FinFlowNavy2,
-                                uncheckedBorderColor = BorderDark,
-                            ))
-                        }
-                        NavigationDrawerItem(
-                            selected = false,
-                            onClick = { confirmLogout = true },
-                            label = { Text("Cerrar sesión") },
-                            icon = { Icon(Icons.AutoMirrored.Outlined.Logout, contentDescription = null) },
-                            colors = NavigationDrawerItemDefaults.colors(
-                                unselectedIconColor = TextSecondDark,
-                                unselectedTextColor = TextSecondDark,
+                        AccountSummary(userName)
+                        Button(
+                            onClick = onNewTransaction,
+                            modifier = Modifier.fillMaxWidth()
+                                .padding(horizontal = 18.dp, vertical = 11.dp).heightIn(min = 48.dp),
+                            shape = RoundedCornerShape(13.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = FinFlowGold,
+                                contentColor = FinFlowNavy,
                             ),
+                        ) {
+                            Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(19.dp))
+                            Spacer(Modifier.width(9.dp))
+                            Text("Nueva transacción", fontWeight = FontWeight.Bold)
+                        }
+                        HorizontalDivider(color = BorderDark, thickness = 1.dp)
+
+                        // Scrolling only the destinations keeps logout and theme in reach,
+                        // even on compact devices and large accessibility text settings.
+                        Column(
+                            modifier = Modifier.weight(1f).fillMaxWidth()
+                                .verticalScroll(rememberScrollState())
+                                .padding(start = 12.dp, end = 12.dp, top = 4.dp, bottom = 12.dp),
+                            verticalArrangement = Arrangement.spacedBy(2.dp),
+                        ) {
+                            DrawerGroup("Tu panorama", mainItems, currentRoute, onNavigate)
+                            DrawerSeparator()
+                            DrawerGroup(
+                                "Tu dinero", financeItems,
+                                if (currentRoute == Screen.Advisor.route) "advisor" else currentSection,
+                                onModule,
+                            )
+                            DrawerSeparator()
+                            DrawerGroup("Tu cuenta", accountItems, currentSection, onModule)
+                            if (isAdmin) {
+                                DrawerSeparator()
+                                DrawerGroup(
+                                    "Administración",
+                                    listOf(MenuItem("admin", "Panel de administración", Icons.Outlined.AdminPanelSettings)),
+                                    currentSection, onModule,
+                                )
+                            }
+                        }
+                        DrawerFooter(
+                            isDark = isDark,
+                            onToggleTheme = onToggleTheme,
+                            onLogout = { confirmLogout = true },
                         )
-                        Spacer(Modifier.height(12.dp))
                     }
                 }
             },
             content = content,
         )
     }
-    if (confirmLogout) AlertDialog(
-        onDismissRequest = { confirmLogout = false },
-        title = { Text("¿Cerrar sesión?") },
-        text = { Text("Podrás volver a entrar con tu correo y contraseña.") },
-        confirmButton = { TextButton(onClick = { confirmLogout = false; onClose(); onLogout() }) { Text("Cerrar sesión") } },
-        dismissButton = { TextButton(onClick = { confirmLogout = false }) { Text("Cancelar") } },
+
+    if (confirmLogout) {
+        AlertDialog(
+            onDismissRequest = { confirmLogout = false },
+            title = { Text("¿Cerrar sesión?") },
+            text = { Text("Podrás volver a entrar con tu correo y contraseña.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    confirmLogout = false
+                    onClose()
+                    onLogout()
+                }) { Text("Cerrar sesión") }
+            },
+            dismissButton = {
+                TextButton(onClick = { confirmLogout = false }) { Text("Cancelar") }
+            },
+        )
+    }
+}
+
+@Composable
+private fun AccountSummary(userName: String) {
+    val cleanName = remember(userName) { userName.trim().ifBlank { "Tu espacio financiero" } }
+    val initials = remember(cleanName) {
+        cleanName.split(' ').filter { it.isNotBlank() }.take(2)
+            .mapNotNull { it.firstOrNull()?.uppercaseChar() }.joinToString("")
+            .ifBlank { "F" }
+    }
+    Surface(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 4.dp),
+        color = FinFlowNavy2,
+        shape = RoundedCornerShape(15.dp),
+        border = BorderStroke(1.dp, FinFlowGold.copy(alpha = 0.20f)),
+    ) {
+        Row(
+            Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Box(
+                modifier = Modifier.size(43.dp).clip(CircleShape)
+                    .background(FinFlowGold.copy(alpha = .14f))
+                    .border(1.dp, FinFlowGold.copy(alpha = .45f), CircleShape),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(initials, color = FinFlowGold, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+            }
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                Text(cleanName, color = TextPrimaryDark, fontWeight = FontWeight.SemiBold,
+                    maxLines = 1, overflow = TextOverflow.Ellipsis, fontSize = 14.sp)
+                Text("Tu espacio financiero", color = TextSecondDark,
+                    style = MaterialTheme.typography.labelSmall)
+            }
+        }
+    }
+}
+
+@Composable
+private fun DrawerSeparator() {
+    HorizontalDivider(
+        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+        color = BorderDark.copy(alpha = .7f),
     )
 }
 
 @Composable
-private fun DrawerGroup(title: String, items: List<MenuItem>, selectedKey: String?, onSelect: (String) -> Unit) {
-    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+private fun DrawerGroup(
+    title: String,
+    items: List<MenuItem>,
+    selectedKey: String?,
+    onSelect: (String) -> Unit,
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
         Text(
             title.uppercase(),
-            modifier = Modifier.padding(start = 16.dp, top = 12.dp, bottom = 6.dp),
-            style = MaterialTheme.typography.labelMedium,
+            modifier = Modifier.padding(start = 15.dp, top = 12.dp, bottom = 7.dp),
+            style = MaterialTheme.typography.labelSmall,
             fontWeight = FontWeight.Bold,
-            letterSpacing = 1.sp,
+            letterSpacing = 1.15.sp,
             color = TextTertiaryDark,
         )
         items.forEach { item ->
-            NavigationDrawerItem(
-                selected = selectedKey == item.key,
-                onClick = { onSelect(item.key) },
-                label = {
-                    Text(
-                        item.title,
-                        fontSize = 16.sp,
-                        fontWeight = if (selectedKey == item.key) FontWeight.SemiBold else FontWeight.Medium,
-                        maxLines = 1,
+            val selected = selectedKey == item.key
+            val shape = RoundedCornerShape(12.dp)
+            val fill by animateColorAsState(
+                targetValue = if (selected) FinFlowDrawerSelected else Color.Transparent,
+                animationSpec = tween(durationMillis = 160),
+                label = "drawer-selection",
+            )
+            val foreground by animateColorAsState(
+                targetValue = if (selected) Color.White else TextSecondDark,
+                animationSpec = tween(durationMillis = 160),
+                label = "drawer-text",
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth()
+                    .clip(shape)
+                    .background(fill)
+                    .border(
+                        1.dp, if (selected) FinFlowGold.copy(alpha = .23f) else Color.Transparent,
+                        shape,
                     )
-                },
-                icon = { Icon(item.icon, contentDescription = null) },
-                colors = NavigationDrawerItemDefaults.colors(
-                    selectedContainerColor = FinFlowDrawerSelected,
-                    selectedIconColor = FinFlowGold,
-                    selectedTextColor = Color.White,
-                    unselectedContainerColor = Color.Transparent,
-                    unselectedIconColor = TextSecondDark,
-                    unselectedTextColor = TextSecondDark,
+                    .selectable(selected = selected, role = Role.Button, onClick = { onSelect(item.key) })
+                    .heightIn(min = 49.dp)
+                    .padding(start = 12.dp, end = 10.dp, top = 7.dp, bottom = 7.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                Box(
+                    Modifier.size(width = 3.dp, height = 24.dp)
+                        .clip(RoundedCornerShape(3.dp))
+                        .background(if (selected) FinFlowGold else Color.Transparent),
+                )
+                Box(
+                    modifier = Modifier.size(31.dp).clip(RoundedCornerShape(9.dp))
+                        .background(if (selected) FinFlowGold.copy(alpha = .13f) else Color.Transparent),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        item.icon, contentDescription = null,
+                        modifier = Modifier.size(20.dp),
+                        tint = if (selected) FinFlowGold else TextSecondDark,
+                    )
+                }
+                Text(
+                    item.title,
+                    modifier = Modifier.weight(1f),
+                    color = foreground,
+                    fontSize = 14.sp,
+                    lineHeight = 19.sp,
+                    fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun DrawerFooter(
+    isDark: Boolean,
+    onToggleTheme: () -> Unit,
+    onLogout: () -> Unit,
+) {
+    HorizontalDivider(color = BorderDark)
+    Column(
+        modifier = Modifier.fillMaxWidth()
+            .padding(start = 18.dp, end = 18.dp, top = 9.dp, bottom = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Row(
+            Modifier.fillMaxWidth().heightIn(min = 48.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(if (isDark) Icons.Outlined.DarkMode else Icons.Outlined.LightMode,
+                contentDescription = null, tint = TextSecondDark, modifier = Modifier.size(20.dp))
+            Spacer(Modifier.width(11.dp))
+            Text("Modo oscuro", modifier = Modifier.weight(1f),
+                color = TextPrimaryDark, style = MaterialTheme.typography.bodyMedium)
+            Switch(
+                checked = isDark,
+                onCheckedChange = { onToggleTheme() },
+                modifier = Modifier.heightIn(min = 48.dp),
+                colors = SwitchDefaults.colors(
+                    checkedThumbColor = FinFlowNavy,
+                    checkedTrackColor = FinFlowGold,
+                    uncheckedThumbColor = TextSecondDark,
+                    uncheckedTrackColor = FinFlowNavy2,
+                    uncheckedBorderColor = BorderDark,
                 ),
             )
         }
+        OutlinedButton(
+            onClick = onLogout,
+            modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
+            shape = RoundedCornerShape(12.dp),
+            border = BorderStroke(1.dp, BorderDark),
+            colors = ButtonDefaults.outlinedButtonColors(contentColor = TextSecondDark),
+        ) {
+            Icon(Icons.AutoMirrored.Outlined.Logout, contentDescription = null,
+                modifier = Modifier.size(19.dp))
+            Spacer(Modifier.width(8.dp))
+            Text("Cerrar sesión", fontWeight = FontWeight.Medium)
+        }
+        Text(
+            "Creado por AEVQOR",
+            modifier = Modifier.fillMaxWidth(),
+            color = FinFlowGold,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+            style = MaterialTheme.typography.labelSmall,
+        )
     }
 }
