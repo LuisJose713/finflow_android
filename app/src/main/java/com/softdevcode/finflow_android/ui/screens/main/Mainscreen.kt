@@ -109,7 +109,7 @@ fun MainScreen(
         Scaffold(
             containerColor = MaterialTheme.colorScheme.background,
             topBar = {
-                if (title != null && route !in setOf(Screen.Goals.route, Screen.Transactions.route, Screen.PlannedExpenses.route)) TopAppBar(
+                if (title != null && route !in setOf(Screen.Dashboard.route, Screen.Goals.route, Screen.Transactions.route, Screen.PlannedExpenses.route)) TopAppBar(
                     title = { Text(title, fontWeight = FontWeight.SemiBold) },
                     navigationIcon = {
                         IconButton(onClick = { scope.launch { drawerState.open() } }) {
@@ -148,6 +148,7 @@ fun MainScreen(
                 composable(Screen.Dashboard.route) {
                     DashboardScreen(
                         userName = uiState.user?.name.orEmpty(),
+                        onOpenMenu = { scope.launch { drawerState.open() } },
                         isDark = darkMode,
                         onToggleTheme = authViewModel::toggleDarkMode,
                         onLogout = authViewModel::logout,

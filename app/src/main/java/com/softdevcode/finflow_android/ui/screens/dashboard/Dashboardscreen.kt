@@ -43,6 +43,7 @@ import java.util.Locale
 @Composable
 fun DashboardScreen(
     userName: String,
+    onOpenMenu: () -> Unit,
     isDark: Boolean,
     onToggleTheme: () -> Unit,
     onLogout: () -> Unit,
@@ -76,7 +77,7 @@ fun DashboardScreen(
             modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            DashboardTopBar(userName, isDark, onToggleTheme, onLogout)
+            DashboardTopBar(userName, isDark, onToggleTheme, onOpenMenu)
             uiState.stats?.let { stats ->
                 Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp),
                     verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -148,7 +149,7 @@ fun DashboardScreen(
 }
 
 @Composable
-private fun DashboardTopBar(userName: String, isDark: Boolean, onToggleTheme: () -> Unit, onLogout: () -> Unit) {
+private fun DashboardTopBar(userName: String, isDark: Boolean, onToggleTheme: () -> Unit, onOpenMenu: () -> Unit) {
     Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 18.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             FinFlowV4BrandMark(Modifier.size(49.dp))
@@ -161,8 +162,8 @@ private fun DashboardTopBar(userName: String, isDark: Boolean, onToggleTheme: ()
                 Icon(if (isDark) Icons.Outlined.LightMode else Icons.Outlined.DarkMode,
                     if (isDark) "Activar tema claro" else "Activar tema oscuro")
             }
-            IconButton(onClick = onLogout) {
-                Icon(Icons.Outlined.Logout, "Cerrar sesión")
+            IconButton(onClick = onOpenMenu) {
+                Icon(Icons.Outlined.Menu, "Abrir menú")
             }
         }
         Spacer(Modifier.height(24.dp))
