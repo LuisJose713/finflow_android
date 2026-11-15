@@ -51,6 +51,7 @@ import com.softdevcode.finflow_android.ui.theme.FinFlowNavy
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.softdevcode.finflow_android.ui.sync.FinanceLiveRefresh
 import com.softdevcode.finflow_android.domain.model.Goal
 import java.util.Locale
 
@@ -66,6 +67,7 @@ fun GoalsScreen(
 
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    FinanceLiveRefresh { viewModel.loadGoals(silent = true) }
 
     Scaffold(
         topBar = {

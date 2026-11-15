@@ -54,6 +54,7 @@ import com.softdevcode.finflow_android.ui.theme.FinFlowNavy
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.softdevcode.finflow_android.ui.sync.FinanceLiveRefresh
 import com.softdevcode.finflow_android.domain.model.PlannedExpense
 import java.util.Locale
 
@@ -65,6 +66,7 @@ fun PlannedExpensesScreen(
     viewModel: PlannedExpensesViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    FinanceLiveRefresh { viewModel.loadPlannedExpenses(silent = true) }
 
     var expenseToDelete by remember {
         mutableStateOf<PlannedExpense?>(null)

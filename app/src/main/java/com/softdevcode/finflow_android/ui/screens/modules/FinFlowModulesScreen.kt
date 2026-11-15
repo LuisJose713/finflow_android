@@ -27,6 +27,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.softdevcode.finflow_android.ui.sync.FinanceLiveRefresh
 import com.softdevcode.finflow_android.domain.model.*
 import com.softdevcode.finflow_android.ui.theme.FinFlowGold
 import com.softdevcode.finflow_android.ui.theme.FinFlowNavy
@@ -56,6 +57,12 @@ fun FinFlowModulesScreen(
     val selected = initialSection
     var year by rememberSaveable { mutableIntStateOf(cal.get(Calendar.YEAR)) }
     var month by rememberSaveable { mutableIntStateOf(cal.get(Calendar.MONTH) + 1) }
+
+    if (selected in setOf("accounts", "budgets", "recurring", "categories")) {
+        FinanceLiveRefresh(selected, year, month) {
+            if (!vm.state.value.busy) vm.refresh(selected, year, month, silent = true)
+        }
+    }
 
     LaunchedEffect(selected) {
         if (selected in listOf("accounts", "budgets", "recurring", "categories", "privacy"))

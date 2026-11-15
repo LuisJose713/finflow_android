@@ -33,6 +33,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.softdevcode.finflow_android.ui.sync.FinanceLiveRefresh
 import com.softdevcode.finflow_android.domain.model.*
 import com.softdevcode.finflow_android.ui.theme.*
 import java.text.DateFormat
@@ -58,6 +59,7 @@ fun DashboardScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var amountsVisible by rememberSaveable { mutableStateOf(true) }
     val lifecycleOwner = LocalLifecycleOwner.current
+    FinanceLiveRefresh { viewModel.synchronize() }
 
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->

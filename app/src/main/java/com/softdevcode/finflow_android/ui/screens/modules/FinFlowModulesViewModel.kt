@@ -43,11 +43,11 @@ class FinFlowModulesViewModel @Inject constructor(private val api: FinFlowApi) :
 
     fun clearMessages() = _state.update { it.copy(chat = emptyList(), error = null, notice = null) }
 
-    fun refresh(section: String, year: Int = selectedYear, month: Int = selectedMonth) {
+    fun refresh(section: String, year: Int = selectedYear, month: Int = selectedMonth, silent: Boolean = false) {
         selectedYear = year
         selectedMonth = month
         viewModelScope.launch {
-            _state.update { it.copy(busy = true, error = null) }
+            if (!silent) _state.update { it.copy(busy = true, error = null) }
             try {
                 when (section) {
                     "accounts" -> {
@@ -83,9 +83,9 @@ class FinFlowModulesViewModel @Inject constructor(private val api: FinFlowApi) :
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                _state.update { it.copy(error = "No se pudo cargar esta sección. Comprueba la conexión.") }
+                if (!silent) _state.update { it.copy(error = "No se pudo cargar esta sección. Comprueba la conexión.") }
             } finally {
-                _state.update { it.copy(busy = false) }
+                if (!silent) _state.update { it.copy(busy = false) }
             }
         }
     }

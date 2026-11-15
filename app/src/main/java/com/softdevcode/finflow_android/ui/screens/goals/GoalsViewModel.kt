@@ -42,14 +42,11 @@ class GoalsViewModel @Inject constructor(
     // CARGAR METAS
     // ============================================================
 
-    fun loadGoals() {
+    fun loadGoals(silent: Boolean = false) {
         viewModelScope.launch {
 
-            _uiState.update {
-                it.copy(
-                    isLoading = true,
-                    error = null
-                )
+            if (!silent) _uiState.update {
+                it.copy(isLoading = true, error = null)
             }
 
             when (val result = repository.getGoals()) {
@@ -68,7 +65,7 @@ class GoalsViewModel @Inject constructor(
                     _uiState.update {
                         it.copy(
                             isLoading = false,
-                            error = result.message
+                            error = if (silent) it.error else result.message
                         )
                     }
                 }

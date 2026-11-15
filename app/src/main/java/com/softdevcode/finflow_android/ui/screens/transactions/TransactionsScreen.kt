@@ -58,6 +58,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.softdevcode.finflow_android.ui.sync.FinanceLiveRefresh
 import com.softdevcode.finflow_android.domain.model.Transaction
 import com.softdevcode.finflow_android.ui.theme.FinFlowGold
 import com.softdevcode.finflow_android.ui.theme.FinFlowNavy
@@ -75,6 +76,9 @@ fun TransactionsScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var editing by remember { mutableStateOf<Transaction?>(null) }
     var deleting by remember { mutableStateOf<Transaction?>(null) }
+    FinanceLiveRefresh {
+        if (editing == null && deleting == null) viewModel.load(silent = true)
+    }
     var search by rememberSaveable { mutableStateOf("") }
     var typeFilter by rememberSaveable { mutableStateOf("") }
     val visibleTransactions = remember(uiState.transactions, typeFilter, search) {

@@ -23,11 +23,11 @@ class DashboardViewModel @Inject constructor(
         load()
     }
 
-    fun load() {
+    fun load(silent: Boolean = false) {
         // Initial composition and ON_RESUME can arrive together. Keep one request in flight.
         if (loadJob?.isActive == true) return
         loadJob = viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, error = null) }
+            if (!silent) _uiState.update { it.copy(isLoading = true, error = null) }
 
             try {
                 // Retrofit suspend calls already perform network I/O off the main thread.
@@ -59,13 +59,13 @@ class DashboardViewModel @Inject constructor(
                 }
                 _uiState.value = updated
             } catch (e: TimeoutCancellationException) {
-                _uiState.update {
+                if (!silent) _uiState.update {
                     it.copy(isLoading = false, error = "La consulta tardó demasiado. Puedes reintentar sin salir de Inicio.")
                 }
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                _uiState.update {
+                if (!silent) _uiState.update {
                     it.copy(
                         isLoading = false,
                         error = "Revisa tu conexión y vuelve a intentarlo."
@@ -76,6 +76,7 @@ class DashboardViewModel @Inject constructor(
     }
 
     fun refresh() = load()
+    fun synchronize() = load(silent = true)
 
     // 🔥 Optimizado (evita buscar en lista cada vez)
     private val categoryMap: Map<Int, String>

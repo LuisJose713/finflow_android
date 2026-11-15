@@ -47,7 +47,7 @@ class TransactionsViewModel @Inject constructor(
         }
     }
 
-    fun load(force: Boolean = false) {
+    fun load(force: Boolean = false, silent: Boolean = false) {
         // Initial load and ON_RESUME may fire together. Keep one request active;
         // forced reloads cancel stale responses and refresh after mutations.
         if (loadJob?.isActive == true) {
@@ -55,11 +55,8 @@ class TransactionsViewModel @Inject constructor(
             loadJob?.cancel()
         }
         loadJob = viewModelScope.launch {
-            _uiState.update {
-                it.copy(
-                    isLoading = true,
-                    error = null,
-                )
+            if (!silent) _uiState.update {
+                it.copy(isLoading = true, error = null)
             }
 
             when (val result = transactionRepository.getTransactions()) {
@@ -78,7 +75,7 @@ class TransactionsViewModel @Inject constructor(
                     _uiState.update {
                         it.copy(
                             isLoading = false,
-                            error = result.message,
+                            error = if (silent) it.error else result.message,
                         )
                     }
                 }
