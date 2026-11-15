@@ -35,9 +35,10 @@ fun MainScreen(
     onLogout: () -> Unit,
     updateViewModel: AppUpdateViewModel,
     authViewModel: AuthViewModel = hiltViewModel(),
-    assistantCreateRequested: Boolean = false,
+    assistantDraft: AssistantMovementDraft? = null,
     onAssistantRequestHandled: () -> Unit = {},
 ) {
+    var activeAssistantDraft by remember { mutableStateOf<AssistantMovementDraft?>(null) }
     val navController = rememberNavController()
     val entry by navController.currentBackStackEntryAsState()
     val route = entry?.destination?.route
@@ -89,8 +90,11 @@ fun MainScreen(
     }
     // System assistant/launcher shortcuts only open the authenticated form.
     // The user must review and explicitly save the transaction.
-    LaunchedEffect(assistantCreateRequested, uiState.isAuthenticated) {
-        if (assistantCreateRequested && uiState.isAuthenticated) {
+    LaunchedEffect(assistantDraft, uiState.isAuthenticated) {
+        if (assistantDraft != null && uiState.isAuthenticated) {
+            // Keep the draft after acknowledging the external request, until
+            // the authenticated user confirms or explicitly closes the form.
+            activeAssistantDraft = assistantDraft
             navController.navigate(Screen.AddTransaction.route) { launchSingleTop = true }
             onAssistantRequestHandled()
         }
@@ -176,7 +180,13 @@ fun MainScreen(
                     })
                 }
                 composable(Screen.AddTransaction.route) {
-                    AddTransactionScreen(onBack = { navController.popBackStack() })
+                    AddTransactionScreen(
+                        assistantDraft = activeAssistantDraft,
+                        onBack = {
+                            activeAssistantDraft = null
+                            navController.popBackStack()
+                        }
+                    )
                 }
                 composable(Screen.Goals.route) {
                     GoalsScreen(
