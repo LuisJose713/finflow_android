@@ -8,7 +8,7 @@ plugins {
 
 android {
     namespace = "com.softdevcode.finflow_android"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         // Public OAuth client ID supplied by Google Cloud. Never embed client secrets.
