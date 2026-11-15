@@ -43,6 +43,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.softdevcode.finflow_android.domain.model.Category
 import com.softdevcode.finflow_android.domain.model.CreateTransactionRequest
 import com.softdevcode.finflow_android.domain.model.FinancialAccount
+import com.softdevcode.finflow_android.ui.screens.navigation.AssistantMovementDraft
+import java.text.Normalizer
 import java.time.LocalDate
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -50,19 +52,20 @@ import java.time.LocalDate
 @Composable
 fun AddTransactionScreen(
     onBack: () -> Unit,
+    assistantDraft: AssistantMovementDraft? = null,
     viewModel: AddTransactionViewModel = hiltViewModel(),
 ) {
 
     var description by remember {
-        mutableStateOf("")
+        mutableStateOf(assistantDraft?.title.orEmpty())
     }
 
     var amount by remember {
-        mutableStateOf("")
+        mutableStateOf(assistantDraft?.amount.orEmpty())
     }
 
     var type by remember {
-        mutableStateOf("expense")
+        mutableStateOf(if (assistantDraft?.type == "income") "income" else "expense")
     }
 
     var selectedCategory by remember {
@@ -87,6 +90,23 @@ fun AddTransactionScreen(
 
     val uiState by viewModel.uiState
         .collectAsStateWithLifecycle()
+
+    // Assistant's category is untrusted. Select only an actual category
+    // belonging to this user and of the requested movement type.
+    LaunchedEffect(assistantDraft, uiState.categories, type) {
+        if (assistantDraft != null && type == assistantDraft.type && selectedCategory == null) {
+            fun normal(text: String): String =
+                Normalizer.normalize(text.trim().lowercase(), Normalizer.Form.NFD)
+                    .replace(Regex("\\p{Mn}+"), "")
+            val wanted = assistantDraft.category?.let(::normal)
+            if (!wanted.isNullOrBlank()) {
+                val matches = uiState.categories.filter {
+                    it.type.lowercase() == type && normal(it.name) == wanted
+                }
+                if (matches.size == 1) selectedCategory = matches.first()
+            }
+        }
+    }
 
     // ─────────────────────────────────────────────────────────────
     // VOLVER DESPUÉS DE GUARDAR
@@ -149,10 +169,23 @@ fun AddTransactionScreen(
                 Arrangement.spacedBy(12.dp),
         ) {
 
+            if (assistantDraft != null) {
+                Text(
+                    "CONFIRMA TU MOVIMIENTO",
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+                Text(
+                    "Revisa los datos recibidos del asistente. Al pulsar Confirmar y registrar, " +
+                        "FinFlow creará el movimiento una sola vez. Sin confirmación no se guarda.",
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            } else {
             FinFlowV4Hero(
                 "NUEVA TRANSACCIÓN", "Registra con claridad.",
                 "Cada ingreso o gasto, en su lugar.",
             )
+            }
 
             // ─────────────────────────────────────────────────────
             // TIPO
@@ -567,7 +600,8 @@ fun AddTransactionScreen(
                 } else {
 
                     Text(
-                        "Guardar transacción"
+                        if (assistantDraft != null) "Confirmar y registrar"
+                        else "Guardar transacción"
                     )
                 }
             }
