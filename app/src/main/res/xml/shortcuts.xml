@@ -1,7 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
-<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android"
+           xmlns:app="http://schemas.android.com/apk/res-auto">
     <!-- Google Assistant and system launcher can discover this static shortcut.
          No financial write happens until the authenticated user saves the form. -->
+    <!-- Google Assistant custom App Actions are en-US only.
+         The application always requires a human confirmation before POST. -->
+    <capability android:name="custom.actions.intent.LOG_FINFLOW_EXPENSE"
+                app:queryPatterns="@array/finflow_expense_voice_queries">
+        <intent android:targetPackage="com.softdevcode.finflow_android"
+                android:targetClass="com.softdevcode.finflow_android.MainActivity">
+            <extra android:key="finflow.assistant.create" android:value="true"/>
+            <extra android:key="finflow.assistant.type" android:value="expense"/>
+            <parameter android:name="title" android:key="finflow.assistant.title"
+                       android:mimeType="https://schema.org/Text" />
+            <parameter android:name="amount" android:key="finflow.assistant.amount"
+                       android:mimeType="https://schema.org/Number" />
+            <parameter android:name="category" android:key="finflow.assistant.category"
+                       android:mimeType="https://schema.org/Text" />
+        </intent>
+    </capability>
+
+    <capability android:name="custom.actions.intent.LOG_FINFLOW_INCOME"
+                app:queryPatterns="@array/finflow_income_voice_queries">
+        <intent android:targetPackage="com.softdevcode.finflow_android"
+                android:targetClass="com.softdevcode.finflow_android.MainActivity">
+            <extra android:key="finflow.assistant.create" android:value="true"/>
+            <extra android:key="finflow.assistant.type" android:value="income"/>
+            <parameter android:name="title" android:key="finflow.assistant.title"
+                       android:mimeType="https://schema.org/Text" />
+            <parameter android:name="amount" android:key="finflow.assistant.amount"
+                       android:mimeType="https://schema.org/Number" />
+            <parameter android:name="category" android:key="finflow.assistant.category"
+                       android:mimeType="https://schema.org/Text" />
+        </intent>
+    </capability>
+
     <shortcut
         android:shortcutId="finflow_new_movement"
         android:enabled="true"
