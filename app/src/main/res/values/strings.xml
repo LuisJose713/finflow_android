@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">FinFlow</string>
+    <string name="shortcut_new_movement">Nuevo movimiento</string>
+    <string name="shortcut_new_movement_long">Registrar movimiento en FinFlow</string>
 </resources>
