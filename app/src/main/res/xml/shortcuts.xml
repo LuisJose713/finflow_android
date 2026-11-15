@@ -35,6 +35,55 @@
         </intent>
     </capability>
 
+    <!-- Spanish (es-ES) supported built-in App Action. Opens the real FinFlow
+         form; custom free-form amount extraction is not supported in Spanish. -->
+    <capability android:name="actions.intent.OPEN_APP_FEATURE">
+        <intent
+            android:targetPackage="com.softdevcode.finflow_android"
+            android:targetClass="com.softdevcode.finflow_android.MainActivity">
+            <parameter android:name="feature"
+                       android:key="finflow.assistant.feature"/>
+        </intent>
+    </capability>
+
+    <shortcut
+        android:shortcutId="finflow_create_expense"
+        android:enabled="true"
+        android:icon="@mipmap/ic_launcher"
+        android:shortcutShortLabel="@string/shortcut_new_expense"
+        android:shortcutLongLabel="@string/shortcut_new_expense_long">
+        <capability-binding android:key="actions.intent.OPEN_APP_FEATURE">
+            <parameter-binding
+                android:key="feature"
+                android:value="@array/finflow_expense_feature_names"/>
+        </capability-binding>
+        <intent android:action="android.intent.action.VIEW"
+                android:targetPackage="com.softdevcode.finflow_android"
+                android:targetClass="com.softdevcode.finflow_android.MainActivity">
+            <extra android:name="finflow.assistant.create" android:value="true"/>
+            <extra android:name="finflow.assistant.type" android:value="expense"/>
+        </intent>
+    </shortcut>
+
+    <shortcut
+        android:shortcutId="finflow_create_income"
+        android:enabled="true"
+        android:icon="@mipmap/ic_launcher"
+        android:shortcutShortLabel="@string/shortcut_new_income"
+        android:shortcutLongLabel="@string/shortcut_new_income_long">
+        <capability-binding android:key="actions.intent.OPEN_APP_FEATURE">
+            <parameter-binding
+                android:key="feature"
+                android:value="@array/finflow_income_feature_names"/>
+        </capability-binding>
+        <intent android:action="android.intent.action.VIEW"
+                android:targetPackage="com.softdevcode.finflow_android"
+                android:targetClass="com.softdevcode.finflow_android.MainActivity">
+            <extra android:name="finflow.assistant.create" android:value="true"/>
+            <extra android:name="finflow.assistant.type" android:value="income"/>
+        </intent>
+    </shortcut>
+
     <shortcut
         android:shortcutId="finflow_new_movement"
         android:enabled="true"
