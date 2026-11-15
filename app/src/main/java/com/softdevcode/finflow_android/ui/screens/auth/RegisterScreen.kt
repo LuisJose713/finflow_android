@@ -81,20 +81,7 @@ fun RegisterScreen(
             Spacer(Modifier.height(60.dp))
 
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                    modifier = Modifier.size(54.dp)
-                        .background(
-                            com.softdevcode.finflow_android.ui.theme.FinFlowNavy,
-                            RoundedCornerShape(16.dp)
-                        ),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.finflow_brand_symbol),
-                        contentDescription = "Marca de FinFlow",
-                        modifier = Modifier.size(46.dp),
-                    )
-                }
+                com.softdevcode.finflow_android.ui.theme.FinFlowV4BrandMark(Modifier.size(54.dp))
                 Spacer(Modifier.width(12.dp))
                 com.softdevcode.finflow_android.ui.theme.FinFlowV4Wordmark()
             }

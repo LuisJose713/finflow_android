@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Monochrome icon for Android themed launchers (Android 13+). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <group android:scaleX="0.75" android:scaleY="0.75"
+        android:translateX="18" android:translateY="18">
+        <path android:fillColor="#FFFFFFFF"
+            android:pathData="M13,81 L29,40 C36,22 45,17 60,17 H80 L75,29 H59 C49,29 43,33 39,42 L24,81 Z" />
+        <path android:fillColor="#FFFFFFFF"
+            android:pathData="M25,68 C34,50 48,40 67,40 H78 L71,52 H60 C43,52 33,60 25,68 Z" />
+        <path android:fillColor="#FFFFFFFF"
+            android:pathData="M24,81 L30,68 C36,60 41,56 49,53 L41,68 L35,81 Z" />
+    </group>
+</vector>

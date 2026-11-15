@@ -79,18 +79,7 @@ fun LoginScreen(
             Spacer(Modifier.height(80.dp))
 
             // ── Official FinFlow identity shared with Web ──────────────────
-            Box(
-                modifier = Modifier
-                    .size(88.dp)
-                    .background(FinFlowNavy, RoundedCornerShape(24.dp)),
-                contentAlignment = Alignment.Center
-            ) {
-                Image(
-                    painter = painterResource(id = R.drawable.finflow_brand_symbol),
-                    contentDescription = "Símbolo de FinFlow",
-                    modifier = Modifier.size(73.dp)
-                )
-            }
+            com.softdevcode.finflow_android.ui.theme.FinFlowV4BrandMark(Modifier.size(88.dp))
 
             Spacer(Modifier.height(20.dp))
             com.softdevcode.finflow_android.ui.theme.FinFlowV4Wordmark()

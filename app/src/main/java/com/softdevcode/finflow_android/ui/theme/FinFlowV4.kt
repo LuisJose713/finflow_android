@@ -175,18 +175,13 @@ fun FinFlowV4PrimaryButton(
 /** Brand geometry matches public/finflow-icon-classic.svg in the Web repo. */
 @Composable
 fun FinFlowV4BrandMark(modifier: Modifier = Modifier) {
-    Box(
-        modifier = modifier
-            .clip(RoundedCornerShape(14.dp))
-            .background(FinFlowNavy),
-        contentAlignment = Alignment.Center,
-    ) {
-        Image(
-            painter = painterResource(R.drawable.finflow_brand_symbol),
-            contentDescription = "FinFlow",
-            modifier = Modifier.fillMaxSize().padding(4.dp),
-        )
-    }
+    // The image already contains its official navy tile and 22/96 corner radius.
+    // Don't wrap another rounded tile around it or shrink the emblem differently.
+    Image(
+        painter = painterResource(R.drawable.finflow_brand_symbol),
+        contentDescription = "FinFlow",
+        modifier = modifier,
+    )
 }
 
 /** Native version of the official Web wordmark: gold dot over the white 'i'. */
