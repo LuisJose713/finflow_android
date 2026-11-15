@@ -82,6 +82,7 @@ internal fun MainMenu(
     onNewTransaction: () -> Unit,
     onToggleTheme: () -> Unit,
     onLogout: () -> Unit,
+    onStartTutorial: () -> Unit = {},
     userEmail: String = "",
     content: @Composable () -> Unit,
 ) {
@@ -182,6 +183,12 @@ internal fun MainMenu(
                                     contentDescription = null, tint = TextTertiaryDark,
                                     modifier = Modifier.size(16.dp))
                             }
+                        }
+                        TextButton(onClick = onStartTutorial,
+                            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
+                            Icon(Icons.Outlined.HelpOutline, contentDescription = null)
+                            Spacer(Modifier.width(9.dp))
+                            Text("Guía paso a paso", color = FinFlowGold)
                         }
                         DrawerFooter(
                             isDark = isDark,

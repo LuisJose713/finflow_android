@@ -11,6 +11,9 @@ import androidx.compose.material.icons.outlined.DateRange
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Rect
+import com.softdevcode.finflow_android.ui.tutorial.GuidedTourStep
+import com.softdevcode.finflow_android.ui.tutorial.guideAnchor
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -23,6 +26,8 @@ import java.util.Locale
 @Composable
 fun CreateGoalScreen(
     onBack: () -> Unit,
+    tutorialStep: GuidedTourStep? = null,
+    onTutorialTarget: (Rect) -> Unit = {},
     viewModel: GoalsViewModel = hiltViewModel(),
 ) {
 
@@ -109,10 +114,10 @@ fun CreateGoalScreen(
 
             OutlinedTextField(
                 value = title,
-                onValueChange = {
-                    title = it
-                },
-                modifier = Modifier.fillMaxWidth(),
+                onValueChange = { title = it },
+                modifier = Modifier.fillMaxWidth().guideAnchor(
+                    tutorialStep == GuidedTourStep.GOAL_NAME, onTutorialTarget
+                ),
                 label = {
                     Text("Nombre de la meta")
                 },
@@ -121,10 +126,10 @@ fun CreateGoalScreen(
 
             CopAmountField(
                 value = targetAmount,
-                onValueChange = {
-                    targetAmount = it
-                },
-                modifier = Modifier.fillMaxWidth(),
+                onValueChange = { targetAmount = it },
+                modifier = Modifier.fillMaxWidth().guideAnchor(
+                    tutorialStep == GuidedTourStep.GOAL_AMOUNT, onTutorialTarget
+                ),
                 label = {
                     Text("Monto objetivo")
                 },

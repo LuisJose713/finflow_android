@@ -37,6 +37,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Rect
+import com.softdevcode.finflow_android.ui.tutorial.GuidedTourStep
+import com.softdevcode.finflow_android.ui.tutorial.guideAnchor
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -53,6 +56,8 @@ import java.time.LocalDate
 fun AddTransactionScreen(
     onBack: () -> Unit,
     assistantDraft: AssistantMovementDraft? = null,
+    tutorialStep: GuidedTourStep? = null,
+    onTutorialTarget: (Rect) -> Unit = {},
     viewModel: AddTransactionViewModel = hiltViewModel(),
 ) {
 
@@ -199,9 +204,9 @@ fun AddTransactionScreen(
 
             Row(
 
-                modifier =
-                    Modifier.fillMaxWidth(),
-
+                modifier = Modifier.fillMaxWidth().guideAnchor(
+                    tutorialStep == GuidedTourStep.TYPE, onTutorialTarget
+                ),
                 horizontalArrangement =
                     Arrangement.spacedBy(8.dp),
             ) {
@@ -255,9 +260,9 @@ fun AddTransactionScreen(
                     description = it
                 },
 
-                modifier =
-                    Modifier.fillMaxWidth(),
-
+                modifier = Modifier.fillMaxWidth().guideAnchor(
+                    tutorialStep == GuidedTourStep.DESCRIPTION, onTutorialTarget
+                ),
                 label = {
                     Text("Descripción")
                 },
@@ -277,9 +282,9 @@ fun AddTransactionScreen(
                     amount = it
                 },
 
-                modifier =
-                    Modifier.fillMaxWidth(),
-
+                modifier = Modifier.fillMaxWidth().guideAnchor(
+                    tutorialStep == GuidedTourStep.AMOUNT, onTutorialTarget
+                ),
                 label = {
                     Text("Monto")
                 },
@@ -308,7 +313,9 @@ fun AddTransactionScreen(
                 }
 
             ExposedDropdownMenuBox(
-
+                modifier = Modifier.guideAnchor(
+                    tutorialStep == GuidedTourStep.CATEGORY, onTutorialTarget
+                ),
                 expanded = categoryExpanded,
 
                 onExpandedChange = {
@@ -583,9 +590,9 @@ fun AddTransactionScreen(
                     )
                 },
 
-                modifier =
-                    Modifier.fillMaxWidth(),
-
+                modifier = Modifier.fillMaxWidth().guideAnchor(
+                    tutorialStep == GuidedTourStep.SAVE, onTutorialTarget
+                ),
                 enabled = canSave,
             ) {
 

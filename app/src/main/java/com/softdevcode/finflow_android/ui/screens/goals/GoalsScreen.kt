@@ -41,6 +41,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Rect
+import com.softdevcode.finflow_android.ui.tutorial.GuidedTourStep
+import com.softdevcode.finflow_android.ui.tutorial.guideAnchor
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import com.softdevcode.finflow_android.ui.theme.FinFlowGold
@@ -57,6 +60,8 @@ fun GoalsScreen(
     onAddGoal: () -> Unit,
     onOpenGoal: (Int) -> Unit,
     onOpenMenu: (() -> Unit)? = null,
+    tutorialStep: GuidedTourStep? = null,
+    onTutorialTarget: (Rect) -> Unit = {},
     viewModel: GoalsViewModel = hiltViewModel(),
 
 ) {
@@ -109,6 +114,9 @@ fun GoalsScreen(
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 onClick = onAddGoal,
+                modifier = Modifier.guideAnchor(
+                    tutorialStep == GuidedTourStep.NEW_GOAL, onTutorialTarget
+                ),
                 icon = { Icon(Icons.Outlined.Add, contentDescription = null) },
                 text = { Text("Nueva meta") },
                 containerColor = MaterialTheme.colorScheme.primary,

@@ -19,6 +19,9 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Rect
+import com.softdevcode.finflow_android.ui.tutorial.GuidedTourStep
+import com.softdevcode.finflow_android.ui.tutorial.guideAnchor
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -44,6 +47,8 @@ fun FinFlowModulesScreen(
     updateViewModel: AppUpdateViewModel,
     isAdmin: Boolean = false,
     initialSection: String = "accounts",
+    tutorialStep: GuidedTourStep? = null,
+    onTutorialTarget: (Rect) -> Unit = {},
     vm: FinFlowModulesViewModel = hiltViewModel(),
 ) {
     val state by vm.state.collectAsStateWithLifecycle()
@@ -110,7 +115,7 @@ fun FinFlowModulesScreen(
             if (state.busy) LinearProgressIndicator(Modifier.fillMaxWidth())
 
             when (selected) {
-                "accounts" -> AccountsSection(state, vm)
+                "accounts" -> AccountsSection(state, vm, tutorialStep, onTutorialTarget)
                 "budgets" -> BudgetsSection(state, vm, year, month,
                     previous = {
                         if (month == 1) { month = 12; year -= 1 } else month -= 1
@@ -121,7 +126,7 @@ fun FinFlowModulesScreen(
                         vm.refresh("budgets", year, month)
                     })
                 "recurring" -> RecurringSection(state, vm)
-                "categories" -> CategoriesSection(state, vm, userId)
+                "categories" -> CategoriesSection(state, vm, userId, tutorialStep, onTutorialTarget)
                 "advisor" -> AdvisorConversationScreen(state, vm)
                 "reports" -> FinFlowReportsSection(state, vm)
                 "privacy" -> FinFlowPrivacySection(state, vm)
@@ -185,7 +190,8 @@ private fun dateNow(): String = SimpleDateFormat("yyyy-MM-dd", Locale.US).apply 
 }.format(java.util.Date())
 
 @Composable
-private fun AccountsSection(state: ModulesState, vm: FinFlowModulesViewModel) {
+private fun AccountsSection(state: ModulesState, vm: FinFlowModulesViewModel,
+    tutorialStep: GuidedTourStep?, onTutorialTarget: (Rect) -> Unit) {
     var showForm by remember { mutableStateOf(false) }
     var editing by remember { mutableStateOf<FinancialAccount?>(null) }
     var transfer by remember { mutableStateOf(false) }
@@ -194,7 +200,10 @@ private fun AccountsSection(state: ModulesState, vm: FinFlowModulesViewModel) {
         refresh = { vm.refresh("accounts") })
 
     Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-        Button(onClick = { editing = null; showForm = true }) {
+        Button(onClick = { editing = null; showForm = true },
+            modifier = Modifier.guideAnchor(
+                tutorialStep == GuidedTourStep.NEW_ACCOUNT, onTutorialTarget
+            )) {
             Icon(Icons.Outlined.Add, null, Modifier.size(18.dp))
             Spacer(Modifier.width(5.dp))
             Text("Nueva cuenta")
@@ -358,7 +367,10 @@ private fun BudgetsSection(
         Text(monthNames[month - 1] + " " + year, fontWeight = FontWeight.Bold)
         IconButton(onClick = next) { Icon(Icons.Outlined.ChevronRight, "Mes siguiente") }
     }
-    Button(onClick = { editing = null; showForm = true }) {
+    Button(onClick = { editing = null; showForm = true },
+        modifier = Modifier.guideAnchor(
+            tutorialStep == GuidedTourStep.NEW_CATEGORY, onTutorialTarget
+        )) {
         Icon(Icons.Outlined.Add, null, Modifier.size(18.dp))
         Spacer(Modifier.width(5.dp))
         Text("Nuevo presupuesto")
@@ -556,7 +568,8 @@ private fun RecurringForm(
 }
 
 @Composable
-private fun CategoriesSection(state: ModulesState, vm: FinFlowModulesViewModel, userId: Int?) {
+private fun CategoriesSection(state: ModulesState, vm: FinFlowModulesViewModel, userId: Int?,
+    tutorialStep: GuidedTourStep?, onTutorialTarget: (Rect) -> Unit) {
     var showForm by remember { mutableStateOf(false) }
     var editing by remember { mutableStateOf<Category?>(null) }
     var deleting by remember { mutableStateOf<Category?>(null) }
