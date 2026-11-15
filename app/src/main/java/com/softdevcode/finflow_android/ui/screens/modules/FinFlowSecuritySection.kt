@@ -104,6 +104,8 @@ fun FinFlowSecuritySection(
         }
     }
 
+    GoogleAccountSecurityCard()
+
     // Clearly separated from routine security actions: irreversible deletion.
     Card(
         Modifier.fillMaxWidth(), shape = RoundedCornerShape(18.dp),

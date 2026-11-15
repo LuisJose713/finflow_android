@@ -37,6 +37,26 @@ class AuthRepository @Inject constructor(
             }
         )
 
+    suspend fun googleLogin(idToken: String): Result<AuthResponse> =
+        runCatching {
+            require(idToken.isNotBlank() && idToken.length <= 8192)
+            val response = api.googleLogin(mapOf("idToken" to idToken))
+            tokenManager.saveAuth(
+                token = response.token, name = response.user.name, email = response.user.email,
+                id = response.user.id, refreshToken = response.refreshToken,
+            )
+            response
+        }.fold(
+            onSuccess = { Result.Success(it) },
+            onFailure = {
+                if (it is CancellationException) throw it
+                Result.Error(if ((it.message ?: "").contains("409")) {
+                    "Primero inicia sesión con tu contraseña y vincula Google desde Seguridad."
+                } else "No se pudo verificar el acceso con Google."
+                )
+            }
+        )
+
     suspend fun register(
         email: String, password: String, name: String, confirmPassword: String,
         privacyAccepted: Boolean?, privacyVersion: String?, marketingConsent: Boolean?,

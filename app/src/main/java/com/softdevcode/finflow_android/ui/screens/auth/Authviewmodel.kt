@@ -108,6 +108,24 @@ class AuthViewModel @Inject constructor(
         }
     }
 
+    fun googleLogin(idToken: String) {
+        if (!canStartAuthRequest(_uiState.value) || idToken.length > 8192) return
+        authOperation++
+        val operation = authOperation
+        _uiState.update { it.copy(isLoading = true, error = null) }
+        authRequestJob = viewModelScope.launch {
+            authRepository.googleLogin(idToken).onSuccess { response ->
+                if (operation != authOperation) return@onSuccess
+                _uiState.update {
+                    it.copy(isLoading = false, isAuthenticated = true, user = response.user)
+                }
+            }.onError { message ->
+                if (operation != authOperation) return@onError
+                _uiState.update { it.copy(isLoading = false, error = message) }
+            }
+        }
+    }
+
     fun loadRegistrationPolicy() {
         viewModelScope.launch {
             _uiState.update {
@@ -198,5 +216,6 @@ class AuthViewModel @Inject constructor(
     }
 
     fun clearError() = _uiState.update { it.copy(error = null) }
+    fun setLoginError(message: String) = _uiState.update { it.copy(error = message) }
 }
 

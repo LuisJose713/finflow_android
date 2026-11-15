@@ -11,6 +11,14 @@ android {
     compileSdk = 34
 
     defaultConfig {
+        // Public OAuth client ID supplied by Google Cloud. Never embed client secrets.
+        val googleWebClientId = providers.gradleProperty("FINFLOW_GOOGLE_WEB_CLIENT_ID")
+            .orElse(providers.environmentVariable("FINFLOW_GOOGLE_WEB_CLIENT_ID")).orNull ?: ""
+        if (googleWebClientId.isNotEmpty() &&
+            !Regex("^[A-Za-z0-9._-]+\\.apps\\.googleusercontent\\.com$").matches(googleWebClientId)) {
+            error("FINFLOW_GOOGLE_WEB_CLIENT_ID has an invalid format")
+        }
+        buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"$googleWebClientId\"")
         applicationId = "com.softdevcode.finflow_android"
         minSdk = 24
         targetSdk = 34
@@ -79,6 +87,9 @@ dependencies {
     implementation(libs.compose.material3)
     implementation(libs.compose.material.icons)
     implementation(libs.compose.animation)
+
+    // Google ID token (server-verified; the client never creates FinFlow sessions).
+    implementation("com.google.android.gms:play-services-auth:21.2.0")
 
     // Activity + Lifecycle
     implementation(libs.activity.compose)

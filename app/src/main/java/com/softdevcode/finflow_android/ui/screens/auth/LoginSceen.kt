@@ -227,6 +227,13 @@ fun LoginScreen(
                 }
             }
 
+            Spacer(Modifier.height(16.dp))
+            GoogleAuthButton(
+                enabled = !uiState.isLoading,
+                onCredential = { idToken -> viewModel.googleLogin(idToken) },
+                onError = { viewModel.setLoginError(it) },
+            )
+
             Spacer(Modifier.height(24.dp))
 
             // ── Register link ─────────────────────────────────────────────

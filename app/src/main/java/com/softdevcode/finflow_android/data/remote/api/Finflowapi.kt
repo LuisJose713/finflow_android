@@ -52,6 +52,8 @@ import com.softdevcode.finflow_android.domain.model.AdminPlatformHealth
 
 data class PreferredCurrencyResponse(val currency: String)
 
+data class GoogleLinkStatus(val linked: Boolean, val email: String)
+
 interface FinFlowApi {
     @GET("preferences/currency")
     suspend fun getPreferredCurrency(): PreferredCurrencyResponse
@@ -227,6 +229,18 @@ interface FinFlowApi {
     // ── Auth ──────────────────────────────────────────────────────────────────
     @POST("auth/login")
     suspend fun login(@Body request: LoginRequest): AuthResponse
+
+    @POST("auth/google/login")
+    suspend fun googleLogin(@Body body: Map<String, String>): AuthResponse
+
+    @GET("auth/google/status")
+    suspend fun googleStatus(): GoogleLinkStatus
+
+    @POST("auth/google/link")
+    suspend fun googleLink(@Body body: Map<String, String>): GoogleLinkStatus
+
+    @DELETE("auth/google/link")
+    suspend fun googleUnlink(): retrofit2.Response<Void>
 
     @POST("auth/register")
     suspend fun register(@Body request: RegisterRequest): AuthResponse
