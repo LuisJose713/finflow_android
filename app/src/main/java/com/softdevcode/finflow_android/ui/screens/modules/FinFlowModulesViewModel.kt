@@ -102,6 +102,7 @@ class FinFlowModulesViewModel @Inject constructor(private val api: FinFlowApi) :
             else -> return
         }
         currentCoroutineContext().ensureActive()
+        if (section == "budgets" && (year != selectedYear || month != selectedMonth)) return
         _state.update(snapshot)
     }
 
@@ -119,7 +120,15 @@ class FinFlowModulesViewModel @Inject constructor(private val api: FinFlowApi) :
                 try {
                     // Keep one operation busy until its authoritative snapshot
                     // arrives; a failed reload must not report a failed write.
-                    loadSection(section, selectedYear, selectedMonth)
+                    do {
+                        val year = selectedYear
+                        val month = selectedMonth
+                        loadSection(section, year, month)
+                        // A month selection can change while this post-save
+                        // read is pending. Keep the save busy until the newly
+                        // selected period has its own authoritative snapshot.
+                    } while (section == "budgets" &&
+                        (year != selectedYear || month != selectedMonth))
                 } catch (e: CancellationException) {
                     throw e
                 } catch (_: Exception) {

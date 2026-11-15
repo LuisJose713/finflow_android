@@ -105,6 +105,39 @@ class FinanceRefreshStabilityTest {
         } finally { Dispatchers.resetMain() }
     }
 
+    @Test fun changingMonthDuringAPostSaveReloadLoadsTheNewPeriod() = runTest {
+        Dispatchers.setMain(StandardTestDispatcher(testScheduler))
+        try {
+            val oldResponse = CompletableDeferred<Unit>()
+            var saved = false
+            val requestedMonths = mutableListOf<Int>()
+            val vm = FinFlowModulesViewModel(api { name, args ->
+                when (name) {
+                    "getCategories" -> emptyList<Category>()
+                    "createBudget" -> { saved = true; retrofit2.Response.success(Unit) }
+                    "getBudgets" -> {
+                        val month = args[1] as Int
+                        requestedMonths += month
+                        if (saved && month == 11) oldResponse.await()
+                        listOf(MonthlyBudget(month, 1, year = 2026, month = month, limitAmount = 500000.0))
+                    }
+                    else -> error("Unexpected API call $name")
+                }
+            })
+            vm.refresh("budgets", 2026, 11)
+            advanceUntilIdle()
+            vm.createBudget(1, 2026, 11, 500000.0)
+            runCurrent()
+            vm.refresh("budgets", 2026, 12)
+            assertTrue(vm.state.value.busy)
+            oldResponse.complete(Unit)
+            advanceUntilIdle()
+            assertEquals(listOf(11, 11, 12), requestedMonths)
+            assertEquals(12, vm.state.value.budgets.single().month)
+            assertFalse(vm.state.value.busy)
+        } finally { Dispatchers.resetMain() }
+    }
+
     @Test fun aSuccessfulWriteIsPreservedWhenItsReloadFails() = runTest {
         Dispatchers.setMain(StandardTestDispatcher(testScheduler))
         try {
