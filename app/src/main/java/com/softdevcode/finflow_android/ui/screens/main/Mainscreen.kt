@@ -107,6 +107,7 @@ fun MainScreen(
         currentRoute = route,
         currentSection = module,
         userName = uiState.user?.name.orEmpty(),
+        userEmail = uiState.user?.email.orEmpty(),
         isDark = darkMode,
         isAdmin = isAdmin,
         onClose = { scope.launch { drawerState.close() } },

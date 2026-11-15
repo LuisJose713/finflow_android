@@ -51,6 +51,7 @@ class MainMenuTest {
         }
         compose.onNodeWithContentDescription("Cerrar menú").assertIsDisplayed()
         compose.onNodeWithText("Cerrar sesión").assertIsDisplayed()
+        compose.onNodeWithText("Editar perfil y seguridad").assertIsDisplayed()
         compose.onNodeWithText("Nueva transacción").performClick()
         compose.runOnIdle { assertEquals(1, createdCount) }
         compose.runOnIdle {
@@ -75,6 +76,27 @@ class MainMenuTest {
         compose.onNodeWithContentDescription("Cerrar menú").performClick()
         compose.runOnIdle { assertEquals(1, closeCount) }
     }
+    @Test fun accountSummaryOpensRealSecurityModule() {
+        var currentSection by mutableStateOf<String?>(null)
+        compose.setContent {
+            FinFlowTheme(darkTheme = true) {
+                val drawer = rememberDrawerState(DrawerValue.Open)
+                MainMenu(
+                    drawerState = drawer, gesturesEnabled = true,
+                    currentRoute = Screen.Dashboard.route, currentSection = currentSection,
+                    userName = "Ana María", userEmail = "ana@example.com",
+                    isDark = true, isAdmin = false,
+                    onClose = {}, onNavigate = {},
+                    onModule = { currentSection = it },
+                    onNewTransaction = {}, onToggleTheme = {}, onLogout = {},
+                ) { Box(Modifier.fillMaxSize()) }
+            }
+        }
+        compose.onNodeWithText("ana@example.com").assertIsDisplayed()
+        compose.onNodeWithText("Editar perfil y seguridad").performClick()
+        compose.runOnIdle { assertEquals("security", currentSection) }
+    }
+
     @Test
     @Config(qualifiers = "w430dp-h900dp-mdpi")
     fun lightModeAndAdminNavigationKeepCoreActionsAvailable() {

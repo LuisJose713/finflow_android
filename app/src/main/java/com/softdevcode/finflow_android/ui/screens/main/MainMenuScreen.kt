@@ -82,13 +82,13 @@ internal fun MainMenu(
     onNewTransaction: () -> Unit,
     onToggleTheme: () -> Unit,
     onLogout: () -> Unit,
+    userEmail: String = "",
     content: @Composable () -> Unit,
 ) {
     var confirmLogout by remember { mutableStateOf(false) }
     var accountExpanded by rememberSaveable { mutableStateOf(currentSection in accountItems.map { it.key }) }
-    LaunchedEffect(currentSection) {
-        if (currentSection in accountItems.map { it.key }) accountExpanded = true
-    }
+    // Never automatically expand a menu group when a route changes: doing so
+    // pushes the chosen item and the user's scroll position away.
     val destinationsScroll = rememberScrollState()
     val drawerShape = RoundedCornerShape(topEnd = 22.dp, bottomEnd = 22.dp)
     BoxWithConstraints(Modifier.fillMaxSize()) {
@@ -116,7 +116,10 @@ internal fun MainMenu(
                                 Icon(Icons.Outlined.Close, "Cerrar menú", tint = TextSecondDark)
                             }
                         }
-                        AccountSummary(userName)
+                        AccountSummary(userName, userEmail) {
+                            accountExpanded = true
+                            onModule("security")
+                        }
                         Button(
                             onClick = onNewTransaction,
                             modifier = Modifier.fillMaxWidth()
@@ -212,7 +215,7 @@ internal fun MainMenu(
 }
 
 @Composable
-private fun AccountSummary(userName: String) {
+private fun AccountSummary(userName: String, userEmail: String, onClick: () -> Unit) {
     val cleanName = remember(userName) { userName.trim().ifBlank { "Tu espacio financiero" } }
     val initials = remember(cleanName) {
         cleanName.split(' ').filter { it.isNotBlank() }.take(2)
@@ -220,7 +223,9 @@ private fun AccountSummary(userName: String) {
             .ifBlank { "F" }
     }
     Surface(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 4.dp),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 4.dp)
+            .clip(RoundedCornerShape(15.dp))
+            .clickable(onClickLabel = "Editar perfil y seguridad", onClick = onClick),
         color = FinFlowNavy2,
         shape = RoundedCornerShape(15.dp),
         border = BorderStroke(1.dp, FinFlowGold.copy(alpha = 0.20f)),
@@ -241,8 +246,11 @@ private fun AccountSummary(userName: String) {
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
                 Text(cleanName, color = TextPrimaryDark, fontWeight = FontWeight.SemiBold,
                     maxLines = 1, overflow = TextOverflow.Ellipsis, fontSize = 14.sp)
-                Text("Tu espacio financiero", color = TextSecondDark,
-                    style = MaterialTheme.typography.labelSmall)
+                Text(userEmail.ifBlank { "Tu espacio financiero" }, color = TextSecondDark,
+                    style = MaterialTheme.typography.labelSmall,
+                    maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text("Editar perfil y seguridad", color = FinFlowGold,
+                    style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.SemiBold)
             }
         }
     }
