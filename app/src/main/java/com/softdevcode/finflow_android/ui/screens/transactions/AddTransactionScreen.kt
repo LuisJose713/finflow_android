@@ -95,6 +95,16 @@ fun AddTransactionScreen(
 
     val uiState by viewModel.uiState
         .collectAsStateWithLifecycle()
+    val tutorialScroll = rememberScrollState()
+    LaunchedEffect(tutorialStep, tutorialScroll.maxValue) {
+        if (tutorialScroll.maxValue > 0) {
+            when (tutorialStep) {
+                GuidedTourStep.SAVE -> tutorialScroll.animateScrollTo(tutorialScroll.maxValue)
+                GuidedTourStep.CATEGORY -> tutorialScroll.animateScrollTo(tutorialScroll.maxValue / 2)
+                else -> Unit
+            }
+        }
+    }
 
     // Assistant's category is untrusted. Select only an actual category
     // belonging to this user and of the requested movement type.
@@ -165,9 +175,7 @@ fun AddTransactionScreen(
                 Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
-                    .verticalScroll(
-                        rememberScrollState()
-                    )
+                    .verticalScroll(tutorialScroll)
                     .padding(20.dp),
 
             verticalArrangement =

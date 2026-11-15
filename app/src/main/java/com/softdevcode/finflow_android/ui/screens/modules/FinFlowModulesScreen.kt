@@ -367,10 +367,7 @@ private fun BudgetsSection(
         Text(monthNames[month - 1] + " " + year, fontWeight = FontWeight.Bold)
         IconButton(onClick = next) { Icon(Icons.Outlined.ChevronRight, "Mes siguiente") }
     }
-    Button(onClick = { editing = null; showForm = true },
-        modifier = Modifier.guideAnchor(
-            tutorialStep == GuidedTourStep.NEW_CATEGORY, onTutorialTarget
-        )) {
+    Button(onClick = { editing = null; showForm = true }) {
         Icon(Icons.Outlined.Add, null, Modifier.size(18.dp))
         Spacer(Modifier.width(5.dp))
         Text("Nuevo presupuesto")
@@ -575,7 +572,12 @@ private fun CategoriesSection(state: ModulesState, vm: FinFlowModulesViewModel, 
     var deleting by remember { mutableStateOf<Category?>(null) }
     Header("Categorías", "Personaliza tus grupos de ingresos y gastos.",
         refresh = { vm.refresh("categories") })
-    Button(onClick = { editing = null; showForm = true }) {
+    Button(
+        onClick = { editing = null; showForm = true },
+        modifier = Modifier.guideAnchor(
+            tutorialStep == GuidedTourStep.NEW_CATEGORY, onTutorialTarget
+        ),
+    ) {
         Icon(Icons.Outlined.Add, null, Modifier.size(18.dp))
         Spacer(Modifier.width(5.dp))
         Text("Nueva categoría")
