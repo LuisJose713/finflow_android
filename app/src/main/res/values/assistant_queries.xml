@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App Actions custom queries currently support en-US, not Spanish. -->
+    <string-array name="finflow_expense_voice_queries">
+        <item>record an expense of $amount for $title in category $category</item>
+        <item>log $amount spent on $title in $category</item>
+    </string-array>
+    <string-array name="finflow_income_voice_queries">
+        <item>record an income of $amount for $title in category $category</item>
+        <item>log $amount earned from $title in $category</item>
+    </string-array>
+</resources>
