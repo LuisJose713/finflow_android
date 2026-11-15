@@ -11,6 +11,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -34,6 +38,9 @@ class GoalsViewModel @Inject constructor(
     val uiState: StateFlow<GoalsUiState> =
         _uiState.asStateFlow()
 
+    private var loadJob: Job? = null
+    private var operationJob: Job? = null
+
     init {
         loadGoals()
     }
@@ -43,8 +50,9 @@ class GoalsViewModel @Inject constructor(
     // ============================================================
 
     fun loadGoals(silent: Boolean = false) {
-        viewModelScope.launch {
-
+        if (operationJob?.isActive == true || (silent && loadJob?.isActive == true)) return
+        loadJob?.cancel()
+        loadJob = viewModelScope.launch {
             if (!silent) _uiState.update {
                 it.copy(isLoading = true, error = null)
             }
@@ -52,6 +60,7 @@ class GoalsViewModel @Inject constructor(
             when (val result = repository.getGoals()) {
 
                 is Result.Success -> {
+                    currentCoroutineContext().ensureActive()
                     _uiState.update {
                         it.copy(
                             isLoading = false,
@@ -86,7 +95,10 @@ class GoalsViewModel @Inject constructor(
     // ============================================================
 
     fun createGoal(request: GoalRequest) {
-        viewModelScope.launch {
+        if (operationJob?.isActive == true) return
+        loadJob?.cancel()
+        _uiState.update { it.copy(isLoading = false) }
+        operationJob = viewModelScope.launch {
 
             _uiState.update {
                 it.copy(
@@ -138,6 +150,8 @@ class GoalsViewModel @Inject constructor(
                     }
                 }
 
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
 
                 _uiState.update {
@@ -162,7 +176,10 @@ class GoalsViewModel @Inject constructor(
         amount: Double,
         note: String?
     ) {
-        viewModelScope.launch {
+        if (operationJob?.isActive == true) return
+        loadJob?.cancel()
+        _uiState.update { it.copy(isLoading = false) }
+        operationJob = viewModelScope.launch {
 
             _uiState.update {
                 it.copy(
@@ -231,7 +248,10 @@ class GoalsViewModel @Inject constructor(
         id: Int,
         request: GoalRequest
     ) {
-        viewModelScope.launch {
+        if (operationJob?.isActive == true) return
+        loadJob?.cancel()
+        _uiState.update { it.copy(isLoading = false) }
+        operationJob = viewModelScope.launch {
 
             _uiState.update {
                 it.copy(
@@ -296,7 +316,10 @@ class GoalsViewModel @Inject constructor(
     // ============================================================
 
     fun deleteGoal(goalId: Int) {
-        viewModelScope.launch {
+        if (operationJob?.isActive == true) return
+        loadJob?.cancel()
+        _uiState.update { it.copy(isLoading = false) }
+        operationJob = viewModelScope.launch {
 
             _uiState.update {
                 it.copy(

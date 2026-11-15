@@ -11,6 +11,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -36,6 +40,9 @@ class PlannedExpensesViewModel @Inject constructor(
     val uiState: StateFlow<PlannedExpensesUiState> =
         _uiState.asStateFlow()
 
+    private var loadJob: Job? = null
+    private var operationJob: Job? = null
+
     init {
         loadPlannedExpenses()
     }
@@ -45,8 +52,9 @@ class PlannedExpensesViewModel @Inject constructor(
     // ============================================================
 
     fun loadPlannedExpenses(silent: Boolean = false) {
-        viewModelScope.launch {
-
+        if (operationJob?.isActive == true || (silent && loadJob?.isActive == true)) return
+        loadJob?.cancel()
+        loadJob = viewModelScope.launch {
             if (!silent) _uiState.update {
                 it.copy(isLoading = true, error = null)
             }
@@ -56,6 +64,7 @@ class PlannedExpensesViewModel @Inject constructor(
             ) {
 
                 is Result.Success -> {
+                    currentCoroutineContext().ensureActive()
                     _uiState.update {
                         it.copy(
                             isLoading = false,
@@ -92,7 +101,10 @@ class PlannedExpensesViewModel @Inject constructor(
     fun createPlannedExpense(
         request: PlannedExpenseRequest
     ) {
-        viewModelScope.launch {
+        if (operationJob?.isActive == true) return
+        loadJob?.cancel()
+        _uiState.update { it.copy(isLoading = false) }
+        operationJob = viewModelScope.launch {
 
             _uiState.update {
                 it.copy(
@@ -152,7 +164,10 @@ class PlannedExpensesViewModel @Inject constructor(
         id: Int,
         request: PlannedExpenseRequest
     ) {
-        viewModelScope.launch {
+        if (operationJob?.isActive == true) return
+        loadJob?.cancel()
+        _uiState.update { it.copy(isLoading = false) }
+        operationJob = viewModelScope.launch {
 
             _uiState.update {
                 it.copy(
@@ -220,7 +235,10 @@ class PlannedExpensesViewModel @Inject constructor(
     fun executePlannedExpense(
         id: Int
     ) {
-        viewModelScope.launch {
+        if (operationJob?.isActive == true) return
+        loadJob?.cancel()
+        _uiState.update { it.copy(isLoading = false) }
+        operationJob = viewModelScope.launch {
 
             _uiState.update {
                 it.copy(
@@ -286,7 +304,10 @@ class PlannedExpensesViewModel @Inject constructor(
     fun cancelPlannedExpense(
         id: Int
     ) {
-        viewModelScope.launch {
+        if (operationJob?.isActive == true) return
+        loadJob?.cancel()
+        _uiState.update { it.copy(isLoading = false) }
+        operationJob = viewModelScope.launch {
 
             _uiState.update {
                 it.copy(
@@ -352,7 +373,10 @@ class PlannedExpensesViewModel @Inject constructor(
     fun deletePlannedExpense(
         id: Int
     ) {
-        viewModelScope.launch {
+        if (operationJob?.isActive == true) return
+        loadJob?.cancel()
+        _uiState.update { it.copy(isLoading = false) }
+        operationJob = viewModelScope.launch {
 
             _uiState.update {
                 it.copy(

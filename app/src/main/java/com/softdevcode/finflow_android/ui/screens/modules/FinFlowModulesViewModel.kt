@@ -6,6 +6,9 @@ import com.softdevcode.finflow_android.data.remote.api.FinFlowApi
 import com.softdevcode.finflow_android.domain.model.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.launch
@@ -38,6 +41,10 @@ class FinFlowModulesViewModel @Inject constructor(private val api: FinFlowApi) :
     private val _state = MutableStateFlow(ModulesState())
     val state: StateFlow<ModulesState> = _state.asStateFlow()
 
+    private var refreshJob: Job? = null
+    private var actionJob: Job? = null
+    private var refreshVersion = 0L
+
     private var selectedMonth = 1
     private var selectedYear = 2026
 
@@ -46,57 +53,78 @@ class FinFlowModulesViewModel @Inject constructor(private val api: FinFlowApi) :
     fun refresh(section: String, year: Int = selectedYear, month: Int = selectedMonth, silent: Boolean = false) {
         selectedYear = year
         selectedMonth = month
-        viewModelScope.launch {
-            if (!silent) _state.update { it.copy(busy = true, error = null) }
+        if (actionJob?.isActive == true || (silent && refreshJob?.isActive == true)) return
+        val version = ++refreshVersion
+        refreshJob?.cancel()
+        if (!silent) _state.update { it.copy(busy = true, error = null) }
+        refreshJob = viewModelScope.launch {
             try {
-                when (section) {
-                    "accounts" -> {
-                        val accounts = api.getAccounts()
-                        val transfers = api.getTransfers()
-                        _state.update { it.copy(accounts = accounts, transfers = transfers) }
-                    }
-                    "budgets" -> {
-                        val categories = api.getCategories()
-                        val budgets = api.getBudgets(year, month)
-                        _state.update { it.copy(budgets = budgets, categories = categories) }
-                    }
-                    "recurring" -> {
-                        val categories = api.getCategories()
-                        val accounts = api.getAccounts()
-                        val rules = api.getRecurringRules()
-                        _state.update {
-                            it.copy(rules = rules, categories = categories, accounts = accounts)
-                        }
-                    }
-                    "categories" -> {
-                        _state.update { it.copy(categories = api.getCategories()) }
-                    }
-                    "privacy" -> {
-                        val policy = api.getPrivacyPolicy()
-                        val status = api.getPrivacyStatus()
-                        val requests = api.getPrivacyRequests()
-                        _state.update {
-                            it.copy(privacyPolicy = policy, privacyStatus = status, privacyRequests = requests)
-                        }
-                    }
-                }
+                loadSection(section, year, month)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
                 if (!silent) _state.update { it.copy(error = "No se pudo cargar esta sección. Comprueba la conexión.") }
             } finally {
-                if (!silent) _state.update { it.copy(busy = false) }
+                // A cancelled old read must not unlock a newer read or save.
+                if (version == refreshVersion) _state.update { it.copy(busy = false) }
             }
         }
     }
 
+    private suspend fun loadSection(section: String, year: Int, month: Int) {
+        val snapshot: (ModulesState) -> ModulesState = when (section) {
+            "accounts" -> {
+                val accounts = api.getAccounts()
+                val transfers = api.getTransfers();
+                { state: ModulesState -> state.copy(accounts = accounts, transfers = transfers) }
+            }
+            "budgets" -> {
+                val categories = api.getCategories()
+                val budgets = api.getBudgets(year, month);
+                { state: ModulesState -> state.copy(budgets = budgets, categories = categories) }
+            }
+            "recurring" -> {
+                val categories = api.getCategories()
+                val accounts = api.getAccounts()
+                val rules = api.getRecurringRules();
+                { state: ModulesState -> state.copy(rules = rules, categories = categories, accounts = accounts) }
+            }
+            "categories" -> {
+                val categories = api.getCategories();
+                { state: ModulesState -> state.copy(categories = categories) }
+            }
+            "privacy" -> {
+                val policy = api.getPrivacyPolicy()
+                val status = api.getPrivacyStatus()
+                val requests = api.getPrivacyRequests();
+                { state: ModulesState -> state.copy(privacyPolicy = policy, privacyStatus = status, privacyRequests = requests) }
+            }
+            else -> return
+        }
+        currentCoroutineContext().ensureActive()
+        _state.update(snapshot)
+    }
+
     private fun runAction(section: String, success: String, block: suspend () -> Unit) {
-        viewModelScope.launch {
-            _state.update { it.copy(busy = true, error = null, notice = null) }
+        // The Job is assigned before launch is dispatched, also covering rapid
+        // double taps before Compose has rendered the disabled submit button.
+        if (actionJob?.isActive == true) return
+        ++refreshVersion
+        refreshJob?.cancel()
+        _state.update { it.copy(busy = true, error = null, notice = null) }
+        actionJob = viewModelScope.launch {
             try {
                 block()
                 _state.update { it.copy(notice = success) }
-                refresh(section)
+                try {
+                    // Keep one operation busy until its authoritative snapshot
+                    // arrives; a failed reload must not report a failed write.
+                    loadSection(section, selectedYear, selectedMonth)
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (_: Exception) {
+                    _state.update { it.copy(error = "El cambio se guardó, pero no pudimos actualizar la lista. Vuelve a cargar esta sección.") }
+                }
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
