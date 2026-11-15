@@ -2,4 +2,8 @@
     <string name="app_name">FinFlow</string>
     <string name="shortcut_new_movement">Nuevo movimiento</string>
     <string name="shortcut_new_movement_long">Registrar movimiento en FinFlow</string>
+    <string name="shortcut_new_expense">Registrar gasto</string>
+    <string name="shortcut_new_expense_long">Registrar un gasto en FinFlow</string>
+    <string name="shortcut_new_income">Registrar ingreso</string>
+    <string name="shortcut_new_income_long">Registrar un ingreso en FinFlow</string>
 </resources>
