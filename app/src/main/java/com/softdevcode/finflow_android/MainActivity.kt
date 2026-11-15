@@ -18,6 +18,7 @@ import com.softdevcode.finflow_android.ui.screens.auth.AuthViewModel
 import com.softdevcode.finflow_android.ui.screens.navigation.FinFlowNavGraph
 import com.softdevcode.finflow_android.ui.screens.navigation.Screen
 import com.softdevcode.finflow_android.ui.theme.FinFlowTheme
+import com.softdevcode.finflow_android.ui.theme.DisplayCurrencyManager
 import com.softdevcode.finflow_android.ui.updates.AppUpdateHost
 import com.softdevcode.finflow_android.ui.updates.AppUpdateViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -32,6 +33,8 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val context = LocalContext.current
+            val displayCurrency by DisplayCurrencyManager.quote.collectAsStateWithLifecycle()
+            LaunchedEffect(Unit) { DisplayCurrencyManager.initialize(context) }
             val notificationPermission = rememberLauncherForActivityResult(
                 ActivityResultContracts.RequestPermission()
             ) { granted ->
@@ -72,12 +75,14 @@ class MainActivity : ComponentActivity() {
                     val startDestination = if (uiState.isAuthenticated)
                         Screen.Main.route else Screen.Login.route
 
-                    FinFlowNavGraph(
-                        startDestination = startDestination,
-                        navController    = navController, // ✅ reutilizado
-                        authViewModel    = authViewModel,
-                        updateViewModel  = updateViewModel,
-                    )
+                    key(displayCurrency) {
+                        FinFlowNavGraph(
+                            startDestination = startDestination,
+                            navController    = navController, // ✅ reutilizado
+                            authViewModel    = authViewModel,
+                            updateViewModel  = updateViewModel,
+                        )
+                    }
                 }
             }
         }

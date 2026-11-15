@@ -30,6 +30,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.launch
 import com.softdevcode.finflow_android.ui.screens.navigation.Screen
 import com.softdevcode.finflow_android.ui.theme.*
 
@@ -374,6 +377,7 @@ private fun DrawerFooter(
             .padding(start = 18.dp, end = 18.dp, top = 9.dp, bottom = 12.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
+        CurrencyPicker()
         Row(
             Modifier.fillMaxWidth().heightIn(min = 48.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -416,4 +420,44 @@ private fun DrawerFooter(
             style = MaterialTheme.typography.labelSmall,
         )
     }
+}
+
+
+@Composable
+private fun CurrencyPicker() {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val current by DisplayCurrencyManager.quote.collectAsStateWithLifecycle()
+    val busy by DisplayCurrencyManager.busy.collectAsStateWithLifecycle()
+    val issue by DisplayCurrencyManager.error.collectAsStateWithLifecycle()
+    var expanded by remember { mutableStateOf(false) }
+    Box {
+        OutlinedButton(
+            onClick = { expanded = true },
+            modifier = Modifier.fillMaxWidth().heightIn(min = 44.dp),
+            enabled = !busy,
+            colors = ButtonDefaults.outlinedButtonColors(contentColor = TextPrimaryDark),
+            border = BorderStroke(1.dp, BorderDark),
+        ) {
+            Icon(Icons.Outlined.CurrencyExchange, contentDescription = null, modifier = Modifier.size(18.dp))
+            Spacer(Modifier.width(8.dp))
+            Text("Moneda visual · " + current.code, modifier = Modifier.weight(1f))
+            Icon(Icons.Outlined.ExpandMore, contentDescription = null)
+        }
+        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            DisplayCurrencyManager.supported.forEach { code ->
+                DropdownMenuItem(text = { Text(code) }, onClick = {
+                    expanded = false
+                    scope.launch { DisplayCurrencyManager.select(context, code) }
+                })
+            }
+        }
+    }
+    if (busy) Text("Consultando tasa…", color = TextSecondDark, style = MaterialTheme.typography.labelSmall)
+    if (current.code != "COP") {
+        Text("Tasa de referencia " + (current.date ?: "") + " · Registros originales COP",
+            color = TextSecondDark, style = MaterialTheme.typography.labelSmall)
+        Text("Fuente: Frankfurter", color = TextSecondDark, style = MaterialTheme.typography.labelSmall)
+    }
+    if (issue != null) Text(issue ?: "", color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.labelSmall)
 }

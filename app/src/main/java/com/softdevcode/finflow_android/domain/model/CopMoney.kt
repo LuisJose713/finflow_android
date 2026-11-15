@@ -2,6 +2,8 @@ package com.softdevcode.finflow_android.domain.model
 
 import java.math.BigDecimal
 import java.math.RoundingMode
+import java.text.NumberFormat
+import java.util.Locale
 
 /** The editable model uses decimal dots; only the display uses es-CO punctuation. */
 fun normalizeCopInput(input: String, previous: String = ""): String? {
@@ -51,7 +53,31 @@ fun copInputDisplay(raw: String, padDecimals: Boolean): CopInputDisplay {
     return CopInputDisplay(display.toString(), offsets)
 }
 
+/** Reference display quote. Never used to persist or submit transaction amounts. */
+data class DisplayCurrencyQuote(val code: String = "COP", val rate: Double = 1.0, val date: String? = null)
+
+object MoneyDisplayQuote {
+    @Volatile var active = DisplayCurrencyQuote()
+}
+
+fun convertedCopAmount(amount: Double, rate: Double): Double? {
+    if (!amount.isFinite() || !rate.isFinite() || rate <= 0) return null
+    return (amount * rate).takeIf { it.isFinite() }
+}
+
 fun formatCopMoney(amount: Double): String {
+    if (!amount.isFinite()) return "—"
+    val quote = MoneyDisplayQuote.active
+    val converted = if (quote.code != "COP") convertedCopAmount(amount, quote.rate) else null
+    if (converted != null) {
+        val sign = if (converted < 0) "−" else ""
+        val decimal = NumberFormat.getNumberInstance(Locale("es", "CO")).apply {
+            minimumFractionDigits = 2
+            maximumFractionDigits = 2
+            isGroupingUsed = true
+        }
+        return sign + quote.code + " " + decimal.format(kotlin.math.abs(converted))
+    }
     val sign = if (amount < 0) "−" else ""
     return sign + "$ " + copInputDisplay(copEditableAmount(kotlin.math.abs(amount)), padDecimals = true).text
 }
