@@ -89,9 +89,9 @@ dependencies {
     implementation(libs.compose.animation)
 
     // Google ID token (server-verified; the client never creates FinFlow sessions).
-    implementation("androidx.credentials:credentials:1.6.0")
-    implementation("androidx.credentials:credentials-play-services-auth:1.6.0")
-    implementation("com.google.android.libraries.identity.googleid:googleid:1.2.1")
+    implementation("androidx.credentials:credentials:1.3.0")
+    implementation("androidx.credentials:credentials-play-services-auth:1.3.0")
+    implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
 
     // Activity + Lifecycle
     implementation(libs.activity.compose)
