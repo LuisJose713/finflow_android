@@ -63,14 +63,14 @@ object DisplayCurrencyManager {
                     setRequestProperty("Accept", "application/json")
                 }
                 try {
-                    if (connection.responseCode != 200) error("FX service unavailable")
+                    if (connection.responseCode != 200) throw IllegalStateException("FX service unavailable")
                     val response = connection.inputStream.bufferedReader().use { it.readText() }
                     val body = JSONObject(response)
                     if (!body.getString("base").equals("COP", ignoreCase = true) ||
-                        !body.getString("quote").equals(code, ignoreCase = true)) error("Invalid FX pair")
+                        !body.getString("quote").equals(code, ignoreCase = true)) throw IllegalStateException("Invalid FX pair")
                     val rate = body.getDouble("rate")
                     val date = body.getString("date")
-                    if (!valid(rate, date)) error("Invalid FX quote")
+                    if (!valid(rate, date)) throw IllegalStateException("Invalid FX quote")
                     DisplayCurrencyQuote(code, rate, date)
                 } finally {
                     connection.disconnect()
@@ -105,7 +105,7 @@ object DisplayCurrencyManager {
         return try {
             val day = LocalDate.parse(date)
             val delta = java.time.temporal.ChronoUnit.DAYS.between(day, LocalDate.now(ZoneOffset.UTC))
-            delta in -1..14
+            delta in -1L..14L
         } catch (_: Exception) { false }
     }
 }

@@ -5,6 +5,20 @@ import org.junit.Assert.*
 import org.junit.Test
 
 class CopMoneyTest {
+    @Test fun selectedCurrencyConvertsOnlyForDisplay() {
+        val original = MoneyDisplayQuote.active
+        try {
+            MoneyDisplayQuote.active = DisplayCurrencyQuote(code = "USD", rate = 0.00025, date = "2026-11-14")
+            assertEquals(25.0, convertedCopAmount(100_000.0, 0.00025)!!, 0.000001)
+            assertEquals("USD 25,00", formatCopMoney(100_000.0))
+            assertEquals("−USD 25,00", formatCopMoney(-100_000.0))
+            assertNull(convertedCopAmount(Double.POSITIVE_INFINITY, 0.00025))
+            assertNull(convertedCopAmount(100_000.0, 0.0))
+        } finally {
+            MoneyDisplayQuote.active = original
+        }
+    }
+
     @Test fun typingWholePesosDoesNotDivideTheAmountByOneHundred() {
         var raw = ""
         "25000".forEach { raw = normalizeCopInput(raw + it, raw)!! }
