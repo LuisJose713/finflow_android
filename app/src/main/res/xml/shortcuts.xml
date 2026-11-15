@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Google Assistant and system launcher can discover this static shortcut.
+         No financial write happens until the authenticated user saves the form. -->
+    <shortcut
+        android:shortcutId="finflow_new_movement"
+        android:enabled="true"
+        android:icon="@mipmap/ic_launcher"
+        android:shortcutShortLabel="@string/shortcut_new_movement"
+        android:shortcutLongLabel="@string/shortcut_new_movement_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="com.softdevcode.finflow_android"
+            android:targetClass="com.softdevcode.finflow_android.MainActivity">
+            <extra android:name="finflow.assistant.create" android:value="true" />
+        </intent>
+    </shortcut>
+</shortcuts>
