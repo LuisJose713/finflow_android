@@ -9,4 +9,16 @@
         <item>record an income of $amount for $title in category $category</item>
         <item>log $amount earned from $title in $category</item>
     </string-array>
+    <string-array name="finflow_expense_feature_names">
+        <item>Register expense</item>
+        <item>New expense</item>
+        <item>Registrar gasto</item>
+        <item>Nuevo gasto</item>
+    </string-array>
+    <string-array name="finflow_income_feature_names">
+        <item>Register income</item>
+        <item>New income</item>
+        <item>Registrar ingreso</item>
+        <item>Nuevo ingreso</item>
+    </string-array>
 </resources>
