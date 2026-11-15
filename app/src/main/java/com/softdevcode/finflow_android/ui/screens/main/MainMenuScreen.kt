@@ -146,6 +146,12 @@ internal fun MainMenu(
                             verticalArrangement = Arrangement.spacedBy(2.dp),
                         ) {
                             DrawerGroup("Tu panorama", mainItems, currentRoute, onNavigate)
+                            TextButton(onClick = onStartTutorial,
+                                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
+                                Icon(Icons.Outlined.HelpOutline, contentDescription = null)
+                                Spacer(Modifier.width(9.dp))
+                                Text("Guía paso a paso", color = FinFlowGold)
+                            }
                             DrawerSeparator()
                             DrawerGroup(
                                 "Tu dinero", financeItems,
@@ -183,12 +189,6 @@ internal fun MainMenu(
                                     contentDescription = null, tint = TextTertiaryDark,
                                     modifier = Modifier.size(16.dp))
                             }
-                        }
-                        TextButton(onClick = onStartTutorial,
-                            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
-                            Icon(Icons.Outlined.HelpOutline, contentDescription = null)
-                            Spacer(Modifier.width(9.dp))
-                            Text("Guía paso a paso", color = FinFlowGold)
                         }
                         DrawerFooter(
                             isDark = isDark,
