@@ -38,6 +38,8 @@ import java.util.TimeZone
 @Composable
 fun FinFlowModulesScreen(
     userId: Int?,
+    userName: String = "",
+    userEmail: String = "",
     onReauthenticate: () -> Unit,
     updateViewModel: AppUpdateViewModel,
     isAdmin: Boolean = false,
@@ -123,7 +125,7 @@ fun FinFlowModulesScreen(
                 "advisor" -> AdvisorConversationScreen(state, vm)
                 "reports" -> FinFlowReportsSection(state, vm)
                 "privacy" -> FinFlowPrivacySection(state, vm)
-                "security" -> FinFlowSecuritySection(state, vm, onReauthenticate)
+                "security" -> FinFlowSecuritySection(state, vm, onReauthenticate, userName, userEmail)
                 "billing" -> FinFlowPlansSection()
                 "updates" -> AppUpdatesSection(updateViewModel)
                 "admin" -> if (isAdmin) FinFlowAdminSection()

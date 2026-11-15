@@ -39,6 +39,7 @@ import com.softdevcode.finflow_android.domain.model.FinFlowRightsRequest
 import com.softdevcode.finflow_android.domain.model.FinFlowRightsEntry
 
 import com.softdevcode.finflow_android.domain.model.ChangeFinFlowPasswordRequest
+import com.softdevcode.finflow_android.domain.model.ChangeFinFlowEmailRequest
 import com.softdevcode.finflow_android.domain.model.ConfirmFinFlowPasswordRequest
 
 import com.softdevcode.finflow_android.domain.model.BillingCatalog
@@ -114,6 +115,11 @@ interface FinFlowApi {
     @POST("admin/billing/grants")
     suspend fun grantAdminPlan(@Body request: BillingGrantRequest): retrofit2.Response<okhttp3.ResponseBody>
 
+
+    @POST("auth/change-email")
+    suspend fun changeFinFlowEmail(
+        @Body request: ChangeFinFlowEmailRequest,
+    ): retrofit2.Response<okhttp3.ResponseBody>
 
     @POST("auth/change-password")
     suspend fun changeFinFlowPassword(

@@ -182,6 +182,46 @@ class FinFlowModulesViewModel @Inject constructor(private val api: FinFlowApi) :
             if (!api.deleteCategory(id).isSuccessful) error("No se pudo eliminar")
         }
 
+    fun changeEmail(
+        password: String, email: String, confirmation: String, onReauthenticate: () -> Unit,
+    ) {
+        val desired = email.trim().lowercase(java.util.Locale.ROOT)
+        val confirmed = confirmation.trim().lowercase(java.util.Locale.ROOT)
+        if (password.isBlank() || password.toByteArray(Charsets.UTF_8).size > 72 ||
+            desired.length > 254 || !desired.contains('@') ||
+            !desired.substringAfter('@').contains('.') ||
+            desired.any { it.isWhitespace() } || desired != confirmed) {
+            _state.update { it.copy(error = "Confirma el correo nuevo y tu contraseña actual.") }
+            return
+        }
+        viewModelScope.launch {
+            _state.update { it.copy(busy = true, error = null, notice = null) }
+            try {
+                val response = api.changeFinFlowEmail(
+                    ChangeFinFlowEmailRequest(password, desired, confirmed)
+                )
+                if (response.isSuccessful) {
+                    onReauthenticate() // The backend invalidates every previous session.
+                } else {
+                    _state.update {
+                        it.copy(error = when (response.code()) {
+                            403 -> "Contraseña actual incorrecta."
+                            409 -> "Ese correo ya está registrado."
+                            400 -> "Comprueba el correo nuevo y su confirmación."
+                            else -> "No se pudo actualizar el correo."
+                        })
+                    }
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (_: Exception) {
+                _state.update { it.copy(error = "No se pudo conectar para actualizar el correo.") }
+            } finally {
+                _state.update { it.copy(busy = false) }
+            }
+        }
+    }
+
     fun changePassword(
         current: String, next: String, confirmation: String, onReauthenticate: () -> Unit,
     ) {

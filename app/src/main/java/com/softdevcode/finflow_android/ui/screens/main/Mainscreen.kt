@@ -224,6 +224,8 @@ fun MainScreen(
                         FinFlowModulesScreen(
                             updateViewModel = updateViewModel,
                             userId = uiState.user?.id,
+                            userName = uiState.user?.name.orEmpty(),
+                            userEmail = uiState.user?.email.orEmpty(),
                             onReauthenticate = authViewModel::logout,
                             isAdmin = isAdmin,
                             initialSection = section,
@@ -234,6 +236,8 @@ fun MainScreen(
                     FinFlowModulesScreen(
                         updateViewModel = updateViewModel,
                         userId = uiState.user?.id,
+                        userName = uiState.user?.name.orEmpty(),
+                        userEmail = uiState.user?.email.orEmpty(),
                         onReauthenticate = authViewModel::logout,
                         isAdmin = isAdmin,
                         initialSection = "advisor",

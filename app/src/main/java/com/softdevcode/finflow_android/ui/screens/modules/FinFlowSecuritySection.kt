@@ -18,7 +18,12 @@ fun FinFlowSecuritySection(
     state: ModulesState,
     vm: FinFlowModulesViewModel,
     onReauthenticate: () -> Unit,
+    userName: String = "",
+    userEmail: String = "",
 ) {
+    var nextEmail by remember(userEmail) { mutableStateOf("") }
+    var confirmEmail by remember(userEmail) { mutableStateOf("") }
+    var emailPassword by remember { mutableStateOf("") }
     var current by remember { mutableStateOf("") }
     var next by remember { mutableStateOf("") }
     var confirm by remember { mutableStateOf("") }
@@ -33,6 +38,46 @@ fun FinFlowSecuritySection(
     Text("Actualiza tus credenciales o cierra todas las sesiones activas.",
         style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant)
+
+    Card(
+        Modifier.fillMaxWidth(), shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+    ) {
+        Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Text("MI PERFIL", color = FinFlowGold, style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.Bold)
+            Text(userName.ifBlank { "Tu cuenta FinFlow" }, fontWeight = FontWeight.SemiBold)
+            Text(userEmail, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text("Cambiar correo electrónico", style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold)
+            OutlinedTextField(nextEmail, { nextEmail = it.take(254) },
+                label = { Text("Nuevo correo") }, singleLine = true, modifier = Modifier.fillMaxWidth())
+            OutlinedTextField(confirmEmail, { confirmEmail = it.take(254) },
+                label = { Text("Confirmar nuevo correo") }, singleLine = true,
+                modifier = Modifier.fillMaxWidth())
+            OutlinedTextField(emailPassword, { emailPassword = it },
+                label = { Text("Contraseña actual") },
+                visualTransformation = PasswordVisualTransformation(), singleLine = true,
+                modifier = Modifier.fillMaxWidth())
+            Text("Al actualizar el correo se cerrarán las sesiones activas. " +
+                "La verificación por enlace de correo todavía no está disponible.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant)
+            val updated = nextEmail.trim().lowercase(java.util.Locale.ROOT)
+            val valid = updated.length in 6..254 &&
+                updated.contains('@') && updated.substringAfter('@').contains('.') &&
+                updated.none { it.isWhitespace() } &&
+                updated != userEmail.lowercase(java.util.Locale.ROOT) &&
+                updated == confirmEmail.trim().lowercase(java.util.Locale.ROOT) &&
+                emailPassword.isNotBlank() &&
+                emailPassword.toByteArray(Charsets.UTF_8).size <= 72
+            Button(onClick = { vm.changeEmail(emailPassword, updated, confirmEmail, onReauthenticate) },
+                enabled = valid && !state.busy, modifier = Modifier.fillMaxWidth()) {
+                Text("Actualizar correo")
+            }
+        }
+    }
 
     Card(
         Modifier.fillMaxWidth(), shape = RoundedCornerShape(20.dp),
