@@ -1,10 +1,6 @@
 package com.softdevcode.finflow_android
-import android.Manifest
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.ui.platform.LocalContext
 import com.softdevcode.finflow_android.data.notifications.DailyReminders
 import com.softdevcode.finflow_android.data.remote.api.FinFlowApi
@@ -41,12 +37,6 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val context = LocalContext.current
-            val displayCurrency by DisplayCurrencyManager.quote.collectAsStateWithLifecycle()
-            val notificationPermission = rememberLauncherForActivityResult(
-                ActivityResultContracts.RequestPermission()
-            ) { granted ->
-                DailyReminders.setEnabled(context, granted)
-            }
             val authViewModel: AuthViewModel = hiltViewModel()
             val updateViewModel: AppUpdateViewModel = hiltViewModel()
             val uiState by authViewModel.uiState.collectAsStateWithLifecycle()
@@ -67,14 +57,8 @@ class MainActivity : ComponentActivity() {
                     DailyReminders.setSessionActive(context, false)
                 } else {
                     DailyReminders.setSessionActive(context, true)
-                    if (!DailyReminders.wasAsked(context)) {
-                        DailyReminders.markAsked(context)
-                        if (DailyReminders.notificationPermission(context)) {
-                            DailyReminders.setEnabled(context, true)
-                        } else if (Build.VERSION.SDK_INT >= 33) {
-                            notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
-                        }
-                    }
+                    // Notification permission alone is not consent to recurring reminders.
+                    // Only an explicit preference may enable them.
                 }
             }
             splashScreen.setKeepOnScreenCondition {
@@ -88,16 +72,14 @@ class MainActivity : ComponentActivity() {
                     val startDestination = if (uiState.isAuthenticated)
                         Screen.Main.route else Screen.Login.route
 
-                    key(displayCurrency) {
-                        FinFlowNavGraph(
+                    FinFlowNavGraph(
                             startDestination = startDestination,
                             navController    = navController, // ✅ reutilizado
                             authViewModel    = authViewModel,
                             updateViewModel  = updateViewModel,
                             assistantDraft = assistantDraft,
                             onAssistantRequestHandled = { assistantDraft = null },
-                        )
-                    }
+                    )
                 }
             }
         }
