@@ -20,6 +20,7 @@ import androidx.navigation.compose.rememberNavController
 import com.softdevcode.finflow_android.ui.screens.auth.AuthViewModel
 import com.softdevcode.finflow_android.ui.screens.navigation.FinFlowNavGraph
 import com.softdevcode.finflow_android.ui.screens.navigation.Screen
+import com.softdevcode.finflow_android.ui.screens.navigation.AssistantMovementDraft
 import com.softdevcode.finflow_android.ui.theme.FinFlowTheme
 import com.softdevcode.finflow_android.ui.theme.DisplayCurrencyManager
 import com.softdevcode.finflow_android.ui.updates.AppUpdateHost
@@ -28,14 +29,14 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    private var assistantCreateRequested by mutableStateOf(false)
+    private var assistantDraft by mutableStateOf<AssistantMovementDraft?>(null)
 
     @Inject lateinit var finFlowApi: FinFlowApi
 
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
-        assistantCreateRequested = intent?.getBooleanExtra("finflow.assistant.create", false) == true
+        assistantDraft = AssistantMovementDraft.fromIntent(intent)
         enableEdgeToEdge()
 
         setContent {
@@ -93,8 +94,8 @@ class MainActivity : ComponentActivity() {
                             navController    = navController, // ✅ reutilizado
                             authViewModel    = authViewModel,
                             updateViewModel  = updateViewModel,
-                            assistantCreateRequested = assistantCreateRequested,
-                            onAssistantRequestHandled = { assistantCreateRequested = false },
+                            assistantDraft = assistantDraft,
+                            onAssistantRequestHandled = { assistantDraft = null },
                         )
                     }
                 }
@@ -104,9 +105,7 @@ class MainActivity : ComponentActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
-        if (intent.getBooleanExtra("finflow.assistant.create", false)) {
-            assistantCreateRequested = true
-        }
+        AssistantMovementDraft.fromIntent(intent)?.let { assistantDraft = it }
     }
 
 }
