@@ -35,6 +35,8 @@ fun MainScreen(
     onLogout: () -> Unit,
     updateViewModel: AppUpdateViewModel,
     authViewModel: AuthViewModel = hiltViewModel(),
+    assistantCreateRequested: Boolean = false,
+    onAssistantRequestHandled: () -> Unit = {},
 ) {
     val navController = rememberNavController()
     val entry by navController.currentBackStackEntryAsState()
@@ -84,6 +86,14 @@ fun MainScreen(
 
     LaunchedEffect(uiState.isAuthenticated) {
         if (!uiState.isAuthenticated) onLogout()
+    }
+    // System assistant/launcher shortcuts only open the authenticated form.
+    // The user must review and explicitly save the transaction.
+    LaunchedEffect(assistantCreateRequested, uiState.isAuthenticated) {
+        if (assistantCreateRequested && uiState.isAuthenticated) {
+            navController.navigate(Screen.AddTransaction.route) { launchSingleTop = true }
+            onAssistantRequestHandled()
+        }
     }
 
     CompositionLocalProvider(LocalPresentationControls provides PresentationControls(presentationState, preferences::setHidden)) {
