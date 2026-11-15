@@ -50,7 +50,15 @@ import com.softdevcode.finflow_android.domain.model.BillingGrantRequest
 import com.softdevcode.finflow_android.domain.model.AdminOverview
 import com.softdevcode.finflow_android.domain.model.AdminPlatformHealth
 
+data class PreferredCurrencyResponse(val currency: String)
+
 interface FinFlowApi {
+    @GET("preferences/currency")
+    suspend fun getPreferredCurrency(): PreferredCurrencyResponse
+
+    @PUT("preferences/currency")
+    suspend fun setPreferredCurrency(@Body request: Map<String, String>): PreferredCurrencyResponse
+
     @POST("auth/session")
     suspend fun adoptSession(@Body empty: Map<String, String> = emptyMap()): AuthResponse
 

@@ -6,6 +6,8 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.ui.platform.LocalContext
 import com.softdevcode.finflow_android.data.notifications.DailyReminders
+import com.softdevcode.finflow_android.data.remote.api.FinFlowApi
+import javax.inject.Inject
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -25,6 +27,7 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    @Inject lateinit var finFlowApi: FinFlowApi
 
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()
@@ -34,7 +37,6 @@ class MainActivity : ComponentActivity() {
         setContent {
             val context = LocalContext.current
             val displayCurrency by DisplayCurrencyManager.quote.collectAsStateWithLifecycle()
-            LaunchedEffect(Unit) { DisplayCurrencyManager.initialize(context) }
             val notificationPermission = rememberLauncherForActivityResult(
                 ActivityResultContracts.RequestPermission()
             ) { granted ->
@@ -44,6 +46,12 @@ class MainActivity : ComponentActivity() {
             val updateViewModel: AppUpdateViewModel = hiltViewModel()
             val uiState by authViewModel.uiState.collectAsStateWithLifecycle()
             val darkMode by authViewModel.darkMode.collectAsStateWithLifecycle()
+            LaunchedEffect(uiState.user?.id, uiState.isAuthenticated) {
+                DisplayCurrencyManager.initialize(
+                    context, finFlowApi,
+                    if (uiState.isAuthenticated) uiState.user?.id else null
+                )
+            }
 
             val navController = rememberNavController() // ✅ SOLO UNA VEZ
             
