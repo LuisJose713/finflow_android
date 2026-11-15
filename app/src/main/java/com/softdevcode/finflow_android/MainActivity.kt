@@ -1,5 +1,6 @@
 package com.softdevcode.finflow_android
 import android.Manifest
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -27,11 +28,14 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    private var assistantCreateRequested by mutableStateOf(false)
+
     @Inject lateinit var finFlowApi: FinFlowApi
 
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
+        assistantCreateRequested = intent?.getBooleanExtra("finflow.assistant.create", false) == true
         enableEdgeToEdge()
 
         setContent {
@@ -89,10 +93,20 @@ class MainActivity : ComponentActivity() {
                             navController    = navController, // ✅ reutilizado
                             authViewModel    = authViewModel,
                             updateViewModel  = updateViewModel,
+                            assistantCreateRequested = assistantCreateRequested,
+                            onAssistantRequestHandled = { assistantCreateRequested = false },
                         )
                     }
                 }
             }
         }
     }
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        if (intent.getBooleanExtra("finflow.assistant.create", false)) {
+            assistantCreateRequested = true
+        }
+    }
+
 }
