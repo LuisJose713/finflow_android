@@ -16,11 +16,17 @@ data class AssistantMovementDraft(
         fun fromIntent(intent: Intent?): AssistantMovementDraft? {
             if (intent == null) return null
             val marker = intent.extras?.get("finflow.assistant.create")?.toString()
-            if (marker != "true") return null
+            val feature = intent.getStringExtra("finflow.assistant.feature")
+            val validFeature = feature == "finflow_create_expense" || feature == "finflow_create_income"
+            if (marker != "true" && !validFeature) return null
             fun extra(name: String, max: Int): String? =
                 intent.extras?.get("finflow.assistant.$name")?.toString()
                     ?.trim()?.take(max)?.takeIf { it.isNotBlank() }
-            val requestedType = extra("type", 10)
+            val requestedType = when (feature) {
+                "finflow_create_income" -> "income"
+                "finflow_create_expense" -> "expense"
+                else -> extra("type", 10)
+            }
             return AssistantMovementDraft(
                 type = if (requestedType == "income") "income" else "expense",
                 title = extra("title", 255),
