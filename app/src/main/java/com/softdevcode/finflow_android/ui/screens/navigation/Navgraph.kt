@@ -39,7 +39,7 @@ fun FinFlowNavGraph(
     navController: NavHostController = rememberNavController(),
     authViewModel: AuthViewModel,
     updateViewModel: AppUpdateViewModel,
-    assistantCreateRequested: Boolean = false,
+    assistantDraft: AssistantMovementDraft? = null,
     onAssistantRequestHandled: () -> Unit = {},
 ) {
     NavHost(
@@ -81,7 +81,7 @@ fun FinFlowNavGraph(
                 },
                 authViewModel = authViewModel,
                 updateViewModel = updateViewModel,
-                assistantCreateRequested = assistantCreateRequested,
+                assistantDraft = assistantDraft,
                 onAssistantRequestHandled = onAssistantRequestHandled,
             )
         }
