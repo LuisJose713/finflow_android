@@ -137,7 +137,7 @@ fun DashboardScreen(
                     }
                 }
                 ActivitySummary(stats, amountsVisible)
-                FinFlowTrendChart(stats.monthlyData, amountsVisible)
+                FinFlowTrendChart(stats.monthlyData, amountsVisible, stats.totalIncome, stats.totalExpenses)
             }
             if (uiState.hasLoadedTransactions) {
                 RecentTransactionsCard(uiState.recentTransactions, viewModel::categoryName,
