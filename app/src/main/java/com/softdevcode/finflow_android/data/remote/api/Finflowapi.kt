@@ -56,6 +56,19 @@ data class PreferredCurrencyResponse(val currency: String)
 data class GoogleLinkStatus(val linked: Boolean, val email: String)
 
 interface FinFlowApi {
+    @PUT("notifications/device")
+    suspend fun setNotificationDevice(@Body input: com.softdevcode.finflow_android.domain.model.NotificationDevice): Map<String, Boolean>
+    @GET("notifications/messages")
+    suspend fun getNotificationMessages(@Query("deviceId") deviceId: String): List<com.softdevcode.finflow_android.domain.model.ScheduledMessage>
+    @POST("notifications/messages/{id}/ack")
+    suspend fun acknowledgeNotification(@Path("id") id: String, @Query("deviceId") deviceId: String): retrofit2.Response<Void>
+    @GET("admin/notifications")
+    suspend fun getNotificationCampaigns(): com.softdevcode.finflow_android.domain.model.NotificationCampaignList
+    @POST("admin/notifications")
+    suspend fun scheduleNotification(@Body input: com.softdevcode.finflow_android.domain.model.NotificationSchedule): com.softdevcode.finflow_android.domain.model.NotificationCampaign
+    @DELETE("admin/notifications/{id}")
+    suspend fun cancelNotification(@Path("id") id: String): retrofit2.Response<Void>
+
     @GET("preferences/currency")
     suspend fun getPreferredCurrency(): PreferredCurrencyResponse
 

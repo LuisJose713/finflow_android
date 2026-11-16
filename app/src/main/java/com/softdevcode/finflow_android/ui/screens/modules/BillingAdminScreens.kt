@@ -117,6 +117,7 @@ fun FinFlowAdminSection(vm: BillingAdminViewModel = hiltViewModel()) {
     Text("Indicadores agregados y herramientas reservadas a administradores.",
         style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant)
+    AdminNotificationScheduler()
     if (state.busy) LinearProgressIndicator(Modifier.fillMaxWidth())
     state.error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
     state.notice?.let { Text(it, color = MaterialTheme.colorScheme.primary) }

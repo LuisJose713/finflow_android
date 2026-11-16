@@ -3,6 +3,13 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.compose.ui.platform.LocalContext
 import com.softdevcode.finflow_android.data.notifications.DailyReminders
+import com.softdevcode.finflow_android.data.notifications.NativeMessages
+import com.softdevcode.finflow_android.data.local.TokenManager
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.repeatOnLifecycle
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import com.softdevcode.finflow_android.data.remote.api.FinFlowApi
 import javax.inject.Inject
 import androidx.activity.ComponentActivity
@@ -28,6 +35,7 @@ class MainActivity : ComponentActivity() {
     private var assistantDraft by mutableStateOf<AssistantMovementDraft?>(null)
 
     @Inject lateinit var finFlowApi: FinFlowApi
+    @Inject lateinit var notificationTokens: TokenManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()
@@ -51,15 +59,28 @@ class MainActivity : ComponentActivity() {
             val navController = rememberNavController() // ✅ SOLO UNA VEZ
             
             val isReady = !uiState.isCheckingAuth
-            LaunchedEffect(isReady, uiState.isAuthenticated) {
+            LaunchedEffect(isReady, uiState.isAuthenticated, uiState.user?.id) {
+                if (!isReady || !uiState.isAuthenticated) return@LaunchedEffect
+                lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                    while (isActive) {
+                        try { NativeMessages.sync(context, finFlowApi, notificationTokens) }
+                        catch (ex: CancellationException) { throw ex }
+                        catch (_: Exception) { /* The next sync retries without interrupting navigation. */ }
+                        delay(30_000)
+                    }
+                }
+            }
+            LaunchedEffect(isReady, uiState.isAuthenticated, uiState.user?.id) {
                 if (!isReady) return@LaunchedEffect
                 if (!uiState.isAuthenticated) {
                     DailyReminders.setSessionActive(context, false)
                 } else {
                     DailyReminders.setSessionActive(context, true)
+                    DailyReminders.setEnabled(context, uiState.user?.id?.let { NativeMessages.enabled(context, it) } == true)
                     // Notification permission alone is not consent to recurring reminders.
                     // Only an explicit preference may enable them.
                 }
+                NativeMessages.bindSession(context, if (uiState.isAuthenticated) uiState.user?.id else null)
             }
             splashScreen.setKeepOnScreenCondition {
                 uiState.isCheckingAuth

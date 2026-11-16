@@ -100,6 +100,8 @@ fun MainScreen(
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     var navigatingDrawer by remember { mutableStateOf(false) }
+    val menuGesturesEnabled = isMainDestination(route) && !keyboardVisible &&
+        guideStep == null && !welcomeGuide && !navigatingDrawer
 
     fun navigateFromDrawer(destination: () -> Unit) {
         // Finish the drawer animation before the destination transition begins.
@@ -151,7 +153,7 @@ fun MainScreen(
     CompositionLocalProvider(LocalPresentationControls provides PresentationControls(presentationState, preferences::setHidden)) {
     MainMenu(
         drawerState = drawerState,
-        gesturesEnabled = isMainDestination(route) && !keyboardVisible,
+        gesturesEnabled = menuGesturesEnabled,
         currentRoute = route,
         currentSection = module,
         userName = uiState.user?.name.orEmpty(),
@@ -321,6 +323,8 @@ fun MainScreen(
         }
     }
     }
+    DrawerBackNavigation(enabled = menuGesturesEnabled && drawerState.isClosed) { drawerState.open() }
+
     if (welcomeGuide && guideStep == null) {
         AlertDialog(
             onDismissRequest = ::acknowledgeGuide,

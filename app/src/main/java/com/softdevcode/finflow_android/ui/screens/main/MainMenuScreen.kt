@@ -13,6 +13,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.systemGestureExclusion
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Logout
 import androidx.compose.material.icons.filled.Add
@@ -24,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
@@ -31,6 +33,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
 import com.softdevcode.finflow_android.ui.screens.navigation.Screen
@@ -92,7 +95,16 @@ internal fun MainMenu(
     // pushes the chosen item and the user's scroll position away.
     val destinationsScroll = rememberScrollState()
     val drawerShape = RoundedCornerShape(topEnd = 22.dp, bottomEnd = 22.dp)
-    BoxWithConstraints(Modifier.fillMaxSize()) {
+    val density = LocalDensity.current
+    val edgeWidth = with(density) { 24.dp.toPx() }
+    val edgeHeight = with(density) { 200.dp.toPx() }
+    // Android 10+ permits a bounded exclusion area; never exclude the bottom or right edge.
+    val edgeGesture = if (gesturesEnabled) Modifier.systemGestureExclusion { coordinates ->
+        val height = coordinates.size.height.toFloat()
+        val top = ((height - edgeHeight) / 2f).coerceAtLeast(0f)
+        Rect(0f, top, edgeWidth.coerceAtMost(coordinates.size.width.toFloat()), (top + edgeHeight).coerceAtMost(height))
+    } else Modifier
+    BoxWithConstraints(Modifier.fillMaxSize().then(edgeGesture)) {
         val drawerWidth = (maxWidth * 0.90f).coerceAtMost(370.dp)
         ModalNavigationDrawer(
             drawerState = drawerState,

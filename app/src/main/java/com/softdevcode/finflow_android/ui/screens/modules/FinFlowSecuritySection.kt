@@ -150,6 +150,7 @@ fun FinFlowSecuritySection(
     }
 
     GoogleAccountSecurityCard()
+    NativeNotificationSettings()
 
     // Clearly separated from routine security actions: irreversible deletion.
     Card(
