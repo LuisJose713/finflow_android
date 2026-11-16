@@ -74,9 +74,9 @@ internal fun buildTrendMonths(
 internal fun trendTotals(months: List<TrendMonth>): TrendTotals =
     TrendTotals(months.sumOf { it.income }, months.sumOf { it.expenses })
 
-internal fun selectTrendIndex(touchX: Float, chartWidth: Float, count: Int): Int {
+internal fun selectTrendIndex(touchX: Float, chartWidth: Float, count: Int, inset: Float = 16f): Int {
     if (count <= 1) return 0
-    val fraction = ((touchX - 16f) / (chartWidth - 32f).coerceAtLeast(1f)).coerceIn(0f, 1f)
+    val fraction = ((touchX - inset) / (chartWidth - 2f * inset).coerceAtLeast(1f)).coerceIn(0f, 1f)
     return (fraction * (count - 1)).toInt().let { index ->
         if (fraction * (count - 1) - index >= .5f) index + 1 else index
     }.coerceIn(0, count - 1)
@@ -217,6 +217,7 @@ private fun FinFlowPeriodDonut(
             val density = androidx.compose.ui.platform.LocalDensity.current
             val ringWidthPx = with(density) { 28.dp.toPx() }
             val tolerancePx = with(density) { 13.dp.toPx() }
+            val trackColor = MaterialTheme.colorScheme.outlineVariant
             Canvas(
                 Modifier.matchParentSize()
                     .pointerInput(income, expenses, filter) {
@@ -246,7 +247,7 @@ private fun FinFlowPeriodDonut(
                 val position = Offset(inset, inset)
                 val dimension = Size((size.width - 2 * inset).coerceAtLeast(1f),
                     (size.height - 2 * inset).coerceAtLeast(1f))
-                drawArc(color = MaterialTheme.colorScheme.outlineVariant,
+                drawArc(color = trackColor,
                     startAngle = 0f, sweepAngle = 360f, useCenter = false,
                     topLeft = position, size = dimension, style = Stroke(thickness))
                 if (income > 0) {
@@ -332,18 +333,19 @@ private fun FinFlowPeriodLine(
     val activeIndex = data.indexOfFirst { it.key == selectedKey }.takeIf { it >= 0 } ?: data.lastIndex
     val active = data[activeIndex]
     val gridColor = MaterialTheme.colorScheme.outlineVariant
+    val chartInsetPx = with(androidx.compose.ui.platform.LocalDensity.current) { 12.dp.toPx() }
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Canvas(
             Modifier.fillMaxWidth().height(186.dp)
                 .pointerInput(data) {
                     detectTapGestures { offset ->
-                        onSelect(data[selectTrendIndex(offset.x, size.width.toFloat(), data.size)].key)
+                        onSelect(data[selectTrendIndex(offset.x, size.width.toFloat(), data.size, chartInsetPx)].key)
                     }
                 }
                 .pointerInput(data) {
                     detectHorizontalDragGestures(
                         onHorizontalDrag = { change, _ ->
-                            onSelect(data[selectTrendIndex(change.position.x, size.width.toFloat(), data.size)].key)
+                            onSelect(data[selectTrendIndex(change.position.x, size.width.toFloat(), data.size, chartInsetPx)].key)
                             change.consume()
                         },
                     )
