@@ -50,3 +50,11 @@ val FinFlowGoldMuted = Color(0xFF8A6837)
 val FinFlowGoldPale = Color(0xFFDCC29A)
 val FinFlowHeroEnd = Color(0xFF1B2B43)
 
+// OLED keeps the canvas black; raised surfaces distinguish controls and cards.
+val BackgroundOled = Color.Black
+val SurfaceOled = Color.Black
+val RaisedOled = Color(0xFF101214)
+val ElevatedOled = Color(0xFF1B1E22)
+val BorderOled = Color(0xFF5C6067)
+val BorderSubtleOled = Color(0xFF2B2F35)
+

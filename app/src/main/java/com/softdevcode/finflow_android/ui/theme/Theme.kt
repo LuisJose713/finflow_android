@@ -1,6 +1,7 @@
 package com.softdevcode.finflow_android.ui.theme
 
 import android.app.Activity
+import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -10,6 +11,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
+import com.softdevcode.finflow_android.domain.model.AppTheme
 
 // ── Light color scheme ────────────────────────────────────────────────────────
 private val LightColorScheme = lightColorScheme(
@@ -51,6 +53,32 @@ private val DarkColorScheme = darkColorScheme(
     errorContainer     = Color(0xFF7F1D1D),
 )
 
+private val OledColorScheme = DarkColorScheme.copy(
+    background = BackgroundOled,
+    surface = SurfaceOled,
+    surfaceVariant = RaisedOled,
+    surfaceDim = Color.Black,
+    surfaceBright = ElevatedOled,
+    surfaceContainerLowest = Color.Black,
+    surfaceContainerLow = Color(0xFF080A0C),
+    surfaceContainer = RaisedOled,
+    surfaceContainerHigh = ElevatedOled,
+    surfaceContainerHighest = Color(0xFF25282D),
+    primaryContainer = Color(0xFF2A2418),
+    secondaryContainer = RaisedOled,
+    outline = BorderOled,
+    outlineVariant = BorderSubtleOled,
+    surfaceTint = Color.Transparent,
+)
+
+internal fun finFlowColors(theme: AppTheme): ColorScheme = when (theme) {
+    AppTheme.LIGHT -> LightColorScheme
+    AppTheme.DARK -> DarkColorScheme
+    AppTheme.OLED -> OledColorScheme
+}
+
+val LocalAppTheme = staticCompositionLocalOf { AppTheme.DARK }
+
 // ── FinFlow extras (non-MD3 tokens) ──────────────────────────────────────────
 data class FinFlowExtras(
     val success: Color,
@@ -62,6 +90,12 @@ data class FinFlowExtras(
     val border: Color,
     val textSecondary: Color,
     val textTertiary: Color,
+    val navigationBackground: Color = FinFlowNavy,
+    val navigationSurface: Color = FinFlowNavy2,
+    val navigationSelected: Color = FinFlowDrawerSelected,
+    val heroStart: Color = FinFlowNavy,
+    val heroMiddle: Color = FinFlowNavy2,
+    val heroEnd: Color = FinFlowHeroEnd,
 )
 
 val LocalFinFlowExtras = staticCompositionLocalOf {
@@ -86,11 +120,13 @@ val MaterialTheme.extras: FinFlowExtras
 @Composable
 fun FinFlowTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
+    oledTheme: Boolean = false,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
+    val theme = if (oledTheme) AppTheme.OLED else if (darkTheme) AppTheme.DARK else AppTheme.LIGHT
+    val colorScheme = finFlowColors(theme)
 
-    val extras = if (darkTheme) {
+    val baseExtras = if (theme.isDark) {
         FinFlowExtras(
             success       = SuccessLight,
             successLight  = Success,
@@ -116,17 +152,35 @@ fun FinFlowTheme(
         )
     }
 
+    val extras = if (theme == AppTheme.OLED) baseExtras.copy(
+        cardBg = RaisedOled,
+        border = BorderOled,
+        navigationBackground = Color.Black,
+        navigationSurface = RaisedOled,
+        navigationSelected = ElevatedOled,
+        heroStart = Color.Black,
+        heroMiddle = Color(0xFF080A0C),
+        heroEnd = RaisedOled,
+    ) else baseExtras
+
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
             window.statusBarColor = colorScheme.background.toArgb()
+            window.navigationBarColor = colorScheme.background.toArgb()
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                window.isNavigationBarContrastEnforced = theme != AppTheme.OLED
+            }
             WindowCompat.getInsetsController(window, view)
-                .isAppearanceLightStatusBars = !darkTheme
+                .apply {
+                    isAppearanceLightStatusBars = !theme.isDark
+                    isAppearanceLightNavigationBars = !theme.isDark
+                }
         }
     }
 
-    CompositionLocalProvider(LocalFinFlowExtras provides extras) {
+    CompositionLocalProvider(LocalFinFlowExtras provides extras, LocalAppTheme provides theme) {
         MaterialTheme(
             colorScheme = colorScheme,
             typography  = FinFlowTypography,

@@ -25,6 +25,7 @@ import com.softdevcode.finflow_android.ui.screens.navigation.FinFlowNavGraph
 import com.softdevcode.finflow_android.ui.screens.navigation.Screen
 import com.softdevcode.finflow_android.ui.screens.navigation.AssistantMovementDraft
 import com.softdevcode.finflow_android.ui.theme.FinFlowTheme
+import com.softdevcode.finflow_android.domain.model.AppTheme
 import com.softdevcode.finflow_android.ui.theme.DisplayCurrencyManager
 import com.softdevcode.finflow_android.ui.updates.AppUpdateHost
 import com.softdevcode.finflow_android.ui.updates.AppUpdateViewModel
@@ -48,7 +49,7 @@ class MainActivity : ComponentActivity() {
             val authViewModel: AuthViewModel = hiltViewModel()
             val updateViewModel: AppUpdateViewModel = hiltViewModel()
             val uiState by authViewModel.uiState.collectAsStateWithLifecycle()
-            val darkMode by authViewModel.darkMode.collectAsStateWithLifecycle()
+            val themeMode by authViewModel.themeMode.collectAsStateWithLifecycle()
             LaunchedEffect(uiState.user?.id, uiState.isAuthenticated) {
                 DisplayCurrencyManager.initialize(
                     context, finFlowApi,
@@ -86,7 +87,7 @@ class MainActivity : ComponentActivity() {
                 uiState.isCheckingAuth
             }
 
-            FinFlowTheme(darkTheme = darkMode) {
+            FinFlowTheme(darkTheme = themeMode.isDark, oledTheme = themeMode == AppTheme.OLED) {
                 AppUpdateHost(updateViewModel)
                 if (isReady) {
 

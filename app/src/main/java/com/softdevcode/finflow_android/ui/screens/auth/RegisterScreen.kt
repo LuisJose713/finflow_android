@@ -6,9 +6,14 @@ import android.net.Uri
 import androidx.compose.animation.*
 import androidx.compose.foundation.*
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.platform.LocalContext
 import com.softdevcode.finflow_android.R
+import com.softdevcode.finflow_android.BuildConfig
+import com.softdevcode.finflow_android.domain.model.AppTheme
+import com.softdevcode.finflow_android.ui.theme.LocalAppTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -22,6 +27,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import kotlinx.coroutines.launch
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.*
@@ -29,6 +38,7 @@ import androidx.compose.ui.unit.*
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun RegisterScreen(
     onNavigateToLogin: () -> Unit,
@@ -38,6 +48,8 @@ fun RegisterScreen(
     val uiState      by viewModel.uiState.collectAsStateWithLifecycle()
     val focusManager = LocalFocusManager.current
     val context = LocalContext.current
+    val privacySection = remember { BringIntoViewRequester() }
+    val scope = rememberCoroutineScope()
     var privacyAccepted by remember { mutableStateOf(false) }
     var marketingConsent by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) { viewModel.loadRegistrationPolicy() }
@@ -66,7 +78,9 @@ fun RegisterScreen(
                 .height(250.dp)
                 .background(
                     Brush.verticalGradient(
-                        listOf(MaterialTheme.colorScheme.primary.copy(alpha = 0.07f), MaterialTheme.colorScheme.background)
+                        listOf(if (LocalAppTheme.current == AppTheme.OLED) Color.Transparent
+                            else MaterialTheme.colorScheme.primary.copy(alpha = 0.07f),
+                            MaterialTheme.colorScheme.background)
                     )
                 )
         )
@@ -78,7 +92,7 @@ fun RegisterScreen(
                 .padding(horizontal = 28.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Spacer(Modifier.height(60.dp))
+            Spacer(Modifier.height(28.dp))
 
             Row(verticalAlignment = Alignment.CenterVertically) {
                 com.softdevcode.finflow_android.ui.theme.FinFlowV4BrandMark(Modifier.size(54.dp))
@@ -104,7 +118,32 @@ fun RegisterScreen(
                 color = MaterialTheme.colorScheme.onSurface.copy(0.45f),
                 modifier = Modifier.fillMaxWidth().padding(start = 48.dp))
 
-            Spacer(Modifier.height(36.dp))
+            Spacer(Modifier.height(20.dp))
+            GoogleAuthButton(
+                label = "Crear cuenta con Google",
+                enabled = !uiState.isLoading && !uiState.isLoadingRegistrationPolicy &&
+                    uiState.registrationPolicy != null &&
+                    (uiState.registrationPolicy?.ready != true || privacyAccepted),
+                onCredential = { idToken ->
+                    viewModel.googleRegister(idToken, privacyAccepted, marketingConsent)
+                },
+                onError = { viewModel.setLoginError(it) },
+            )
+            Text(
+                "Con Google no necesitas completar nombre, correo ni contraseña.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+            )
+            if (uiState.registrationPolicy?.ready == true && !privacyAccepted) {
+                TextButton(onClick = { scope.launch { privacySection.bringIntoView() } }) {
+                    Text("Revisar privacidad para continuar")
+                }
+            }
+            Spacer(Modifier.height(20.dp))
+            Text("O regístrate con tu correo", style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Spacer(Modifier.height(16.dp))
 
             // Name
             OutlinedTextField(
@@ -178,7 +217,7 @@ fun RegisterScreen(
 
             Spacer(Modifier.height(20.dp))
             Card(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().bringIntoViewRequester(privacySection),
                 shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
             ) {
@@ -220,6 +259,7 @@ fun RegisterScreen(
                         if (policy.ready) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Checkbox(checked = privacyAccepted,
+                                    modifier = Modifier.semantics { contentDescription = "Autorizar tratamiento de datos" },
                                     onCheckedChange = { privacyAccepted = it })
                                 Text(
                                     "He leído y autorizo expresamente el tratamiento " +
@@ -278,24 +318,6 @@ fun RegisterScreen(
                 }
             }
 
-            Spacer(Modifier.height(16.dp))
-            GoogleAuthButton(
-                label = "Crear cuenta con Google",
-                enabled = !uiState.isLoading && !uiState.isLoadingRegistrationPolicy &&
-                    uiState.registrationPolicy != null &&
-                    (uiState.registrationPolicy?.ready != true || privacyAccepted),
-                onCredential = { idToken ->
-                    viewModel.googleRegister(idToken, privacyAccepted, marketingConsent)
-                },
-                onError = { viewModel.setLoginError(it) },
-            )
-            Text(
-                "Con Google no necesitas completar nombre, correo ni contraseña.",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-            )
-
             Spacer(Modifier.height(20.dp))
 
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -306,7 +328,11 @@ fun RegisterScreen(
             }
 
             Spacer(Modifier.height(40.dp))
-            Text("SOFTDEVCODE SAS", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface.copy(0.2f), letterSpacing = 2.sp)
+            Text("CREADO POR AEVQOR", style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant, letterSpacing = 2.sp)
+            Text("Versión " + BuildConfig.VERSION_NAME,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant)
             Spacer(Modifier.height(24.dp))
         }
     }

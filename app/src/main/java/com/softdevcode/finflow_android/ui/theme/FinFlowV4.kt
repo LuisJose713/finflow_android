@@ -39,7 +39,7 @@ import com.softdevcode.finflow_android.R
 fun FinFlowV4Overline(text: String, color: Color? = null) {
     Text(
         text = text.uppercase(),
-        color = color ?: if (MaterialTheme.colorScheme.background == BackgroundDark) FinFlowGold else FinFlowGoldMuted,
+        color = color ?: if (LocalAppTheme.current.isDark) FinFlowGold else FinFlowGoldMuted,
         style = MaterialTheme.typography.labelSmall.copy(
             fontWeight = FontWeight.ExtraBold,
             letterSpacing = 1.65.sp,
@@ -82,7 +82,8 @@ fun FinFlowV4Hero(
             .clip(shape)
             .background(
                 Brush.linearGradient(
-                    colors = listOf(FinFlowNavy, FinFlowNavy2, FinFlowHeroEnd)
+                    colors = listOf(MaterialTheme.extras.heroStart, MaterialTheme.extras.heroMiddle,
+                        MaterialTheme.extras.heroEnd)
                 )
             )
     ) {

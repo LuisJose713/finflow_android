@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStore
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.*
+import com.softdevcode.finflow_android.domain.model.AppTheme
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -23,6 +24,8 @@ class TokenManager @Inject constructor(
         val USER_EMAIL= stringPreferencesKey("user_email")
         val USER_ID   = intPreferencesKey("user_id")
         val DARK_MODE = booleanPreferencesKey("dark_mode")
+        val THEME = stringPreferencesKey("theme_mode")
+        val LAST_DARK_THEME = stringPreferencesKey("last_dark_theme")
     }
 
     val token: Flow<String?> = context.dataStore.data.map { cipher.read(it[Keys.TOKEN]) }
@@ -30,7 +33,10 @@ class TokenManager @Inject constructor(
     val userName: Flow<String?> = context.dataStore.data.map { cipher.read(it[Keys.USER_NAME]) }
     val userEmail: Flow<String?> = context.dataStore.data.map { cipher.read(it[Keys.USER_EMAIL]) }
     val userId: Flow<Int?> = context.dataStore.data.map { it[Keys.USER_ID] }
-    val darkMode: Flow<Boolean?> = context.dataStore.data.map { it[Keys.DARK_MODE] }
+    val themeMode: Flow<AppTheme> = context.dataStore.data.map {
+        AppTheme.resolve(it[Keys.THEME], it[Keys.DARK_MODE])
+    }.distinctUntilChanged()
+    val darkMode: Flow<Boolean?> = themeMode.map { it.isDark }
 
     suspend fun saveAuth(token: String, name: String, email: String, id: Int, refreshToken: String? = null) {
         context.dataStore.edit { prefs ->
@@ -53,7 +59,29 @@ class TokenManager @Inject constructor(
     }
 
     suspend fun setDarkMode(dark: Boolean) {
-        context.dataStore.edit { it[Keys.DARK_MODE] = dark }
+        context.dataStore.edit { prefs ->
+            writeTheme(prefs, if (dark) preferredDarkTheme(prefs) else AppTheme.LIGHT)
+        }
+    }
+
+    suspend fun setThemeMode(theme: AppTheme) {
+        context.dataStore.edit { writeTheme(it, theme) }
+    }
+
+    suspend fun toggleDarkMode() {
+        context.dataStore.edit { prefs ->
+            val current = AppTheme.resolve(prefs[Keys.THEME], prefs[Keys.DARK_MODE])
+            writeTheme(prefs, if (current.isDark) AppTheme.LIGHT else preferredDarkTheme(prefs))
+        }
+    }
+
+    private fun preferredDarkTheme(prefs: Preferences): AppTheme =
+        AppTheme.resolve(prefs[Keys.LAST_DARK_THEME], true).takeIf { it.isDark } ?: AppTheme.DARK
+
+    private fun writeTheme(prefs: MutablePreferences, theme: AppTheme) {
+        prefs[Keys.THEME] = theme.name
+        prefs[Keys.DARK_MODE] = theme.isDark
+        if (theme.isDark) prefs[Keys.LAST_DARK_THEME] = theme.name
     }
 
     suspend fun getTokenOnce(): String? {

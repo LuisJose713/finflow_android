@@ -5,6 +5,12 @@ el servidor de FinFlow. Un checkout limpio de `main` muestra Google en Inicio de
 sesión, Registro y Seguridad sin depender de una variable configurada en el PC.
 No se incluye ningún secreto de cliente ni credencial de firma.
 
+Desde `1.2.11-beta` (código 13), el botón de Google está **antes del formulario**
+en Inicio de sesión y Registro para ser visible también en pantallas pequeñas.
+El pie de ambas pantallas muestra la versión instalada. Si Google requiere
+autorización de privacidad, Registro ofrece un acceso directo a esa sección;
+no exige completar los campos de registro por contraseña.
+
 `FINFLOW_GOOGLE_WEB_CLIENT_ID` puede reemplazar ese valor mediante `-P` de Gradle,
 una propiedad de usuario o una variable de entorno. Un valor vacío o inválido
 detiene la compilación para impedir publicar otro APK sin acceso con Google.

@@ -251,7 +251,8 @@ private fun FinFlowQuickLinks(
 private fun HeroBalance(stats: TransactionStats, visible: Boolean, onToggleVisibility: () -> Unit) {
     var showCalculation by rememberSaveable { mutableStateOf(false) }
     Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp).clip(RoundedCornerShape(26.dp))
-        .background(Brush.linearGradient(listOf(FinFlowNavy, FinFlowNavy2, Color(0xFF22394D)))).padding(24.dp),
+        .background(Brush.linearGradient(listOf(MaterialTheme.extras.heroStart,
+            MaterialTheme.extras.heroMiddle, MaterialTheme.extras.heroEnd))).padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text("TU BALANCE  /  FINFLOW", Modifier.weight(1f), style = MaterialTheme.typography.labelMedium,

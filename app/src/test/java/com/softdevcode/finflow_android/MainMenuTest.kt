@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.Density
 import com.softdevcode.finflow_android.ui.screens.main.MainMenu
 import com.softdevcode.finflow_android.ui.screens.navigation.Screen
 import com.softdevcode.finflow_android.ui.theme.FinFlowTheme
+import com.softdevcode.finflow_android.domain.model.AppTheme
 import org.junit.Assert.*
 import org.junit.Rule
 import org.junit.Test
@@ -29,6 +30,37 @@ import java.io.File
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 class MainMenuTest {
     @get:Rule val compose = createAndroidComposeRule<ComponentActivity>()
+
+    @Test fun appearancePickerAppliesOledWithoutClosingTheDrawer() {
+        var selected by mutableStateOf(AppTheme.DARK)
+        var closeCount = 0
+        compose.setContent {
+            FinFlowTheme(darkTheme = selected.isDark, oledTheme = selected == AppTheme.OLED) {
+                val drawer = rememberDrawerState(DrawerValue.Open)
+                MainMenu(
+                    drawerState = drawer, gesturesEnabled = true,
+                    currentRoute = Screen.Dashboard.route, currentSection = null,
+                    userName = "Ana María", isDark = selected.isDark, isAdmin = false,
+                    themeMode = selected, onSelectTheme = { selected = it },
+                    onClose = { closeCount++ }, onNavigate = {}, onModule = {},
+                    onNewTransaction = {}, onToggleTheme = {}, onLogout = {},
+                ) { Box(Modifier.fillMaxSize()) }
+            }
+        }
+        compose.onNodeWithContentDescription("Elegir apariencia").assertIsDisplayed().performClick()
+        compose.onNodeWithText("Oscuro OLED").performClick()
+        compose.onNodeWithText("Oscuro OLED").assertIsDisplayed()
+        compose.onNodeWithContentDescription("Cerrar menú").assertIsDisplayed()
+        compose.runOnIdle {
+            assertEquals(AppTheme.OLED, selected)
+            assertEquals(0, closeCount)
+            val view = compose.activity.window.decorView
+            val bitmap = Bitmap.createBitmap(view.width, view.height, Bitmap.Config.ARGB_8888)
+            view.draw(Canvas(bitmap))
+            val output = File("build/reports/menu/android-menu-320-oled.png").apply { parentFile?.mkdirs() }
+            output.outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
+        }
+    }
 
     @Test fun verticalMenuRemainsUsableAt320DpWithLargeTextAndUpdatesAreReachable() {
         var route by mutableStateOf(Screen.Dashboard.route)

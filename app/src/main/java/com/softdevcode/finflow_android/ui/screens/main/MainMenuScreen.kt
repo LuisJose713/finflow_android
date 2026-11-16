@@ -38,6 +38,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
 import com.softdevcode.finflow_android.ui.screens.navigation.Screen
 import com.softdevcode.finflow_android.ui.theme.*
+import com.softdevcode.finflow_android.domain.model.AppTheme
 
 /**
  * Native FinFlow navigation: Web V4 brand tokens and hierarchy, Android touch targets.
@@ -87,6 +88,8 @@ internal fun MainMenu(
     onLogout: () -> Unit,
     onStartTutorial: () -> Unit = {},
     userEmail: String = "",
+    themeMode: AppTheme = if (isDark) AppTheme.DARK else AppTheme.LIGHT,
+    onSelectTheme: (AppTheme) -> Unit = { onToggleTheme() },
     content: @Composable () -> Unit,
 ) {
     var confirmLogout by remember { mutableStateOf(false) }
@@ -114,9 +117,9 @@ internal fun MainMenu(
                 ModalDrawerSheet(
                     modifier = Modifier.width(drawerWidth).fillMaxHeight(),
                     drawerShape = drawerShape,
-                    drawerContainerColor = FinFlowNavy,
+                    drawerContainerColor = MaterialTheme.extras.navigationBackground,
                 ) {
-                    Column(Modifier.fillMaxSize().background(FinFlowNavy)) {
+                    Column(Modifier.fillMaxSize().background(MaterialTheme.extras.navigationBackground)) {
                         // Brand always stays visible when browsing long navigation menus.
                         Row(
                             Modifier.fillMaxWidth().padding(start = 18.dp, end = 10.dp, top = 16.dp, bottom = 10.dp),
@@ -203,8 +206,8 @@ internal fun MainMenu(
                             }
                         }
                         DrawerFooter(
-                            isDark = isDark,
-                            onToggleTheme = onToggleTheme,
+                            theme = themeMode,
+                            onSelectTheme = onSelectTheme,
                             onLogout = { confirmLogout = true },
                         )
                     }
@@ -245,7 +248,7 @@ private fun AccountSummary(userName: String, userEmail: String, onClick: () -> U
         modifier = Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 4.dp)
             .clip(RoundedCornerShape(15.dp))
             .clickable(onClickLabel = "Editar perfil y seguridad", onClick = onClick),
-        color = FinFlowNavy2,
+        color = MaterialTheme.extras.navigationSurface,
         shape = RoundedCornerShape(15.dp),
         border = BorderStroke(1.dp, FinFlowGold.copy(alpha = 0.20f)),
     ) {
@@ -338,7 +341,7 @@ private fun DrawerGroup(
             val selected = selectedKey == item.key
             val shape = RoundedCornerShape(12.dp)
             val fill by animateColorAsState(
-                targetValue = if (selected) FinFlowDrawerSelected else Color.Transparent,
+                targetValue = if (selected) MaterialTheme.extras.navigationSelected else Color.Transparent,
                 animationSpec = tween(durationMillis = 160),
                 label = "drawer-selection",
             )
@@ -394,8 +397,8 @@ private fun DrawerGroup(
 
 @Composable
 private fun DrawerFooter(
-    isDark: Boolean,
-    onToggleTheme: () -> Unit,
+    theme: AppTheme,
+    onSelectTheme: (AppTheme) -> Unit,
     onLogout: () -> Unit,
 ) {
     HorizontalDivider(color = BorderDark)
@@ -405,28 +408,7 @@ private fun DrawerFooter(
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         CurrencyPicker()
-        Row(
-            Modifier.fillMaxWidth().heightIn(min = 48.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Icon(if (isDark) Icons.Outlined.DarkMode else Icons.Outlined.LightMode,
-                contentDescription = null, tint = TextSecondDark, modifier = Modifier.size(20.dp))
-            Spacer(Modifier.width(11.dp))
-            Text("Modo oscuro", modifier = Modifier.weight(1f),
-                color = TextPrimaryDark, style = MaterialTheme.typography.bodyMedium)
-            Switch(
-                checked = isDark,
-                onCheckedChange = { onToggleTheme() },
-                modifier = Modifier.heightIn(min = 48.dp),
-                colors = SwitchDefaults.colors(
-                    checkedThumbColor = FinFlowNavy,
-                    checkedTrackColor = FinFlowGold,
-                    uncheckedThumbColor = TextSecondDark,
-                    uncheckedTrackColor = FinFlowNavy2,
-                    uncheckedBorderColor = BorderDark,
-                ),
-            )
-        }
+        AppearancePicker(theme, onSelectTheme)
         OutlinedButton(
             onClick = onLogout,
             modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),

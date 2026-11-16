@@ -22,6 +22,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.softdevcode.finflow_android.ui.theme.FinFlowGold
 import com.softdevcode.finflow_android.ui.theme.FinFlowNavy
+import com.softdevcode.finflow_android.ui.theme.extras
 
 /** Recorrido nativo sobre controles reales; nunca guarda datos automáticamente. */
 enum class GuidedTourStep(val title: String, val hint: String, val destination: String) {
@@ -70,7 +71,7 @@ fun GuidedTourOverlay(step: GuidedTourStep, target: Rect?, next: () -> Unit, exi
         Surface(
             modifier = Modifier.align(if (top) Alignment.TopCenter else Alignment.BottomCenter)
                 .fillMaxWidth().padding(horizontal = 16.dp, vertical = 18.dp),
-            color = FinFlowNavy, contentColor = Color.White,
+            color = MaterialTheme.extras.navigationBackground, contentColor = Color.White,
             shape = RoundedCornerShape(20.dp), shadowElevation = 12.dp,
         ) {
             Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {

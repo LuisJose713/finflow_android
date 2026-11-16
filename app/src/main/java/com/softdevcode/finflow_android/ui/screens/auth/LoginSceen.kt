@@ -14,6 +14,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import com.softdevcode.finflow_android.BuildConfig
+import com.softdevcode.finflow_android.domain.model.AppTheme
+import com.softdevcode.finflow_android.ui.theme.LocalAppTheme
 import androidx.compose.foundation.Image
 import androidx.compose.ui.res.painterResource
 import com.softdevcode.finflow_android.R
@@ -62,7 +66,8 @@ fun LoginScreen(
                 .background(
                     Brush.verticalGradient(
                         colors = listOf(
-                            MaterialTheme.colorScheme.primary.copy(alpha = 0.08f),
+                            if (LocalAppTheme.current == AppTheme.OLED) Color.Transparent
+                            else MaterialTheme.colorScheme.primary.copy(alpha = 0.08f),
                             MaterialTheme.colorScheme.background,
                         )
                     )
@@ -76,12 +81,12 @@ fun LoginScreen(
                 .padding(horizontal = 28.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Spacer(Modifier.height(80.dp))
+            Spacer(Modifier.height(24.dp))
 
             // ── Official FinFlow identity shared with Web ──────────────────
-            com.softdevcode.finflow_android.ui.theme.FinFlowV4BrandMark(Modifier.size(88.dp))
+            com.softdevcode.finflow_android.ui.theme.FinFlowV4BrandMark(Modifier.size(64.dp))
 
-            Spacer(Modifier.height(20.dp))
+            Spacer(Modifier.height(12.dp))
             com.softdevcode.finflow_android.ui.theme.FinFlowV4Wordmark()
             Text(
                 text = "TU DINERO, CON OTRO NIVEL DE CLARIDAD",
@@ -106,7 +111,16 @@ fun LoginScreen(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
             )
-            Spacer(Modifier.height(28.dp))
+            Spacer(Modifier.height(20.dp))
+            GoogleAuthButton(
+                enabled = !uiState.isLoading,
+                onCredential = { idToken -> viewModel.googleLogin(idToken) },
+                onError = { viewModel.setLoginError(it) },
+            )
+            Spacer(Modifier.height(16.dp))
+            Text("O continúa con tu correo", style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Spacer(Modifier.height(16.dp))
 
             // ── Email ─────────────────────────────────────────────────────
             OutlinedTextField(
@@ -227,13 +241,6 @@ fun LoginScreen(
                 }
             }
 
-            Spacer(Modifier.height(16.dp))
-            GoogleAuthButton(
-                enabled = !uiState.isLoading,
-                onCredential = { idToken -> viewModel.googleLogin(idToken) },
-                onError = { viewModel.setLoginError(it) },
-            )
-
             Spacer(Modifier.height(24.dp))
 
             // ── Register link ─────────────────────────────────────────────
@@ -267,6 +274,9 @@ fun LoginScreen(
                 textAlign = TextAlign.Center,
                 letterSpacing = 2.sp,
             )
+            Text("Versión " + BuildConfig.VERSION_NAME,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant)
 
             Spacer(Modifier.height(24.dp))
         }

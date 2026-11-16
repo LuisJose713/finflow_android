@@ -9,7 +9,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.softdevcode.finflow_android.BuildConfig
 import com.softdevcode.finflow_android.data.remote.api.FinFlowApi
 import com.softdevcode.finflow_android.data.remote.api.GoogleLinkStatus
 import com.softdevcode.finflow_android.ui.screens.auth.GoogleAuthButton
@@ -65,7 +64,6 @@ class GoogleLinkViewModel @Inject constructor(private val api: FinFlowApi) : Vie
 
 @Composable
 fun GoogleAccountSecurityCard(vm: GoogleLinkViewModel = hiltViewModel()) {
-    if (BuildConfig.GOOGLE_WEB_CLIENT_ID.isBlank()) return
     LaunchedEffect(Unit) { vm.refresh() }
     var confirmingUnlink by remember { mutableStateOf(false) }
     Card(

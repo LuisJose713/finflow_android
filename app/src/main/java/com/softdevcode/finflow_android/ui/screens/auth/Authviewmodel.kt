@@ -9,6 +9,7 @@ import com.softdevcode.finflow_android.data.remote.api.FinFlowApi
 import com.softdevcode.finflow_android.domain.model.FinFlowPrivacyPolicy
 import com.softdevcode.finflow_android.data.local.TokenManager
 import com.softdevcode.finflow_android.domain.model.User
+import com.softdevcode.finflow_android.domain.model.AppTheme
 import com.softdevcode.finflow_android.domain.model.registrationPasswordError
 import com.softdevcode.finflow_android.util.onError
 import com.softdevcode.finflow_android.util.onSuccess
@@ -44,8 +45,10 @@ class AuthViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(AuthUiState())
     val uiState: StateFlow<AuthUiState> = _uiState.asStateFlow()
 
-    val darkMode: StateFlow<Boolean> = tokenManager.darkMode
-        .map { it ?: true }
+    val themeMode: StateFlow<AppTheme> = tokenManager.themeMode
+        .stateIn(viewModelScope, SharingStarted.Eagerly, AppTheme.DARK)
+    val darkMode: StateFlow<Boolean> = themeMode
+        .map { it.isDark }
         .stateIn(viewModelScope, SharingStarted.Eagerly, true)
 
     init {
@@ -247,8 +250,12 @@ class AuthViewModel @Inject constructor(
 
     fun toggleDarkMode() {
         viewModelScope.launch {
-            tokenManager.setDarkMode(!darkMode.value)
+            tokenManager.toggleDarkMode()
         }
+    }
+
+    fun setThemeMode(theme: AppTheme) {
+        viewModelScope.launch { tokenManager.setThemeMode(theme) }
     }
 
     fun clearError() = _uiState.update { it.copy(error = null) }

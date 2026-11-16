@@ -54,6 +54,7 @@ fun MainScreen(
     val route = entry?.destination?.route
     val uiState by authViewModel.uiState.collectAsStateWithLifecycle()
     val darkMode by authViewModel.darkMode.collectAsStateWithLifecycle()
+    val themeMode by authViewModel.themeMode.collectAsStateWithLifecycle()
     val isAdmin = uiState.user?.role in setOf("ADMIN", "ROLE_ADMIN")
     val uid = uiState.user?.id
     val prefs = remember(context) { context.getSharedPreferences("finflow_guide", Context.MODE_PRIVATE) }
@@ -159,6 +160,8 @@ fun MainScreen(
         userName = uiState.user?.name.orEmpty(),
         userEmail = uiState.user?.email.orEmpty(),
         isDark = darkMode,
+        themeMode = themeMode,
+        onSelectTheme = authViewModel::setThemeMode,
         isAdmin = isAdmin,
         onClose = { scope.launch { drawerState.close() } },
         onNavigate = { target -> navigateFromDrawer { navController.navigateToTopLevel(target) } },
