@@ -24,7 +24,7 @@ class SessionAuthenticator @Inject constructor(private val tokens: TokenManager)
 
     override fun authenticate(route: Route?, response: Response): Request? {
         if (response.request.url.host != BuildConfig.BASE_URL.toHttpUrl().host ||
-            response.request.url.encodedPath in setOf("/auth/login", "/auth/register", "/auth/refresh", "/auth/logout") ||
+            response.request.url.encodedPath in publicAuthPaths ||
             response.priorResponse != null) return null
         val failed = response.request.header("Authorization")?.removePrefix("Bearer ") ?: return null
         return synchronized(lock) {

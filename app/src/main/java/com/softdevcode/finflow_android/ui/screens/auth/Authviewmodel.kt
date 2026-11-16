@@ -146,6 +146,42 @@ class AuthViewModel @Inject constructor(
         }
     }
 
+    fun googleRegister(idToken: String, accepted: Boolean, marketingConsent: Boolean) {
+        if (!canStartAuthRequest(_uiState.value)) return
+        if (idToken.isBlank() || idToken.length > 8192) {
+            _uiState.update { it.copy(error = "Google no proporcionó una credencial válida.") }
+            return
+        }
+        val policy = _uiState.value.registrationPolicy
+        if (policy == null) {
+            _uiState.update { it.copy(error = "Consulta primero la política de privacidad vigente.") }
+            return
+        }
+        if (policy.ready && !accepted) {
+            _uiState.update { it.copy(error = "Debes autorizar expresamente la política vigente.") }
+            return
+        }
+        authOperation++
+        val operation = authOperation
+        _uiState.update { it.copy(isLoading = true, error = null) }
+        authRequestJob = viewModelScope.launch {
+            authRepository.googleRegister(
+                idToken = idToken,
+                privacyAccepted = if (policy.ready) true else null,
+                privacyVersion = if (policy.ready) policy.version else null,
+                marketingConsent = if (policy.ready) marketingConsent else null,
+            ).onSuccess { response ->
+                if (operation != authOperation) return@onSuccess
+                _uiState.update {
+                    it.copy(isLoading = false, isAuthenticated = true, user = response.user)
+                }
+            }.onError { message ->
+                if (operation != authOperation) return@onError
+                _uiState.update { it.copy(isLoading = false, error = message) }
+            }
+        }
+    }
+
     fun register(
         email: String, password: String, name: String, confirmPassword: String,
         accepted: Boolean, marketingConsent: Boolean,

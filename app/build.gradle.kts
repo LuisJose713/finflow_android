@@ -11,19 +11,21 @@ android {
     compileSdk = 35
 
     defaultConfig {
-        // Public OAuth client ID supplied by Google Cloud. Never embed client secrets.
+        // Public Web OAuth ID, also exposed by /auth/google/config. This is not a
+        // client secret. Clean Android Studio/CI builds must include Google sign-in.
         val googleWebClientId = providers.gradleProperty("FINFLOW_GOOGLE_WEB_CLIENT_ID")
-            .orElse(providers.environmentVariable("FINFLOW_GOOGLE_WEB_CLIENT_ID")).orNull ?: ""
-        if (googleWebClientId.isNotEmpty() &&
-            !Regex("^[A-Za-z0-9._-]+\\.apps\\.googleusercontent\\.com$").matches(googleWebClientId)) {
-            error("FINFLOW_GOOGLE_WEB_CLIENT_ID has an invalid format")
+            .orElse(providers.environmentVariable("FINFLOW_GOOGLE_WEB_CLIENT_ID"))
+            .getOrElse("412195763180-reogcpqa588vclniqruber5hubuk90jn.apps.googleusercontent.com")
+            .trim()
+        if (!Regex("^[A-Za-z0-9._-]+\\.apps\\.googleusercontent\\.com$").matches(googleWebClientId)) {
+            error("FINFLOW_GOOGLE_WEB_CLIENT_ID must contain a valid public Web OAuth client ID")
         }
         buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"$googleWebClientId\"")
         applicationId = "com.softdevcode.finflow_android"
         minSdk = 24
         targetSdk = 34
-        versionCode = 11
-        versionName = "1.2.8-beta"
+        versionCode = 12
+        versionName = "1.2.10-beta"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 

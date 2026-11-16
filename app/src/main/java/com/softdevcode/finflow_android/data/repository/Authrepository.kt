@@ -5,11 +5,13 @@ import com.softdevcode.finflow_android.data.remote.api.FinFlowApi
 import com.softdevcode.finflow_android.domain.model.AuthResponse
 import com.softdevcode.finflow_android.domain.model.LoginRequest
 import com.softdevcode.finflow_android.domain.model.RegisterRequest
+import com.softdevcode.finflow_android.domain.model.GoogleRegisterRequest
 import com.softdevcode.finflow_android.domain.model.User
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.withTimeoutOrNull
 import com.softdevcode.finflow_android.util.Result
+import com.softdevcode.finflow_android.util.authErrorMessage
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -33,7 +35,7 @@ class AuthRepository @Inject constructor(
             onSuccess = { Result.Success(it) },
             onFailure = {
                 if (it is CancellationException) throw it
-                Result.Error(it.message ?: "Error al iniciar sesión")
+                Result.Error(authErrorMessage(it, "No se pudo iniciar sesión. Inténtalo nuevamente."))
             }
         )
 
@@ -50,10 +52,7 @@ class AuthRepository @Inject constructor(
             onSuccess = { Result.Success(it) },
             onFailure = {
                 if (it is CancellationException) throw it
-                Result.Error(if ((it.message ?: "").contains("409")) {
-                    "Primero inicia sesión con tu contraseña y vincula Google desde Seguridad."
-                } else "No se pudo verificar el acceso con Google."
-                )
+                Result.Error(authErrorMessage(it, "No se pudo verificar el acceso con Google."))
             }
         )
 
@@ -81,9 +80,30 @@ class AuthRepository @Inject constructor(
             onSuccess = { Result.Success(it) },
             onFailure = {
                 if (it is CancellationException) throw it
-                Result.Error(it.message ?: "Error al registrarse")
+                Result.Error(authErrorMessage(it, "No se pudo crear tu cuenta. Inténtalo nuevamente."))
             }
         )
+
+    suspend fun googleRegister(
+        idToken: String, privacyAccepted: Boolean?, privacyVersion: String?, marketingConsent: Boolean?,
+    ): Result<AuthResponse> = runCatching {
+        require(idToken.isNotBlank() && idToken.length <= 8192)
+        val response = api.googleRegister(GoogleRegisterRequest(
+            idToken = idToken, privacyAccepted = privacyAccepted,
+            privacyVersion = privacyVersion, marketingConsent = marketingConsent,
+        ))
+        tokenManager.saveAuth(
+            token = response.token, name = response.user.name, email = response.user.email,
+            id = response.user.id, refreshToken = response.refreshToken,
+        )
+        response
+    }.fold(
+        onSuccess = { Result.Success(it) },
+        onFailure = {
+            if (it is CancellationException) throw it
+            Result.Error(authErrorMessage(it, "No se pudo crear tu cuenta con Google. Inténtalo nuevamente."))
+        },
+    )
 
     suspend fun logout() {
         val refresh = tokenManager.refreshToken.first()

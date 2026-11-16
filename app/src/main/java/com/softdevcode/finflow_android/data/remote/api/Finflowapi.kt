@@ -11,6 +11,7 @@ import com.softdevcode.finflow_android.domain.model.LoginRequest
 import com.softdevcode.finflow_android.domain.model.PlannedExpense
 import com.softdevcode.finflow_android.domain.model.PlannedExpenseRequest
 import com.softdevcode.finflow_android.domain.model.RegisterRequest
+import com.softdevcode.finflow_android.domain.model.GoogleRegisterRequest
 import com.softdevcode.finflow_android.domain.model.Transaction
 import com.softdevcode.finflow_android.domain.model.TransactionStats
 import com.softdevcode.finflow_android.domain.model.User
@@ -251,6 +252,9 @@ interface FinFlowApi {
 
     @POST("auth/google/login")
     suspend fun googleLogin(@Body body: Map<String, String>): AuthResponse
+
+    @POST("auth/google/register")
+    suspend fun googleRegister(@Body request: GoogleRegisterRequest): AuthResponse
 
     @GET("auth/google/status")
     suspend fun googleStatus(): GoogleLinkStatus

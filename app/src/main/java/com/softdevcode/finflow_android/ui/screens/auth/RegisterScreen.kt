@@ -278,6 +278,24 @@ fun RegisterScreen(
                 }
             }
 
+            Spacer(Modifier.height(16.dp))
+            GoogleAuthButton(
+                label = "Crear cuenta con Google",
+                enabled = !uiState.isLoading && !uiState.isLoadingRegistrationPolicy &&
+                    uiState.registrationPolicy != null &&
+                    (uiState.registrationPolicy?.ready != true || privacyAccepted),
+                onCredential = { idToken ->
+                    viewModel.googleRegister(idToken, privacyAccepted, marketingConsent)
+                },
+                onError = { viewModel.setLoginError(it) },
+            )
+            Text(
+                "Con Google no necesitas completar nombre, correo ni contraseña.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+            )
+
             Spacer(Modifier.height(20.dp))
 
             Row(verticalAlignment = Alignment.CenterVertically) {

@@ -21,11 +21,11 @@ import kotlinx.coroutines.launch
 @Composable
 fun GoogleAuthButton(
     enabled: Boolean = true,
+    label: String = "Continuar con Google",
     onCredential: (String) -> Unit,
     onError: (String) -> Unit,
 ) {
     val webClientId = BuildConfig.GOOGLE_WEB_CLIENT_ID
-    if (!webClientId.matches(Regex("^[A-Za-z0-9._-]+\\.apps\\.googleusercontent\\.com$"))) return
 
     val context = LocalContext.current
     val manager = remember(context) { CredentialManager.create(context) }
@@ -71,6 +71,6 @@ fun GoogleAuthButton(
             CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
             Spacer(Modifier.width(8.dp))
         }
-        Text("Continuar con Google", style = MaterialTheme.typography.labelLarge)
+        Text(label, style = MaterialTheme.typography.labelLarge)
     }
 }

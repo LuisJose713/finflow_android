@@ -30,6 +30,14 @@ data class RegisterRequest(
     val marketingConsent: Boolean? = null,
 )
 
+/** Google owns identity; the server derives name/email from its verified token. */
+data class GoogleRegisterRequest(
+    val idToken: String,
+    val privacyAccepted: Boolean? = null,
+    val privacyVersion: String? = null,
+    val marketingConsent: Boolean? = null,
+)
+
 // ── Transaction ───────────────────────────────────────────────────────────────
 data class Transaction(
     val id: Int,

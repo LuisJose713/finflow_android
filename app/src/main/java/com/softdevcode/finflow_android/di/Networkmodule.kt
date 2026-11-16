@@ -34,7 +34,7 @@ object NetworkModule {
             val request = chain.request()
                 .newBuilder()
                 .apply {
-                    if (token != null && chain.request().url.encodedPath !in setOf("/auth/login", "/auth/register", "/auth/refresh", "/auth/logout")) {
+                    if (token != null && chain.request().url.encodedPath !in publicAuthPaths) {
                         addHeader("Authorization", "Bearer $token")
                         addHeader("X-Client-Type", "mobile")
                     }
