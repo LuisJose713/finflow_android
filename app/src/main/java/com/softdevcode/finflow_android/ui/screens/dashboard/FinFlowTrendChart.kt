@@ -224,7 +224,7 @@ private fun FinFlowPeriodDonut(
                         detectTapGestures { location ->
                             val cx = size.width / 2f
                             val cy = size.height / 2f
-                            val ringRadius = size.minDimension / 2f - ringWidthPx / 2f - 5f
+                            val ringRadius = minOf(size.width, size.height).toFloat() / 2f - ringWidthPx / 2f - 5f
                             val distance = hypot(location.x - cx, location.y - cy)
                             if (kotlin.math.abs(distance - ringRadius) <= ringWidthPx / 2f + tolerancePx
                                 && combined > 0) {
