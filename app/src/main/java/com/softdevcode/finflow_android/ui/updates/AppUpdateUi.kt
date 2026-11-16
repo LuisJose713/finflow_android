@@ -36,6 +36,7 @@ fun AppUpdateHost(viewModel: AppUpdateViewModel) {
     val owner = LocalLifecycleOwner.current
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    var showInstallPermissionHelp by remember { mutableStateOf(false) }
     val notificationPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { }
     LaunchedEffect(context) {
         if (Build.VERSION.SDK_INT >= 33) {
@@ -50,7 +51,7 @@ fun AppUpdateHost(viewModel: AppUpdateViewModel) {
     val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
         val apk = viewModel.state.value.downloadedApk
         if (apk != null && canInstallUpdates(context)) installUpdate(context, apk, viewModel)
-        else viewModel.installationFailed("Autoriza a FinFlow para instalar esta actualización y vuelve a pulsar Instalar.")
+        else viewModel.installationFailed("El permiso sigue desactivado. Activa «Permitir desde esta fuente» para FinFlow y vuelve a pulsar Instalar actualización.")
     }
 
     LaunchedEffect(owner, viewModel) {
@@ -63,7 +64,7 @@ fun AppUpdateHost(viewModel: AppUpdateViewModel) {
     }
 
     val update = state.available
-    if (state.showDialog && update != null) {
+    if (state.showDialog && update != null && !showInstallPermissionHelp) {
         AlertDialog(
             onDismissRequest = viewModel::dismiss,
             title = { Text("Hay una nueva versión de FinFlow") },
@@ -82,7 +83,10 @@ fun AppUpdateHost(viewModel: AppUpdateViewModel) {
                                 style = MaterialTheme.typography.bodySmall)
                         }
                         state.downloadedApk?.exists() == true ->
-                            Text("Descarga lista. Pulsa Instalar y confirma la actualización en Android.")
+                            Text(if (canInstallUpdates(context))
+                                "Descarga lista. Pulsa Instalar y confirma la actualización en Android."
+                            else
+                                "Para actualizar FinFlow debes autorizar esta fuente una sola vez. Te mostraremos el ajuste «Permitir desde esta fuente»; después Android te pedirá confirmar la instalación.")
                         else -> Text("Descárgala aquí. Android te pedirá confirmar la instalación.",
                             style = MaterialTheme.typography.bodySmall)
                     }
@@ -94,12 +98,7 @@ fun AppUpdateHost(viewModel: AppUpdateViewModel) {
                     val apk = state.downloadedApk?.takeIf { it.exists() }
                     if (apk == null) viewModel.downloadUpdate()
                     else if (canInstallUpdates(context)) installUpdate(context, apk, viewModel)
-                    else try {
-                        permissionLauncher.launch(Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
-                            Uri.parse("package:" + context.packageName)))
-                    } catch (e: Exception) {
-                        viewModel.installationFailed("No pudimos abrir el permiso de instalación. Revisa los ajustes de Android.")
-                    }
+                    else showInstallPermissionHelp = true
                 }) {
                     Text(when {
                         state.downloading -> "Descargando…"
@@ -111,6 +110,33 @@ fun AppUpdateHost(viewModel: AppUpdateViewModel) {
             dismissButton = {
                 TextButton(onClick = viewModel::dismiss) {
                     Text(if (state.downloading) "Seguir usando FinFlow" else "Ahora no")
+                }
+            },
+        )
+    }
+    if (showInstallPermissionHelp) {
+        AlertDialog(
+            onDismissRequest = { showInstallPermissionHelp = false },
+            title = { Text("Autorizar instalación de FinFlow") },
+            text = {
+                Text("Android necesita tu autorización para instalar actualizaciones desde FinFlow. Pulsa Abrir ajustes, activa «Permitir desde esta fuente» y regresa: abriremos el instalador automáticamente. No necesitas cambiar los permisos de otras aplicaciones.")
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    showInstallPermissionHelp = false
+                    try {
+                        permissionLauncher.launch(Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
+                            Uri.parse("package:" + context.packageName)))
+                    } catch (e: Exception) {
+                        viewModel.installationFailed("No pudimos abrir los ajustes. Busca «Instalar apps desconocidas» en la configuración de Android y autoriza FinFlow.")
+                    }
+                }) {
+                    Text("Abrir ajustes")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showInstallPermissionHelp = false }) {
+                    Text("Cancelar")
                 }
             },
         )

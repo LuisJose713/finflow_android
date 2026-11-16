@@ -18,6 +18,26 @@ instalar desde FinFlow la primera vez y confirma cada instalación. No se modifi
 la sesión. La descarga continúa al cambiar de pantalla mientras el proceso de la
 app siga abierto; si Android lo cierra, se puede reintentar desde Actualizaciones.
 
+## Primera instalación del APK (sin FinFlow instalado)
+
+La primera instalación la controla Android, no FinFlow. Ninguna aplicación
+puede pedir permisos antes de estar instalada.
+
+1. Descarga únicamente la APK oficial desde el enlace de una release de
+   [FinFlow Android](https://github.com/LuisJose713/finflow_android/releases).
+2. Ábrela en el teléfono desde el navegador o la aplicación Archivos.
+3. Si Android muestra un bloqueo por origen desconocido, pulsa **Ajustes** y
+   activa **Permitir desde esta fuente** para **ese navegador o Archivos**
+   (no para FinFlow, que todavía no está instalado). Regresa y pulsa **Instalar**.
+4. Si Play Protect detecta una amenaza o el dispositivo está administrado,
+   no desactives sus protecciones para forzar la instalación. Comprueba antes
+   la procedencia, firma y legitimidad de la APK.
+
+En Android 8 y posterior el permiso es individual para cada fuente; en
+Android 7 / 7.1 la opción puede aparecer como **Orígenes desconocidos**.
+No hace falta desinstalar una versión anterior para actualizarla. La nueva APK
+debe conservar el mismo identificador de paquete y la misma firma.
+
 ## Publicar una versión compilada en Android Studio
 
 1. Incrementar `versionCode` y actualizar `versionName` en `app/build.gradle.kts`.
