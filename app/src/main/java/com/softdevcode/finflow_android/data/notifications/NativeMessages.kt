@@ -88,9 +88,9 @@ object NativeMessages {
             return
         }
         val network = Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build()
-        WorkManager.getInstance(context).enqueueUniquePeriodicWork(WORK, ExistingPeriodicWorkPolicy.KEEP,
+        WorkManager.getInstance(context).enqueueUniquePeriodicWork(WORK, ExistingPeriodicWorkPolicy.UPDATE,
             PeriodicWorkRequestBuilder<NativeMessageWorker>(15, TimeUnit.MINUTES).setConstraints(network).build())
-        WorkManager.getInstance(context).enqueueUniqueWork("$WORK-now", ExistingWorkPolicy.KEEP,
+        WorkManager.getInstance(context).enqueueUniqueWork("$WORK-now", ExistingWorkPolicy.REPLACE,
             OneTimeWorkRequestBuilder<NativeMessageWorker>().setConstraints(network).build())
     }
     fun setEnabled(context: Context, owner: Int, enabled: Boolean) {
