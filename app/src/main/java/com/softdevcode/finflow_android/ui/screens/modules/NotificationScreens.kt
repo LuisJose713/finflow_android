@@ -137,13 +137,13 @@ fun NativeNotificationSettings(vm: NotificationsViewModel = hiltViewModel()) {
             Text("Recibe los recordatorios de las 10:00 y las 16:00, y los mensajes que programe el administrador. Android puede retrasarlos en segundo plano por ahorro de batería.", style = MaterialTheme.typography.bodySmall)
             state.error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
             state.notice?.let { Text(it, color = MaterialTheme.colorScheme.primary) }
-            Button(onClick = {
-                if (state.enabled) vm.setEnabled(false)
-                else if (Build.VERSION.SDK_INT >= 33 && !DailyReminders.notificationPermission(context)) permission.launch(Manifest.permission.POST_NOTIFICATIONS)
+            if (!state.enabled) Button(onClick = {
+                if (Build.VERSION.SDK_INT >= 33 && !DailyReminders.notificationPermission(context)) permission.launch(Manifest.permission.POST_NOTIFICATIONS)
                 else vm.setEnabled(true)
             }, enabled = !state.busy, modifier = Modifier.fillMaxWidth()) {
-                Text(if (state.busy) "Guardando…" else if (state.enabled) "Desactivar notificaciones" else "Activar notificaciones")
+                Text(if (state.busy) "Guardando…" else "Activar notificaciones")
             }
+            if (state.enabled) Text("Notificaciones activas. Para modificar los permisos, utiliza los ajustes de Android.", style = MaterialTheme.typography.bodySmall)
             OutlinedButton(onClick = vm::testLocalNotification, enabled = state.enabled && !state.busy,
                 modifier = Modifier.fillMaxWidth()) {
                 Text("Probar aviso en este teléfono")
