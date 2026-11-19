@@ -36,6 +36,42 @@ object NativeMessages {
         }
     }
     fun enabled(context: Context, owner: Int): Boolean = prefs(context).getBoolean("enabled_$owner", false)
+
+    /** Check the system permission AND this app's messages channel. */
+    fun canNotify(context: Context): Boolean {
+        if (!DailyReminders.notificationPermission(context)) return false
+        if (Build.VERSION.SDK_INT < 26) return true
+        val manager = context.getSystemService(NotificationManager::class.java)
+        return manager.getNotificationChannel(CHANNEL)?.importance != NotificationManager.IMPORTANCE_NONE
+    }
+
+    private fun createChannel(context: Context) {
+        if (Build.VERSION.SDK_INT >= 26) {
+            context.getSystemService(NotificationManager::class.java).createNotificationChannel(
+                NotificationChannel(CHANNEL, "Mensajes de FinFlow", NotificationManager.IMPORTANCE_DEFAULT)
+            )
+        }
+    }
+
+    /** Verifies Android display permissions locally, without contacting users or scheduling campaigns. */
+    fun showLocalTest(context: Context): Boolean {
+        createChannel(context)
+        if (!canNotify(context)) return false
+        val tap = PendingIntent.getActivity(context, 3030,
+            Intent(context, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP),
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+        val notification = NotificationCompat.Builder(context, CHANNEL)
+            .setSmallIcon(R.drawable.finflow_brand_symbol)
+            .setContentTitle("FinFlow · Prueba de notificación")
+            .setContentText("Tu teléfono puede mostrar los avisos de FinFlow.")
+            .setContentIntent(tap)
+            .setAutoCancel(true)
+            .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
+            .build()
+        context.getSystemService(NotificationManager::class.java).notify("finflow-local-test", 3030, notification)
+        return true
+    }
+
     fun bindSession(context: Context, owner: Int?) {
         val previous = prefs(context).getInt("active_owner", -1)
         if (previous != owner) {
@@ -46,7 +82,7 @@ object NativeMessages {
             }
         }
         prefs(context).edit().putInt("active_owner", owner ?: -1).apply()
-        if (owner == null || !enabled(context, owner) || !DailyReminders.notificationPermission(context)) {
+        if (owner == null || !enabled(context, owner) || !canNotify(context)) {
             WorkManager.getInstance(context).cancelUniqueWork(WORK)
             WorkManager.getInstance(context).cancelUniqueWork("$WORK-now")
             return
@@ -67,16 +103,16 @@ object NativeMessages {
         try {
         val owner = tokens.userId.first() ?: return
         if (prefs(context).getInt("active_owner", -1) != owner || !enabled(context, owner)
-            || !DailyReminders.notificationPermission(context) || tokens.getTokenOnce() == null) return
+            || !canNotify(context) || tokens.getTokenOnce() == null) return
         val device = deviceId(context)
         api.setNotificationDevice(NotificationDevice(device, enabled = true))
         val messages = api.getNotificationMessages(device)
+        createChannel(context)
+        if (!canNotify(context)) return
         val manager = context.getSystemService(NotificationManager::class.java)
-        if (Build.VERSION.SDK_INT >= 26) manager.createNotificationChannel(
-            NotificationChannel(CHANNEL, "Mensajes de FinFlow", NotificationManager.IMPORTANCE_DEFAULT))
         for (message in messages) {
             if (tokens.userId.first() != owner || prefs(context).getInt("active_owner", -1) != owner
-                || !enabled(context, owner) || !DailyReminders.notificationPermission(context)) return
+                || !enabled(context, owner) || !canNotify(context)) return
             // Store IDs only, never message text or credentials in preferences.
             val key = "posted_${owner}_${message.id}"
             if (!prefs(context).contains(key)) {

@@ -48,13 +48,13 @@ class NotificationsViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             tokens.userId.collect { owner -> mutable.update { it.copy(enabled = owner != null &&
-                NativeMessages.enabled(context, owner) && DailyReminders.notificationPermission(context)) } }
+                NativeMessages.enabled(context, owner) && NativeMessages.canNotify(context)) } }
         }
     }
     fun permissionDenied() { mutable.update { it.copy(enabled = false, error = "Permite las notificaciones desde los ajustes del teléfono.") } }
     fun setEnabled(enabled: Boolean) {
         if (state.value.busy) return
-        if (enabled && !DailyReminders.notificationPermission(context)) { permissionDenied(); return }
+        if (enabled && !NativeMessages.canNotify(context)) { permissionDenied(); return }
         viewModelScope.launch {
             val owner = tokens.userId.first() ?: return@launch
             mutable.update { it.copy(busy = true, error = null, notice = null) }
@@ -67,6 +67,16 @@ class NotificationsViewModel @Inject constructor(
             } catch (ex: CancellationException) { throw ex }
             catch (_: Exception) { mutable.update { it.copy(error = if (enabled) "No pudimos activar las notificaciones. Revisa la conexión." else "Desactivadas en este teléfono; no pudimos confirmar el cambio con el servidor.") } }
             finally { mutable.update { it.copy(busy = false) } }
+        }
+    }
+    fun testLocalNotification() {
+        if (!state.value.enabled) return
+        val displayed = NativeMessages.showLocalTest(context)
+        mutable.update {
+            it.copy(
+                notice = if (displayed) "Prueba local publicada. Comprueba las notificaciones del teléfono." else null,
+                error = if (displayed) null else "El canal de mensajes está bloqueado. Revisa Ajustes > Aplicaciones > FinFlow > Notificaciones."
+            )
         }
     }
     fun loadCampaigns() {
@@ -134,6 +144,12 @@ fun NativeNotificationSettings(vm: NotificationsViewModel = hiltViewModel()) {
             }, enabled = !state.busy, modifier = Modifier.fillMaxWidth()) {
                 Text(if (state.busy) "Guardando…" else if (state.enabled) "Desactivar notificaciones" else "Activar notificaciones")
             }
+            OutlinedButton(onClick = vm::testLocalNotification, enabled = state.enabled && !state.busy,
+                modifier = Modifier.fillMaxWidth()) {
+                Text("Probar aviso en este teléfono")
+            }
+            Text("La prueba confirma que Android puede mostrar avisos; los mensajes programados requieren conexión y sincronización con el servidor.",
+                style = MaterialTheme.typography.bodySmall)
         }
     }
 }

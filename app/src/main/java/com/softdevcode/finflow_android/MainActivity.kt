@@ -7,6 +7,9 @@ import com.softdevcode.finflow_android.data.notifications.NativeMessages
 import com.softdevcode.finflow_android.data.local.TokenManager
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -106,6 +109,15 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+    override fun onResume() {
+        super.onResume()
+        // Reconcile OS permission/channel changes made outside the app.
+        DailyReminders.reschedule(this)
+        lifecycleScope.launch {
+            NativeMessages.bindSession(this@MainActivity, notificationTokens.userId.first())
+        }
+    }
+
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)

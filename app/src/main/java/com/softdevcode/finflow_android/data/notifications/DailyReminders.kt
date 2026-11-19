@@ -132,6 +132,7 @@ class DailyReminderReceiver : BroadcastReceiver() {
             val slot = intent.getIntExtra(DailyReminders.EXTRA_SLOT, -1)
             if (slot == 1010 || slot == 1016) DailyReminders.deliver(context, slot)
         } else if (intent.action == Intent.ACTION_BOOT_COMPLETED ||
+            intent.action == Intent.ACTION_MY_PACKAGE_REPLACED ||
             intent.action == Intent.ACTION_TIME_CHANGED ||
             intent.action == Intent.ACTION_TIMEZONE_CHANGED) {
             DailyReminders.reschedule(context)
