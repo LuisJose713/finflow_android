@@ -125,6 +125,9 @@ dependencies {
     // Charts
     implementation(libs.mpandroidchart)
 
+    // Offline on-device Latin receipt OCR; no cloud processing.
+    implementation("com.google.mlkit:text-recognition:16.0.1")
+
     // Coil (images)
     implementation(libs.coil.compose)
 
