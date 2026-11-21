@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -22,6 +23,13 @@ import androidx.compose.material.icons.outlined.ArrowUpward
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Delete
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.ui.platform.LocalContext
+import com.google.mlkit.vision.common.InputImage
+import com.google.mlkit.vision.text.TextRecognition
+import com.google.mlkit.vision.text.latin.TextRecognizerOptions
+import com.softdevcode.finflow_android.ui.screens.navigation.AssistantMovementDraft
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.OutlinedTextField
@@ -70,12 +78,54 @@ import java.util.Locale
 @Composable
 fun TransactionsScreen(
     onAddTransaction: () -> Unit,
+    onReceiptDraft: (AssistantMovementDraft) -> Unit = {},
     onOpenMenu: (() -> Unit)? = null,
     viewModel: TransactionsViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var editing by remember { mutableStateOf<Transaction?>(null) }
     var deleting by remember { mutableStateOf<Transaction?>(null) }
+    var isReadingReceipt by remember { mutableStateOf(false) }
+    var receiptError by remember { mutableStateOf<String?>(null) }
+    val context = LocalContext.current
+    val photoPicker = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        if (uri != null && !isReadingReceipt) {
+            isReadingReceipt = true
+            try {
+                val image = InputImage.fromFilePath(context, uri)
+                val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
+                recognizer.process(image)
+                    .addOnSuccessListener { text ->
+                        val draft = ReceiptTextParser.parse(text.text)
+                        if (draft == null) receiptError = "No encontramos texto en la foto. Prueba una imagen más clara."
+                        else onReceiptDraft(AssistantMovementDraft(
+                            type = "expense", title = draft.title,
+                            amount = draft.amount, category = null
+                        ))
+                    }
+                    .addOnFailureListener {
+                        receiptError = "No se pudo leer la factura. Intenta con una imagen más clara."
+                    }
+                    .addOnCompleteListener {
+                        recognizer.close()
+                        isReadingReceipt = false
+                    }
+            } catch (_: Exception) {
+                receiptError = "No se pudo abrir la imagen. Elige otra foto."
+                isReadingReceipt = false
+            }
+        }
+    }
+    receiptError?.let { message ->
+        AlertDialog(
+            onDismissRequest = { receiptError = null },
+            title = { Text("Lectura de factura") },
+            text = { Text(message) },
+            confirmButton = {
+                TextButton(onClick = { receiptError = null }) { Text("Entendido") }
+            }
+        )
+    }
     FinanceLiveRefresh {
         if (editing == null && deleting == null) viewModel.load(silent = true)
     }
@@ -176,6 +226,19 @@ fun TransactionsScreen(
                 },
 
                 actions = {
+                    IconButton(
+                        onClick = { photoPicker.launch("image/*") },
+                        enabled = !isReadingReceipt
+                    ) {
+                        if (isReadingReceipt) {
+                            CircularProgressIndicator(modifier = Modifier.size(20.dp))
+                        } else {
+                            Icon(
+                                imageVector = Icons.Outlined.Edit,
+                                contentDescription = "Leer factura desde la galería"
+                            )
+                        }
+                    }
 
                     IconButton(
                         onClick = {
