@@ -239,9 +239,18 @@ fun MainScreen(
                     )
                 }
                 composable(Screen.Transactions.route) {
-                    TransactionsScreen(onOpenMenu = { scope.launch { drawerState.open() } }, onAddTransaction = {
-                        navController.navigate(Screen.AddTransaction.route) { launchSingleTop = true }
-                    })
+                    TransactionsScreen(
+                        onOpenMenu = { scope.launch { drawerState.open() } },
+                        onAddTransaction = {
+                            activeAssistantDraft = null
+                            navController.navigate(Screen.AddTransaction.route) { launchSingleTop = true }
+                        },
+                        onReceiptDraft = { receipt ->
+                            // OCR is only a draft; user reviews the existing form.
+                            activeAssistantDraft = receipt
+                            navController.navigate(Screen.AddTransaction.route) { launchSingleTop = true }
+                        }
+                    )
                 }
                 composable(Screen.AddTransaction.route) {
                     AddTransactionScreen(
