@@ -1,5 +1,11 @@
 package com.softdevcode.finflow_android
 import android.content.Intent
+import android.net.Uri
+import android.widget.Toast
+import com.google.mlkit.vision.common.InputImage
+import com.google.mlkit.vision.text.TextRecognition
+import com.google.mlkit.vision.text.latin.TextRecognizerOptions
+import com.softdevcode.finflow_android.ui.screens.transactions.ReceiptTextParser
 import android.os.Bundle
 import androidx.compose.ui.platform.LocalContext
 import com.softdevcode.finflow_android.data.notifications.DailyReminders
@@ -47,6 +53,9 @@ class MainActivity : ComponentActivity() {
         assistantDraft = AssistantMovementDraft.fromIntent(intent)
         enableEdgeToEdge()
 
+        // ACTION_SEND from the photo gallery or another scanner.
+        // Never persist the shared image or post a transaction directly.
+        handleSharedReceipt(intent)
         setContent {
             val context = LocalContext.current
             val authViewModel: AuthViewModel = hiltViewModel()
@@ -122,6 +131,38 @@ class MainActivity : ComponentActivity() {
         super.onNewIntent(intent)
         setIntent(intent)
         AssistantMovementDraft.fromIntent(intent)?.let { assistantDraft = it }
+        handleSharedReceipt(intent)
+    }
+
+    private fun handleSharedReceipt(incoming: Intent?) {
+        if (incoming?.action != Intent.ACTION_SEND ||
+            incoming.type?.startsWith("image/") != true) return
+        @Suppress("DEPRECATION")
+        val imageUri = incoming.getParcelableExtra<Uri>(Intent.EXTRA_STREAM) ?: return
+        try {
+            val image = InputImage.fromFilePath(this, imageUri)
+            val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
+            recognizer.process(image)
+                .addOnSuccessListener { response ->
+                    val draft = ReceiptTextParser.parse(response.text)
+                    if (draft == null) {
+                        Toast.makeText(this, "No encontramos texto en la factura", Toast.LENGTH_LONG).show()
+                    } else {
+                        // MainScreen requires authentication and navigates to
+                        // the editable confirmation form. Nothing is saved yet.
+                        assistantDraft = AssistantMovementDraft(
+                            type = "expense", title = draft.title,
+                            amount = draft.amount, category = null
+                        )
+                    }
+                }
+                .addOnFailureListener {
+                    Toast.makeText(this, "No pudimos leer la factura", Toast.LENGTH_LONG).show()
+                }
+                .addOnCompleteListener { recognizer.close() }
+        } catch (_: Exception) {
+            Toast.makeText(this, "No pudimos abrir la imagen compartida", Toast.LENGTH_LONG).show()
+        }
     }
 
 }
